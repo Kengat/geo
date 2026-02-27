@@ -52,7 +52,7 @@ const Calc = (() => {
       for (let c = 0; c < cols; c++) {
         const dx = (c - midC) * squareA;
         const dy = (r - midR) * squareB;
-        marks.push(Hser + dx * i1 + dy * i2);
+        marks.push(Hser + dx * i2 + dy * i1);
       }
     }
     return marks;

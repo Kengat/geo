@@ -85,7 +85,7 @@ const Diagram = (() => {
       }
     }
 
-    drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, data.i1, 'arr-prev');
+    drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, data.i1, data.i2, 'arr-prev');
 
     return { svg, g, scale, padX: pad, padY: pad, gridW: W, gridH: H };
   }
@@ -197,12 +197,12 @@ const Diagram = (() => {
       }
     }
 
-    drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, data.i1, 'arrowhead');
+    drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, data.i1, data.i2, 'arrowhead');
   }
 
   // ========== Shared helpers ==========
 
-  function drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, i1, arrowId) {
+  function drawDimensions(g, sW, sH, squareA, squareB, cols, rows, scale, i1, i2, arrowId) {
     const dimY = sH + 35;
     el('line', { x1: 0, y1: dimY, x2: sW, y2: dimY, stroke: '#555', 'stroke-width': 1 }, g);
     el('line', { x1: 0, y1: dimY - 4, x2: 0, y2: dimY + 4, stroke: '#555', 'stroke-width': 1.5 }, g);
@@ -224,11 +224,21 @@ const Diagram = (() => {
       transform: `rotate(-90,-20,${sH / 2})` }, g);
     aii.textContent = 'II ────── II';
 
-    if (i1) {
+    // i₂ arrow on top (horizontal direction)
+    if (i2) {
       const arrowY = -42;
       el('line', { x1: sW / 2 - 40, y1: arrowY, x2: sW / 2 + 40, y2: arrowY,
         stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})` }, g);
       const it = el('text', { x: sW / 2 + 50, y: arrowY + 5, 'font-size': 13, fill: '#333', 'font-weight': 'bold' }, g);
+      it.textContent = `i₂ = ${i2}`;
+    }
+
+    // i₁ arrow on left (vertical direction)
+    if (i1) {
+      const arrowX = -42;
+      el('line', { x1: arrowX, y1: sH / 2 + 40, x2: arrowX, y2: sH / 2 - 40,
+        stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})` }, g);
+      const it = el('text', { x: arrowX - 5, y: sH / 2 + 60, 'text-anchor': 'middle', 'font-size': 13, fill: '#333', 'font-weight': 'bold' }, g);
       it.textContent = `i₁ = ${i1}`;
     }
   }

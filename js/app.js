@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSiteDiagram(results, {
       cols, rows, squareA, squareB,
       blackMarks: inp.blackMarks, redMarks, workingMarks,
-      zeroPoints, contourParams, i1: inp.i1
+      zeroPoints, contourParams, i1: inp.i1, i2: inp.i2
     });
 
     // Step 7: Cartogram
@@ -578,7 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const svgInfo = Diagram.drawSitePreview('sitePreview', {
       cols, rows, squareA, squareB,
-      blackMarks, i1: parseFloat(document.getElementById('paramI1').value) || 0
+      blackMarks,
+      i1: parseFloat(document.getElementById('paramI1').value) || 0,
+      i2: parseFloat(document.getElementById('paramI2').value) || 0
     });
 
     if (svgInfo && typeof ContourEditor !== 'undefined') {
