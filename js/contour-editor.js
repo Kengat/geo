@@ -13,6 +13,7 @@ const ContourEditor = (() => {
   // Default contour positions — circular-arc tangent-intersection model
   // centered at bottom-left corner (0, gridH).
   // P1 = (endX, startY) gives tangent-perpendicular behavior for circular arcs.
+  const REF_W = 270, REF_H = 180;
   const DEFAULT_CONTOURS = [
     {
       id: 'K', label: 'K = 269', elevation: 269, color: '#c1121f',
@@ -28,12 +29,25 @@ const ContourEditor = (() => {
     }
   ];
 
+  function scaleContours(contours, fromW, fromH, toW, toH) {
+    if (fromW === toW && fromH === toH) return contours;
+    const sx = toW / fromW, sy = toH / fromH;
+    return contours.map(c => ({
+      ...c,
+      start:   { x: c.start.x * sx,   y: c.start.y * sy },
+      control: { x: c.control.x * sx, y: c.control.y * sy },
+      end:     { x: c.end.x * sx,     y: c.end.y * sy }
+    }));
+  }
+
   let cfg = {
     svg: null,
     g: null,
     scale: 1,
     gridW: 270,
     gridH: 180,
+    prevW: 270,
+    prevH: 180,
     contours: [],
     editing: false,
     dragInfo: null,
@@ -44,16 +58,26 @@ const ContourEditor = (() => {
   function init(options) {
     cfg.svg = options.svg;
     cfg.scale = options.scale;
-    cfg.gridW = options.gridW || 270;
-    cfg.gridH = options.gridH || 180;
+    const newW = options.gridW || 270;
+    const newH = options.gridH || 180;
     cfg.paramPanel = options.paramPanel || null;
     cfg.onUpdate = options.onUpdate || null;
     cfg.editing = false;
     cfg.dragInfo = null;
 
-    cfg.contours = options.contours
+    let rawContours = options.contours
       ? JSON.parse(JSON.stringify(options.contours))
-      : JSON.parse(JSON.stringify(DEFAULT_CONTOURS));
+      : scaleContours(JSON.parse(JSON.stringify(DEFAULT_CONTOURS)), REF_W, REF_H, newW, newH);
+
+    if (options.contours && (newW !== cfg.prevW || newH !== cfg.prevH)) {
+      rawContours = scaleContours(rawContours, cfg.prevW, cfg.prevH, newW, newH);
+    }
+
+    cfg.prevW = newW;
+    cfg.prevH = newH;
+    cfg.gridW = newW;
+    cfg.gridH = newH;
+    cfg.contours = rawContours;
 
     const mainG = cfg.svg.querySelector('g');
     if (cfg.g) cfg.g.remove();
@@ -95,18 +119,12 @@ const ContourEditor = (() => {
     if (!isOnEdge(mid.start, gW, gH)) {
       const dx = mid.start.x - mid.control.x;
       const dy = mid.start.y - mid.control.y;
-      const ext = extendToEdge(mid.start.x, mid.start.y, dx, dy, gW, gH);
-      mid.control.x += (ext.x - mid.start.x) * 0.3;
-      mid.control.y += (ext.y - mid.start.y) * 0.3;
-      mid.start = ext;
+      mid.start = extendToEdge(mid.start.x, mid.start.y, dx, dy, gW, gH);
     }
     if (!isOnEdge(mid.end, gW, gH)) {
       const dx = mid.end.x - mid.control.x;
       const dy = mid.end.y - mid.control.y;
-      const ext = extendToEdge(mid.end.x, mid.end.y, dx, dy, gW, gH);
-      mid.control.x += (ext.x - mid.end.x) * 0.3;
-      mid.control.y += (ext.y - mid.end.y) * 0.3;
-      mid.end = ext;
+      mid.end = extendToEdge(mid.end.x, mid.end.y, dx, dy, gW, gH);
     }
     return mid;
   }
@@ -352,7 +370,9 @@ const ContourEditor = (() => {
     updatePanel();
   }
 
-  function getDefaults() { return JSON.parse(JSON.stringify(DEFAULT_CONTOURS)); }
+  function getDefaults() {
+    return scaleContours(JSON.parse(JSON.stringify(DEFAULT_CONTOURS)), REF_W, REF_H, cfg.gridW, cfg.gridH);
+  }
 
   /* ── compute black marks from contour positions ── */
   // Interpolates vertex elevations using radial distance from bottom-left
