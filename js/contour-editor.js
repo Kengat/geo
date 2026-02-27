@@ -67,6 +67,50 @@ const ContourEditor = (() => {
     updatePanel();
   }
 
+  // Extend a point to the nearest grid edge along a direction vector
+  function extendToEdge(px, py, dx, dy, gW, gH) {
+    if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return { x: px, y: py };
+    let tMin = Infinity;
+    const tryT = t => { if (t > 0.01) tMin = Math.min(tMin, t); };
+    if (dx !== 0) { tryT(-px / dx); tryT((gW - px) / dx); }
+    if (dy !== 0) { tryT(-py / dy); tryT((gH - py) / dy); }
+    if (!isFinite(tMin)) return { x: px, y: py };
+    return {
+      x: Math.max(0, Math.min(gW, px + tMin * dx)),
+      y: Math.max(0, Math.min(gH, py + tMin * dy))
+    };
+  }
+
+  function isOnEdge(p, gW, gH) {
+    return p.x <= 0.5 || p.x >= gW - 0.5 || p.y <= 0.5 || p.y >= gH - 0.5;
+  }
+
+  // Build intermediate contour between two main ones, extending to grid edges
+  function midContour(a, b, gW, gH) {
+    const mid = {
+      start:   { x: (a.start.x + b.start.x) / 2,    y: (a.start.y + b.start.y) / 2 },
+      control: { x: (a.control.x + b.control.x) / 2, y: (a.control.y + b.control.y) / 2 },
+      end:     { x: (a.end.x + b.end.x) / 2,         y: (a.end.y + b.end.y) / 2 }
+    };
+    if (!isOnEdge(mid.start, gW, gH)) {
+      const dx = mid.start.x - mid.control.x;
+      const dy = mid.start.y - mid.control.y;
+      const ext = extendToEdge(mid.start.x, mid.start.y, dx, dy, gW, gH);
+      mid.control.x += (ext.x - mid.start.x) * 0.3;
+      mid.control.y += (ext.y - mid.start.y) * 0.3;
+      mid.start = ext;
+    }
+    if (!isOnEdge(mid.end, gW, gH)) {
+      const dx = mid.end.x - mid.control.x;
+      const dy = mid.end.y - mid.control.y;
+      const ext = extendToEdge(mid.end.x, mid.end.y, dx, dy, gW, gH);
+      mid.control.x += (ext.x - mid.end.x) * 0.3;
+      mid.control.y += (ext.y - mid.end.y) * 0.3;
+      mid.end = ext;
+    }
+    return mid;
+  }
+
   /* ── rendering ── */
 
   function render() {
@@ -74,16 +118,41 @@ const ContourEditor = (() => {
     cfg.g.innerHTML = '';
     const s = cfg.scale;
 
+    // draw intermediate (half-step) contours between adjacent main ones
+    const sorted = [...cfg.contours].sort((a, b) => a.elevation - b.elevation);
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const a = sorted[i], b = sorted[i + 1];
+      const mid = midContour(a, b, cfg.gridW, cfg.gridH);
+      const midElev = ((a.elevation + b.elevation) / 2).toFixed(1);
+      const gM = svgEl('g', {}, cfg.g);
+      svgEl('path', {
+        d: qPath(mid, s),
+        fill: 'none', stroke: '#999', 'stroke-width': 1, 'stroke-dasharray': '6,4', opacity: 0.6
+      }, gM);
+      const lt = 0.5;
+      const lx = qB(lt, mid.start.x, mid.control.x, mid.end.x) * s;
+      const ly = qB(lt, mid.start.y, mid.control.y, mid.end.y) * s;
+      const dx = qBd(lt, mid.start.x, mid.control.x, mid.end.x);
+      const dy = qBd(lt, mid.start.y, mid.control.y, mid.end.y);
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len * 11, ny = dx / len * 11;
+      const txt = svgEl('text', {
+        x: lx + nx, y: ly + ny,
+        'font-size': 10, fill: '#999', 'font-style': 'italic',
+        'text-anchor': 'middle', 'dominant-baseline': 'central', opacity: 0.7
+      }, gM);
+      txt.textContent = midElev;
+    }
+
+    // draw main contours
     cfg.contours.forEach((c, ci) => {
       const gC = svgEl('g', {}, cfg.g);
 
-      // visible curve
       svgEl('path', {
         d: qPath(c, s),
         fill: 'none', stroke: c.color, 'stroke-width': 2.5, 'stroke-linecap': 'round'
       }, gC);
 
-      // fat invisible hit-area (easier clicking)
       if (cfg.editing) {
         svgEl('path', {
           d: qPath(c, s),
@@ -91,7 +160,6 @@ const ContourEditor = (() => {
         }, gC);
       }
 
-      // label near t=0.38
       const lt = 0.38;
       const lx = qB(lt, c.start.x, c.control.x, c.end.x) * s;
       const ly = qB(lt, c.start.y, c.control.y, c.end.y) * s;
@@ -108,7 +176,6 @@ const ContourEditor = (() => {
 
       if (!cfg.editing) return;
 
-      // guide lines
       svgEl('line', {
         x1: c.start.x * s, y1: c.start.y * s,
         x2: c.control.x * s, y2: c.control.y * s,
@@ -120,7 +187,6 @@ const ContourEditor = (() => {
         stroke: '#aaa', 'stroke-width': 1, 'stroke-dasharray': '4,3'
       }, gC);
 
-      // handles
       makeCircleHandle(gC, c.start, s, ci, 'start', '#e63946');
       makeDiamondHandle(gC, c.control, s, ci, 'control', '#f4a261');
       makeCircleHandle(gC, c.end, s, ci, 'end', '#06d6a0');
@@ -367,12 +433,26 @@ const ContourEditor = (() => {
 
   function drawStatic(g, contourParams, scale, opacity) {
     if (!contourParams) return;
+    const s = scale;
+    const op = opacity || 0.5;
+
+    // intermediate contours (extended to edges)
+    const gW = cfg.gridW, gH = cfg.gridH;
+    const sorted = [...contourParams].sort((a, b) => a.elevation - b.elevation);
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const mid = midContour(sorted[i], sorted[i + 1], gW, gH);
+      svgEl('path', {
+        d: `M ${mid.start.x * s} ${mid.start.y * s} Q ${mid.control.x * s} ${mid.control.y * s} ${mid.end.x * s} ${mid.end.y * s}`,
+        fill: 'none', stroke: '#999', 'stroke-width': 0.8, 'stroke-dasharray': '5,3',
+        opacity: op * 0.6
+      }, g);
+    }
+
+    // main contours
     contourParams.forEach(c => {
-      const s = scale;
       svgEl('path', {
         d: `M ${c.start.x * s} ${c.start.y * s} Q ${c.control.x * s} ${c.control.y * s} ${c.end.x * s} ${c.end.y * s}`,
-        fill: 'none', stroke: c.color, 'stroke-width': 2, 'stroke-linecap': 'round',
-        opacity: opacity || 0.5
+        fill: 'none', stroke: c.color, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: op
       }, g);
       const t = 0.38;
       const lx = qB(t, c.start.x, c.control.x, c.end.x) * s;
@@ -383,7 +463,7 @@ const ContourEditor = (() => {
       const nx = -dy / len * 12, ny = dx / len * 12;
       const txt = svgEl('text', {
         x: lx + nx, y: ly + ny,
-        'font-size': 12, fill: c.color, 'font-style': 'italic', opacity: opacity || 0.5,
+        'font-size': 12, fill: c.color, 'font-style': 'italic', opacity: op,
         'text-anchor': 'middle'
       }, g);
       txt.textContent = c.label;

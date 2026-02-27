@@ -280,12 +280,10 @@ const Diagram = (() => {
     svg.setAttribute('style', 'max-width:1000px');
     container.appendChild(svg);
 
-    // hatching patterns: vertical for bottom chart, horizontal for right chart
+    // hatching patterns
     const defs = el('defs', {}, svg);
-    makeHatchPattern(defs, 'hatchCutV', '#e76f51', 0);
-    makeHatchPattern(defs, 'hatchFillV', '#2a9d8f', 0);
-    makeHatchPattern(defs, 'hatchCutH', '#e76f51', 90);
-    makeHatchPattern(defs, 'hatchFillH', '#2a9d8f', 90);
+    makeHatchPattern(defs, 'hatchBetweenV', '#777', 0);
+    makeHatchPattern(defs, 'hatchBetweenH', '#777', 90);
 
     // ── site plan ──
     const sX = padL, sY = padT;
@@ -311,6 +309,42 @@ const Diagram = (() => {
     const rTblX = rChartX + chartW;
     const gRightTbl = el('g', { transform: `translate(${rTblX},${sY})` }, svg);
     drawRightTable(gRightTbl, carto, nR, squareB, sy, siteH);
+
+    // ── connecting lines from M/N on site plan to ½V points on charts ──
+    const mxF = sX + carto.cxFill * sx, myF = sY + carto.cyFill * sy;
+    const mxC = sX + carto.cxCut * sx, myC = sY + carto.cyCut * sy;
+    const stepW = siteW / nC, stepH = siteH / nR;
+    const halfCut = carto.cumColCut[nC] / 2, halfFill = carto.cumColFill[nC] / 2;
+    const halfCutR = carto.cumRowCut[nR] / 2, halfFillR = carto.cumRowFill[nR] / 2;
+
+    const findHalfX = (cum, n, step, half) => {
+      for (let i = 0; i < n; i++) {
+        if ((cum[i] <= half && cum[i + 1] >= half) || (cum[i] >= half && cum[i + 1] <= half)) {
+          const t = (half - cum[i]) / (cum[i + 1] - cum[i] || 0.01);
+          return (i + t) * step;
+        }
+      }
+      return 0;
+    };
+
+    const cutXBot = sX + findHalfX(carto.cumColCut, nC, stepW, halfCut);
+    const fillXBot = sX + findHalfX(carto.cumColFill, nC, stepW, halfFill);
+    const cutYRight = sY + findHalfX(carto.cumRowCut, nR, stepH, halfCutR);
+    const fillYRight = sY + findHalfX(carto.cumRowFill, nR, stepH, halfFillR);
+
+    const dash = '4,3';
+    const gConn = el('g', {}, svg);
+    // M (cut): projection lines to both charts
+    el('line', { x1: mxC, y1: myC, x2: cutXBot, y2: myC, stroke: '#e76f51', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: cutXBot, y1: myC, x2: cutXBot, y2: sY + siteH, stroke: '#e76f51', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: mxC, y1: myC, x2: mxC, y2: cutYRight, stroke: '#e76f51', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: mxC, y1: cutYRight, x2: sX + siteW, y2: cutYRight, stroke: '#e76f51', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+
+    // N (fill): projection lines to both charts
+    el('line', { x1: mxF, y1: myF, x2: fillXBot, y2: myF, stroke: '#2a9d8f', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: fillXBot, y1: myF, x2: fillXBot, y2: sY + siteH, stroke: '#2a9d8f', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: mxF, y1: myF, x2: mxF, y2: fillYRight, stroke: '#2a9d8f', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
+    el('line', { x1: mxF, y1: fillYRight, x2: sX + siteW, y2: fillYRight, stroke: '#2a9d8f', 'stroke-width': 1, 'stroke-dasharray': dash }, gConn);
   }
 
   function makeHatchPattern(defs, id, color, angle) {
@@ -404,12 +438,17 @@ const Diagram = (() => {
     // M, N, Lsr
     const mxF = carto.cxFill * sx, myF = carto.cyFill * sy;
     const mxC = carto.cxCut * sx, myC = carto.cyCut * sy;
-    el('line', { x1: mxF, y1: myF, x2: mxC, y2: myC, stroke: '#264653', 'stroke-width': 1.5, 'stroke-dasharray': '5,3' }, g);
-    el('circle', { cx: mxF, cy: myF, r: 5, fill: '#2a9d8f', stroke: '#fff', 'stroke-width': 1.5 }, g);
+    // arrowhead marker for M→N line
+    const defs = g.ownerSVGElement.querySelector('defs') || el('defs', {}, g.ownerSVGElement);
+    const marker = el('marker', { id: 'arrowMN', markerWidth: 8, markerHeight: 6, refX: 8, refY: 3, orient: 'auto' }, defs);
+    el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: '#264653' }, marker);
+
+    el('line', { x1: mxC, y1: myC, x2: mxF, y2: myF, stroke: '#264653', 'stroke-width': 1.5, 'stroke-dasharray': '5,3', 'marker-end': 'url(#arrowMN)' }, g);
     el('circle', { cx: mxC, cy: myC, r: 5, fill: '#e76f51', stroke: '#fff', 'stroke-width': 1.5 }, g);
-    const tm = el('text', { x: mxF + 8, y: myF - 6, 'font-size': 10, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
+    el('circle', { cx: mxF, cy: myF, r: 5, fill: '#2a9d8f', stroke: '#fff', 'stroke-width': 1.5 }, g);
+    const tm = el('text', { x: mxC + 8, y: myC - 6, 'font-size': 10, fill: '#e76f51', 'font-weight': 'bold' }, g);
     tm.textContent = 'M';
-    const tn = el('text', { x: mxC + 8, y: myC - 6, 'font-size': 10, fill: '#e76f51', 'font-weight': 'bold' }, g);
+    const tn = el('text', { x: mxF + 8, y: myF - 6, 'font-size': 10, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
     tn.textContent = 'N';
     const ml = el('text', { x: (mxF + mxC) / 2, y: (myF + myC) / 2 - 8, 'text-anchor': 'middle', 'font-size': 9.5, fill: '#264653', 'font-weight': 'bold' }, g);
     ml.textContent = `L = ${carto.Lsr.toFixed(1)} м`;
@@ -422,20 +461,18 @@ const Diagram = (() => {
     });
   }
 
-  // ── Bottom chart (below site, standard upward Y-axis) ──
+  // ── Bottom chart (below site, standard upward Y-axis, 0→total left-to-right) ──
   function drawBottomChart(g, carto, nC, siteW, chartH) {
     const maxV = Math.max(...carto.cumColFill, ...carto.cumColCut, 1);
     const vScale = (chartH - 20) / maxV;
     const stepW = siteW / nC;
     const bY = chartH;
 
-    // clip to chart bounds
     const clipId = 'clipBotChart';
     const defs = g.ownerSVGElement.querySelector('defs');
     const clip = el('clipPath', { id: clipId }, defs);
     el('rect', { x: -1, y: 0, width: siteW + 2, height: chartH + 1 }, clip);
 
-    // axes
     el('line', { x1: 0, y1: bY, x2: siteW, y2: bY, stroke: '#666', 'stroke-width': 1 }, g);
     el('line', { x1: 0, y1: 0, x2: 0, y2: bY, stroke: '#666', 'stroke-width': 1 }, g);
 
@@ -443,22 +480,21 @@ const Diagram = (() => {
       fill: '#555', transform: `rotate(-90,-6,${chartH / 2})` }, g);
     yLab.textContent = "Об'єм ґрунту, м³";
 
-    // clipped group for ALL chart content
     const gc = el('g', { 'clip-path': `url(#${clipId})` }, g);
 
-    // hatched fills between curves (vertical lines)
-    hatchedBetweenUp(gc, carto.cumColCut, carto.cumColFill, nC, stepW, vScale, bY, 'url(#hatchCutV)',  'url(#hatchFillV)');
+    // gray hatching only between the two curves
+    hatchOnlyBetweenUp(gc, carto.cumColCut, carto.cumColFill, nC, stepW, vScale, bY, 'url(#hatchBetweenV)');
 
     // curve lines
     curveUp(gc, carto.cumColCut, nC, stepW, vScale, bY, '#e76f51', 2);
     curveUp(gc, carto.cumColFill, nC, stepW, vScale, bY, '#2a9d8f', 2);
 
-    // ½V projections — match M' and N' on site plan (methodology approach)
+    // ½V projections going UPWARD from curve toward site plan (M and N)
     const lastCut = carto.cumColCut[nC], lastFill = carto.cumColFill[nC];
-    halfVProj(gc, carto.cumColCut, nC, stepW, vScale, bY, lastCut / 2, '#e76f51', "N'");
-    halfVProj(gc, carto.cumColFill, nC, stepW, vScale, bY, lastFill / 2, '#2a9d8f', "M'");
+    halfVProjUp(gc, carto.cumColCut, nC, stepW, vScale, bY, lastCut / 2, '#e76f51', "M'");
+    halfVProjUp(gc, carto.cumColFill, nC, stepW, vScale, bY, lastFill / 2, '#2a9d8f', "N'");
 
-    // endpoint totals (outside clip so they show past the edge)
+    // endpoint totals
     const tc = el('text', { x: siteW + 4, y: bY - lastCut * vScale + 4, 'font-size': 9.5, fill: '#e76f51', 'font-weight': 'bold' }, g);
     tc.textContent = lastCut.toFixed(1);
     const tf = el('text', { x: siteW + 4, y: bY - lastFill * vScale + 4, 'font-size': 9.5, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
@@ -536,7 +572,7 @@ const Diagram = (() => {
     // clipped group for ALL chart content
     const gc = el('g', { 'clip-path': `url(#${clipId})` }, g);
 
-    hatchedBetweenVert(gc, carto.cumRowCut, carto.cumRowFill, nR, stepH, vScale, 'url(#hatchCutH)',  'url(#hatchFillH)');
+    hatchOnlyBetweenVert(gc, carto.cumRowCut, carto.cumRowFill, nR, stepH, vScale, 'url(#hatchBetweenH)');
     drawCurveVert(gc, carto.cumRowCut, nR, stepH, vScale, '#e76f51', 2);
     drawCurveVert(gc, carto.cumRowFill, nR, stepH, vScale, '#2a9d8f', 2);
 
@@ -609,34 +645,33 @@ const Diagram = (() => {
   }
 
   // Hatched areas between two curves (bottom chart, upward Y).
-  function hatchedBetweenUp(g, dataA, dataB, n, step, vScale, bY, fillA, fillB) {
+
+  // Hatch only the area between two curves (no baseline fill)
+  function hatchOnlyBetweenUp(g, dataA, dataB, n, step, vScale, bY, fill) {
     for (let i = 0; i < n; i++) {
       const x0 = i * step, x1 = (i + 1) * step;
       const aY0 = bY - dataA[i] * vScale, aY1 = bY - dataA[i + 1] * vScale;
       const bY0 = bY - dataB[i] * vScale, bY1 = bY - dataB[i + 1] * vScale;
       const minY0 = Math.min(aY0, bY0), minY1 = Math.min(aY1, bY1);
       const maxY0 = Math.max(aY0, bY0), maxY1 = Math.max(aY1, bY1);
-
-      // area from baseline to the lower curve (closer to baseline = higher Y = smaller value)
-      el('path', { d: `M ${x0} ${bY} L ${x0} ${maxY0} L ${x1} ${maxY1} L ${x1} ${bY} Z`,
-        fill: dataA[i] + dataA[i + 1] < dataB[i] + dataB[i + 1] ? fillA : fillB, stroke: 'none' }, g);
-
-      // area between the two curves
       el('path', { d: `M ${x0} ${maxY0} L ${x0} ${minY0} L ${x1} ${minY1} L ${x1} ${maxY1} Z`,
-        fill: dataA[i] + dataA[i + 1] < dataB[i] + dataB[i + 1] ? fillB : fillA, stroke: 'none' }, g);
+        fill: fill, stroke: 'none' }, g);
     }
   }
 
-  // Bottom chart: ½V projection — vertical from baseline to curve, horizontal to Y-axis
-  function halfVProj(g, cumData, n, step, vScale, bY, halfV, color, label) {
+  // Bottom chart: ½V projection going UPWARD — from curve to top of chart (toward site plan)
+  function halfVProjUp(g, cumData, n, step, vScale, bY, halfV, color, label) {
     for (let i = 0; i < n; i++) {
-      if (cumData[i] <= halfV && cumData[i + 1] >= halfV) {
-        const t = (halfV - cumData[i]) / Math.max(cumData[i + 1] - cumData[i], 0.01);
+      if ((cumData[i] <= halfV && cumData[i + 1] >= halfV) ||
+          (cumData[i] >= halfV && cumData[i + 1] <= halfV)) {
+        const t = (halfV - cumData[i]) / (cumData[i + 1] - cumData[i] || 0.01);
         const x = (i + t) * step;
         const y = bY - halfV * vScale;
-        el('line', { x1: x, y1: bY, x2: x, y2: y, stroke: color, 'stroke-width': 0.8, 'stroke-dasharray': '3,2' }, g);
+        // vertical: from curve point UP to top of chart (y=0)
+        el('line', { x1: x, y1: y, x2: x, y2: 0, stroke: color, 'stroke-width': 0.8, 'stroke-dasharray': '3,2' }, g);
+        // horizontal: from curve point to Y-axis
         el('line', { x1: 0, y1: y, x2: x, y2: y, stroke: color, 'stroke-width': 0.8, 'stroke-dasharray': '3,2' }, g);
-        const lt = el('text', { x: x, y: bY + 10, 'text-anchor': 'middle', 'font-size': 8, fill: color, 'font-weight': 'bold' }, g);
+        const lt = el('text', { x: x, y: -4, 'text-anchor': 'middle', 'font-size': 8, fill: color, 'font-weight': 'bold' }, g);
         lt.textContent = label;
         const vt = el('text', { x: -3, y: y + 3, 'text-anchor': 'end', 'font-size': 7, fill: color }, g);
         vt.textContent = '½V';
@@ -667,21 +702,15 @@ const Diagram = (() => {
   }
 
   // Hatched areas between two curves (right chart, rightward X).
-  function hatchedBetweenVert(g, dataA, dataB, n, step, vScale, fillA, fillB) {
+  function hatchOnlyBetweenVert(g, dataA, dataB, n, step, vScale, fill) {
     for (let i = 0; i < n; i++) {
       const y0 = i * step, y1 = (i + 1) * step;
       const aX0 = dataA[i] * vScale, aX1 = dataA[i + 1] * vScale;
       const bX0 = dataB[i] * vScale, bX1 = dataB[i + 1] * vScale;
       const minX0 = Math.min(aX0, bX0), minX1 = Math.min(aX1, bX1);
       const maxX0 = Math.max(aX0, bX0), maxX1 = Math.max(aX1, bX1);
-
-      // area from axis to the lower curve (closer to axis = smaller X value)
-      el('path', { d: `M 0 ${y0} L ${minX0} ${y0} L ${minX1} ${y1} L 0 ${y1} Z`,
-        fill: dataA[i] + dataA[i + 1] < dataB[i] + dataB[i + 1] ? fillA : fillB, stroke: 'none' }, g);
-
-      // area between the two curves
       el('path', { d: `M ${minX0} ${y0} L ${maxX0} ${y0} L ${maxX1} ${y1} L ${minX1} ${y1} Z`,
-        fill: dataA[i] + dataA[i + 1] < dataB[i] + dataB[i + 1] ? fillB : fillA, stroke: 'none' }, g);
+        fill: fill, stroke: 'none' }, g);
     }
   }
 

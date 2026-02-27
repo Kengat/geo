@@ -294,12 +294,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderStep7(parent, carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB) {
     const c = makeStep(parent, 7, 'Картограма земляних мас та середня відстань переміщення');
     let html = '<p>Побудовано криві об\'ємів насипу і виїмки з наростаючою сумою. ' +
-      'Центри ваги зон насипу (M) та виїмки (N) визначені графічно.</p>';
+      'Центри ваги зон виїмки (M) та насипу (N) визначені графічно.</p>';
     html += `<p class="formula-result">L<sub>ср</sub> = ${carto.Lsr.toFixed(1)} м</p>`;
     html += '<div class="formula-sub">' +
-      `Центр ваги насипу: x=${carto.cxFill.toFixed(1)} м, y=${carto.cyFill.toFixed(1)} м\n` +
-      `Центр ваги виїмки: x=${carto.cxCut.toFixed(1)} м, y=${carto.cyCut.toFixed(1)} м\n` +
-      `Lср = √((${carto.cxFill.toFixed(1)}−${carto.cxCut.toFixed(1)})² + (${carto.cyFill.toFixed(1)}−${carto.cyCut.toFixed(1)})²) = ${carto.Lsr.toFixed(1)} м</div>`;
+      `Центр ваги виїмки (M): x=${carto.cxCut.toFixed(1)} м, y=${carto.cyCut.toFixed(1)} м\n` +
+      `Центр ваги насипу (N): x=${carto.cxFill.toFixed(1)} м, y=${carto.cyFill.toFixed(1)} м\n` +
+      `Lср = √((${carto.cxCut.toFixed(1)}−${carto.cxFill.toFixed(1)})² + (${carto.cyCut.toFixed(1)}−${carto.cyFill.toFixed(1)})²) = ${carto.Lsr.toFixed(1)} м</div>`;
     html += '<div class="diagram-container" id="cartogramDiagram"></div>';
     c.innerHTML = html;
     setTimeout(() => Diagram.drawCartogram('cartogramDiagram', {
