@@ -1,133 +1,140 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Вертикальне планування будівельного майданчика</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<header>
-  <h1>Вертикальне планування будівельного майданчика</h1>
-  <p>Автоматичний розрахунок за методичними вказівками &mdash; Львівська Політехніка, 2024</p>
-</header>
+  <header>
+    <h1>Вертикальне планування будівельного майданчика</h1>
+    <p>Автоматичний розрахунок за методичними вказівками &mdash; Львівська Політехніка, 2024</p>
+  </header>
 
-<div class="container">
+  <div class="container">
 
-  <!-- ===== Input Section ===== -->
-  <div class="input-section">
-    <h2>Вхідні дані</h2>
+    <!-- ===== Input Section ===== -->
+    <div class="input-section">
+      <h2>Вхідні дані</h2>
 
-    <div class="form-grid">
-      <div class="form-group">
-        <label>A (довжина), м</label>
-        <input type="number" id="paramA" value="270" step="10">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>A (довжина), м</label>
+          <input type="number" id="paramA" value="270" step="10">
+        </div>
+        <div class="form-group">
+          <label>Б (ширина), м</label>
+          <input type="number" id="paramB" value="180" step="10">
+        </div>
+        <div class="form-group">
+          <label>Сторона квадрата, м</label>
+          <input type="number" id="gridSide" value="90" step="10">
+        </div>
+        <div class="form-group">
+          <label>i₁ (ухил вздовж A)</label>
+          <input type="number" id="paramI1" value="0.004" step="0.001">
+        </div>
+        <div class="form-group">
+          <label>i₂ (ухил вздовж Б)</label>
+          <input type="number" id="paramI2" value="0" step="0.001">
+        </div>
+        <div class="form-group">
+          <label>Товщина рослин. шару, м</label>
+          <input type="number" id="paramTopsoil" value="0.2" step="0.05">
+        </div>
+        <div class="form-group">
+          <label>Тип ґрунту</label>
+          <select id="paramSoil">
+            <option value="topsoil">Рослинний ґрунт</option>
+            <option value="sand">Пісок</option>
+            <option value="sandy_loam">Супісок</option>
+            <option value="loam_light" selected>Суглинок легкий</option>
+            <option value="loam_heavy">Суглинок важкий</option>
+            <option value="clay_soft">Глина м'яка</option>
+            <option value="chernozem">Чорнозем</option>
+            <option value="gravel">Гравійно-галькові</option>
+            <option value="loess_soft">Лес м'який</option>
+            <option value="loess_hard">Лес твердий</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Тривалість зміни, год</label>
+          <input type="number" id="paramShiftHours" value="8" step="1">
+        </div>
+        <div class="form-group">
+          <label>Кількість змін</label>
+          <select id="paramNumShifts">
+            <option value="1" selected>1 зміна</option>
+            <option value="2">2 зміни</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Б (ширина), м</label>
-        <input type="number" id="paramB" value="180" step="10">
+
+      <h2 style="margin-top:24px">Горизонталі (дані варіанту)</h2>
+      <p style="font-size:0.88em;color:#666;margin-bottom:8px">
+        Введіть відмітки горизонталей з вашого завдання. Чорні відмітки вершин розрахуються автоматично.
+      </p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label style="color:#c1121f;font-weight:bold">K (горизонталь 1), м</label>
+          <input type="number" id="paramK" value="269" step="0.5">
+        </div>
+        <div class="form-group">
+          <label style="color:#1a759f;font-weight:bold">L (горизонталь 2), м</label>
+          <input type="number" id="paramL" value="270" step="0.5">
+        </div>
+        <div class="form-group">
+          <label style="color:#2a9d8f;font-weight:bold">M (горизонталь 3), м</label>
+          <input type="number" id="paramM" value="271" step="0.5">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Сторона квадрата, м</label>
-        <input type="number" id="gridSide" value="90" step="10">
+
+      <!-- Site Preview + Contour Editor -->
+      <div id="previewSection" style="margin-top:16px">
+        <div class="diagram-container" id="sitePreview"></div>
+        <div class="contour-controls" style="margin-top:8px">
+          <button id="btnEditContours" class="btn-secondary">Редагувати горизонталі</button>
+          <button id="btnResetContours" class="btn-text">Скинути</button>
+          <button id="btnImportContours" class="btn-text">Імпорт JSON</button>
+        </div>
+        <div id="contourParams" class="contour-params-panel" style="display:none"></div>
       </div>
-      <div class="form-group">
-        <label>i₁ (ухил вздовж A)</label>
-        <input type="number" id="paramI1" value="0.004" step="0.001">
+
+      <h2 style="margin-top:24px">Чорні відмітки вершин</h2>
+      <p style="font-size:0.88em;color:#666;margin-bottom:8px">
+        Обчислюються автоматично з позицій горизонталей. За потреби можна змінити вручну.
+      </p>
+      <div id="vertexTableWrap">
+        <!-- filled by JS -->
       </div>
-      <div class="form-group">
-        <label>i₂ (ухил вздовж Б)</label>
-        <input type="number" id="paramI2" value="0" step="0.001">
-      </div>
-      <div class="form-group">
-        <label>Товщина рослин. шару, м</label>
-        <input type="number" id="paramTopsoil" value="0.2" step="0.05">
-      </div>
-      <div class="form-group">
-        <label>Тип ґрунту</label>
-        <select id="paramSoil">
-          <option value="topsoil">Рослинний ґрунт</option>
-          <option value="sand">Пісок</option>
-          <option value="sandy_loam">Супісок</option>
-          <option value="loam_light" selected>Суглинок легкий</option>
-          <option value="loam_heavy">Суглинок важкий</option>
-          <option value="clay_soft">Глина м'яка</option>
-          <option value="chernozem">Чорнозем</option>
-          <option value="gravel">Гравійно-галькові</option>
-          <option value="loess_soft">Лес м'який</option>
-          <option value="loess_hard">Лес твердий</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Тривалість зміни, год</label>
-        <input type="number" id="paramShiftHours" value="8" step="1">
-      </div>
-      <div class="form-group">
-        <label>Кількість змін</label>
-        <select id="paramNumShifts">
-          <option value="1" selected>1 зміна</option>
-          <option value="2">2 зміни</option>
-        </select>
+
+      <div style="margin-top:16px; display:flex; gap: 16px; flex-wrap: wrap;">
+        <button class="btn-primary" id="btnCalculate">
+          Розрахувати все
+        </button>
+        <button class="btn-secondary" id="btnPreviewPdf"
+          style="display:none; background-color: #2a9d8f; border-color: #2a9d8f; color: white;">
+          📄 Превью PDF
+        </button>
       </div>
     </div>
 
-    <h2 style="margin-top:24px">Горизонталі (дані варіанту)</h2>
-    <p style="font-size:0.88em;color:#666;margin-bottom:8px">
-      Введіть відмітки горизонталей з вашого завдання. Чорні відмітки вершин розрахуються автоматично.
-    </p>
-    <div class="form-grid">
-      <div class="form-group">
-        <label style="color:#c1121f;font-weight:bold">K (горизонталь 1), м</label>
-        <input type="number" id="paramK" value="269" step="0.5">
-      </div>
-      <div class="form-group">
-        <label style="color:#1a759f;font-weight:bold">L (горизонталь 2), м</label>
-        <input type="number" id="paramL" value="270" step="0.5">
-      </div>
-      <div class="form-group">
-        <label style="color:#2a9d8f;font-weight:bold">M (горизонталь 3), м</label>
-        <input type="number" id="paramM" value="271" step="0.5">
-      </div>
-    </div>
+    <!-- ===== Results ===== -->
+    <div id="results"></div>
 
-    <!-- Site Preview + Contour Editor -->
-    <div id="previewSection" style="margin-top:16px">
-      <div class="diagram-container" id="sitePreview"></div>
-      <div class="contour-controls" style="margin-top:8px">
-        <button id="btnEditContours" class="btn-secondary">Редагувати горизонталі</button>
-        <button id="btnResetContours" class="btn-text">Скинути</button>
-        <button id="btnImportContours" class="btn-text">Імпорт JSON</button>
-      </div>
-      <div id="contourParams" class="contour-params-panel" style="display:none"></div>
-    </div>
-
-    <h2 style="margin-top:24px">Чорні відмітки вершин</h2>
-    <p style="font-size:0.88em;color:#666;margin-bottom:8px">
-      Обчислюються автоматично з позицій горизонталей. За потреби можна змінити вручну.
-    </p>
-    <div id="vertexTableWrap">
-      <!-- filled by JS -->
-    </div>
-
-    <div style="margin-top:16px">
-      <button class="btn-primary" id="btnCalculate">
-        Розрахувати все
-      </button>
-    </div>
   </div>
 
-  <!-- ===== Results ===== -->
-  <div id="results"></div>
-
-</div>
-
-<script src="js/calc.js"></script>
-<script src="js/machines.js"></script>
-<script src="js/diagram.js"></script>
-<script src="js/contour-editor.js"></script>
-<script src="js/schedule.js"></script>
-<script src="js/app.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/machines.js"></script>
+  <script src="js/diagram.js"></script>
+  <script src="js/contour-editor.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/app.js"></script>
 
 </body>
+
 </html>

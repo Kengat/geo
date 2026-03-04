@@ -121,10 +121,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 13: Calendar schedule
     renderStep13(results, tepResults, inp);
 
+    // Save to window for PDF export
+    window.geoData = {
+      inp, cols, rows, squareA, squareB,
+      Hser, redMarks, workingMarks, zeroPoints,
+      volData, balance, contourParams, carto, processes,
+      suggestions, tepResults, maxVol
+    };
+
     // open first section
     results.querySelectorAll('.step-section').forEach((s, i) => {
       if (i < 2) s.classList.add('open');
     });
+
+    const btnPdf = document.getElementById('btnPreviewPdf');
+    if (btnPdf) btnPdf.style.display = 'inline-block';
   }
 
   // ===== Step renderers =====
@@ -681,6 +692,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== Event bindings =====
   document.getElementById('btnCalculate').addEventListener('click', runCalculations);
+
+  const btnPdf = document.getElementById('btnPreviewPdf');
+  if (btnPdf) {
+    btnPdf.addEventListener('click', () => {
+      // Gather SVGs
+      const resultsDiv = document.getElementById('results');
+      const svgs = {};
+      const allSvgs = resultsDiv.querySelectorAll('svg');
+      if (allSvgs.length >= 3) {
+        svgs.site = allSvgs[0].outerHTML;
+        svgs.carto = allSvgs[1].outerHTML;
+        svgs.sched = allSvgs[2].outerHTML;
+      }
+      window.geoData.svgs = svgs;
+
+      try {
+        localStorage.setItem('rawGeoData', JSON.stringify(window.geoData));
+        window.open('preview.html', '_blank');
+      } catch (e) {
+        console.error(e);
+        alert('Помилка збереження даних для прев\'ю. Можливо завеликий розмір.');
+      }
+    });
+  }
+
   document.getElementById('btnEditContours').addEventListener('click', toggleContourEdit);
   document.getElementById('btnResetContours').addEventListener('click', resetContours);
   document.getElementById('btnImportContours').addEventListener('click', importContours);

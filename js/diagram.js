@@ -119,24 +119,26 @@ const Diagram = (() => {
     const g = el('g', { transform: `translate(${pad},${pad})` }, svg);
 
     // zone shading
+    const gZone = el('g', { class: 'svg-zone-shading' }, g);
     if (zeroPoints && zeroPoints.length >= 2 && workingMarks) {
-      drawZoneShading(g, workingMarks, cols, rows, squareA, squareB, scale);
+      drawZoneShading(gZone, workingMarks, cols, rows, squareA, squareB, scale);
     }
 
     // grid
+    const gGrid = el('g', { class: 'svg-grid' }, g);
     for (let c = 0; c < cols; c++) {
       el('line', {
         x1: c * squareA * scale, y1: 0, x2: c * squareA * scale, y2: sH,
         stroke: '#888', 'stroke-width': 1,
         'stroke-dasharray': (c === 0 || c === cols - 1) ? 'none' : '4,3'
-      }, g);
+      }, gGrid);
     }
     for (let r = 0; r < rows; r++) {
       el('line', {
         x1: 0, y1: r * squareB * scale, x2: sW, y2: r * squareB * scale,
         stroke: '#888', 'stroke-width': 1,
         'stroke-dasharray': (r === 0 || r === rows - 1) ? 'none' : '4,3'
-      }, g);
+      }, gGrid);
     }
 
     // contour curves (from editor, semi-transparent)
@@ -145,17 +147,18 @@ const Diagram = (() => {
     }
 
     // zero line
+    const gZero = el('g', { class: 'svg-zero-line' }, g);
     if (zeroPoints && zeroPoints.length >= 2) {
       let zd = `M ${zeroPoints[0].x * scale} ${zeroPoints[0].y * scale}`;
       for (let i = 1; i < zeroPoints.length; i++) {
         zd += ` L ${zeroPoints[i].x * scale} ${zeroPoints[i].y * scale}`;
       }
-      el('path', { d: zd, fill: 'none', stroke: '#e63946', 'stroke-width': 3, 'stroke-dasharray': '8,4' }, g);
+      el('path', { d: zd, fill: 'none', stroke: '#e63946', 'stroke-width': 3, 'stroke-dasharray': '8,4' }, gZero);
       const mid = zeroPoints[Math.floor(zeroPoints.length / 2)];
       const txt = el('text', {
         x: mid.x * scale + 8, y: mid.y * scale - 10,
         'font-size': 13, fill: '#e63946', 'font-weight': 'bold'
-      }, g);
+      }, gZero);
       txt.textContent = 'Лінія нульових робіт';
     }
 
@@ -168,18 +171,18 @@ const Diagram = (() => {
         el('circle', { cx, cy, r: 4, fill: '#333' }, g);
 
         if (redMarks && redMarks[idx] != null) {
-          const t = el('text', { x: cx + 6, y: cy - 4, 'font-size': 10.5, fill: '#d62828' }, g);
+          const t = el('text', { x: cx + 6, y: cy - 4, 'font-size': 10.5, fill: '#d62828', class: 'svg-red-mark' }, g);
           t.textContent = redMarks[idx].toFixed(2);
         }
         if (blackMarks && blackMarks[idx] != null) {
-          const t = el('text', { x: cx + 6, y: cy + 15, 'font-size': 10.5, fill: '#333', 'font-weight': 'bold' }, g);
+          const t = el('text', { x: cx + 6, y: cy + 15, 'font-size': 10.5, fill: '#333', 'font-weight': 'bold', class: 'svg-black-mark' }, g);
           t.textContent = blackMarks[idx].toFixed(2);
         }
         if (workingMarks && workingMarks[idx] != null) {
           const wm = workingMarks[idx];
           const t = el('text', {
             x: cx - 52, y: cy - 4,
-            'font-size': 10.5, fill: wm >= 0 ? '#2a9d8f' : '#e76f51', 'font-weight': 'bold'
+            'font-size': 10.5, fill: wm >= 0 ? '#2a9d8f' : '#e76f51', 'font-weight': 'bold', class: 'svg-working-mark'
           }, g);
           t.textContent = (wm >= 0 ? '+' : '') + wm.toFixed(2);
         }
@@ -214,21 +217,27 @@ const Diagram = (() => {
     el('line', { x1: dimX, y1: 0, x2: dimX, y2: sH, stroke: '#555', 'stroke-width': 1 }, g);
     el('line', { x1: dimX - 4, y1: 0, x2: dimX + 4, y2: 0, stroke: '#555', 'stroke-width': 1.5 }, g);
     el('line', { x1: dimX - 4, y1: sH, x2: dimX + 4, y2: sH, stroke: '#555', 'stroke-width': 1.5 }, g);
-    const lb = el('text', { x: dimX + 20, y: sH / 2 + 4, 'text-anchor': 'middle', 'font-size': 14, fill: '#333',
-      transform: `rotate(90,${dimX + 20},${sH / 2 + 4})` }, g);
+    const lb = el('text', {
+      x: dimX + 20, y: sH / 2 + 4, 'text-anchor': 'middle', 'font-size': 14, fill: '#333',
+      transform: `rotate(90,${dimX + 20},${sH / 2 + 4})`
+    }, g);
     lb.textContent = `Б = ${(rows - 1) * squareB} м`;
 
     const ai = el('text', { x: sW / 2, y: -20, 'text-anchor': 'middle', 'font-size': 12, fill: '#555' }, g);
     ai.textContent = 'I ─────────── I';
-    const aii = el('text', { x: -20, y: sH / 2, 'text-anchor': 'middle', 'font-size': 12, fill: '#555',
-      transform: `rotate(-90,-20,${sH / 2})` }, g);
+    const aii = el('text', {
+      x: -20, y: sH / 2, 'text-anchor': 'middle', 'font-size': 12, fill: '#555',
+      transform: `rotate(-90,-20,${sH / 2})`
+    }, g);
     aii.textContent = 'II ────── II';
 
     // i₂ arrow on top (horizontal direction)
     if (i2) {
       const arrowY = -42;
-      el('line', { x1: sW / 2 - 40, y1: arrowY, x2: sW / 2 + 40, y2: arrowY,
-        stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})` }, g);
+      el('line', {
+        x1: sW / 2 - 40, y1: arrowY, x2: sW / 2 + 40, y2: arrowY,
+        stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})`
+      }, g);
       const it = el('text', { x: sW / 2 + 50, y: arrowY + 5, 'font-size': 13, fill: '#333', 'font-weight': 'bold' }, g);
       it.textContent = `i₂ = ${i2}`;
     }
@@ -236,8 +245,10 @@ const Diagram = (() => {
     // i₁ arrow on left (vertical direction)
     if (i1) {
       const arrowX = -42;
-      el('line', { x1: arrowX, y1: sH / 2 + 40, x2: arrowX, y2: sH / 2 - 40,
-        stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})` }, g);
+      el('line', {
+        x1: arrowX, y1: sH / 2 + 40, x2: arrowX, y2: sH / 2 - 40,
+        stroke: '#333', 'stroke-width': 2, 'marker-end': `url(#${arrowId})`
+      }, g);
       const it = el('text', { x: arrowX - 5, y: sH / 2 + 60, 'text-anchor': 'middle', 'font-size': 13, fill: '#333', 'font-weight': 'bold' }, g);
       it.textContent = `i₁ = ${i1}`;
     }
@@ -358,8 +369,10 @@ const Diagram = (() => {
   }
 
   function makeHatchPattern(defs, id, color, angle) {
-    const p = el('pattern', { id, patternUnits: 'userSpaceOnUse', width: 6, height: 6,
-      patternTransform: `rotate(${angle})` }, defs);
+    const p = el('pattern', {
+      id, patternUnits: 'userSpaceOnUse', width: 6, height: 6,
+      patternTransform: `rotate(${angle})`
+    }, defs);
     el('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: color, 'stroke-width': 1.2, opacity: 0.45 }, p);
   }
 
@@ -373,7 +386,7 @@ const Diagram = (() => {
       for (let c = 0; c < nC; c++) {
         const sq = volData.squares[r * nC + c];
         const col = sq.type === 'fill' ? 'rgba(42,157,143,0.06)' :
-                    sq.type === 'cut' ? 'rgba(231,111,81,0.06)' : 'none';
+          sq.type === 'cut' ? 'rgba(231,111,81,0.06)' : 'none';
         if (col !== 'none') el('rect', { x: c * squareA * sx, y: r * squareB * sy, width: squareA * sx, height: squareB * sy, fill: col }, g);
       }
     }
@@ -406,8 +419,10 @@ const Diagram = (() => {
         nt.textContent = sq.num;
 
         if (sq.type !== 'transition') {
-          const lt = el('text', { x: cx, y: cy + 4, 'text-anchor': 'middle', 'font-size': 9.5,
-            fill: sq.type === 'fill' ? '#2a9d8f' : '#e76f51', 'font-weight': 'bold' }, g);
+          const lt = el('text', {
+            x: cx, y: cy + 4, 'text-anchor': 'middle', 'font-size': 9.5,
+            fill: sq.type === 'fill' ? '#2a9d8f' : '#e76f51', 'font-weight': 'bold'
+          }, g);
           lt.textContent = sq.type === 'fill' ? 'Насип' : 'Виїмка';
           const vol = sq.type === 'cut' ? sq.cut : sq.fill;
           if (vol > 0.01) {
@@ -464,7 +479,7 @@ const Diagram = (() => {
     ml.textContent = `L = ${carto.Lsr.toFixed(1)} м`;
 
     [{ x: -2, y: -4, a: 'end', l: 'A' }, { x: siteW + 2, y: -4, a: 'start', l: 'B' },
-     { x: siteW + 2, y: siteH + 11, a: 'start', l: 'C' }, { x: -2, y: siteH + 11, a: 'end', l: 'D' }
+    { x: siteW + 2, y: siteH + 11, a: 'start', l: 'C' }, { x: -2, y: siteH + 11, a: 'end', l: 'D' }
     ].forEach(cr => {
       const t = el('text', { x: cr.x, y: cr.y, 'text-anchor': cr.a, 'font-size': 10, fill: '#555', 'font-weight': 'bold' }, g);
       t.textContent = cr.l;
@@ -486,8 +501,10 @@ const Diagram = (() => {
     el('line', { x1: 0, y1: bY, x2: siteW, y2: bY, stroke: '#666', 'stroke-width': 1 }, g);
     el('line', { x1: 0, y1: 0, x2: 0, y2: bY, stroke: '#666', 'stroke-width': 1 }, g);
 
-    const yLab = el('text', { x: -6, y: chartH / 2, 'text-anchor': 'middle', 'font-size': 8,
-      fill: '#555', transform: `rotate(-90,-6,${chartH / 2})` }, g);
+    const yLab = el('text', {
+      x: -6, y: chartH / 2, 'text-anchor': 'middle', 'font-size': 8,
+      fill: '#555', transform: `rotate(-90,-6,${chartH / 2})`
+    }, g);
     yLab.textContent = "Об'єм ґрунту, м³";
 
     const gc = el('g', { 'clip-path': `url(#${clipId})` }, g);
@@ -598,11 +615,15 @@ const Diagram = (() => {
     tf.textContent = lastFill.toFixed(1);
 
     const lY = siteH * 0.55;
-    const l1 = el('text', { x: chartW - 4, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#e76f51',
-      transform: `rotate(90,${chartW - 4},${lY})` }, g);
+    const l1 = el('text', {
+      x: chartW - 4, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#e76f51',
+      transform: `rotate(90,${chartW - 4},${lY})`
+    }, g);
     l1.textContent = 'Виїмка';
-    const l2 = el('text', { x: chartW - 16, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#2a9d8f',
-      transform: `rotate(90,${chartW - 16},${lY})` }, g);
+    const l2 = el('text', {
+      x: chartW - 16, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#2a9d8f',
+      transform: `rotate(90,${chartW - 16},${lY})`
+    }, g);
     l2.textContent = 'Насип';
   }
 
@@ -630,17 +651,23 @@ const Diagram = (() => {
 
     for (let r = 0; r < nR; r++) {
       const cy = (r + 0.5) * squareB * sy;
-      const tv = el('text', { x: rW * 0.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': 9, fill: '#e76f51', transform: `rotate(-90,${rW * 0.5},${cy})` }, g);
+      const tv = el('text', {
+        x: rW * 0.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-size': 9, fill: '#e76f51', transform: `rotate(-90,${rW * 0.5},${cy})`
+      }, g);
       tv.textContent = carto.rowCut[r].toFixed(1);
-      const tn = el('text', { x: rW * 1.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': 9, fill: '#2a9d8f', transform: `rotate(-90,${rW * 1.5},${cy})` }, g);
+      const tn = el('text', {
+        x: rW * 1.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-size': 9, fill: '#2a9d8f', transform: `rotate(-90,${rW * 1.5},${cy})`
+      }, g);
       tn.textContent = carto.rowFill[r].toFixed(1);
     }
     for (let r = 0; r <= nR; r++) {
       const cy = r * squareB * sy;
-      const td = el('text', { x: rW * 2.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-size': 9, fill: '#333', transform: `rotate(-90,${rW * 2.5},${cy})` }, g);
+      const td = el('text', {
+        x: rW * 2.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-size': 9, fill: '#333', transform: `rotate(-90,${rW * 2.5},${cy})`
+      }, g);
       td.textContent = cumDist[r].toFixed(0);
     }
   }
@@ -664,8 +691,10 @@ const Diagram = (() => {
       const bY0 = bY - dataB[i] * vScale, bY1 = bY - dataB[i + 1] * vScale;
       const minY0 = Math.min(aY0, bY0), minY1 = Math.min(aY1, bY1);
       const maxY0 = Math.max(aY0, bY0), maxY1 = Math.max(aY1, bY1);
-      el('path', { d: `M ${x0} ${maxY0} L ${x0} ${minY0} L ${x1} ${minY1} L ${x1} ${maxY1} Z`,
-        fill: fill, stroke: 'none' }, g);
+      el('path', {
+        d: `M ${x0} ${maxY0} L ${x0} ${minY0} L ${x1} ${minY1} L ${x1} ${maxY1} Z`,
+        fill: fill, stroke: 'none'
+      }, g);
     }
   }
 
@@ -673,7 +702,7 @@ const Diagram = (() => {
   function halfVProjUp(g, cumData, n, step, vScale, bY, halfV, color, label) {
     for (let i = 0; i < n; i++) {
       if ((cumData[i] <= halfV && cumData[i + 1] >= halfV) ||
-          (cumData[i] >= halfV && cumData[i + 1] <= halfV)) {
+        (cumData[i] >= halfV && cumData[i + 1] <= halfV)) {
         const t = (halfV - cumData[i]) / (cumData[i + 1] - cumData[i] || 0.01);
         const x = (i + t) * step;
         const y = bY - halfV * vScale;
@@ -719,8 +748,10 @@ const Diagram = (() => {
       const bX0 = dataB[i] * vScale, bX1 = dataB[i + 1] * vScale;
       const minX0 = Math.min(aX0, bX0), minX1 = Math.min(aX1, bX1);
       const maxX0 = Math.max(aX0, bX0), maxX1 = Math.max(aX1, bX1);
-      el('path', { d: `M ${minX0} ${y0} L ${maxX0} ${y0} L ${maxX1} ${y1} L ${minX1} ${y1} Z`,
-        fill: fill, stroke: 'none' }, g);
+      el('path', {
+        d: `M ${minX0} ${y0} L ${maxX0} ${y0} L ${maxX1} ${y1} L ${minX1} ${y1} Z`,
+        fill: fill, stroke: 'none'
+      }, g);
     }
   }
 

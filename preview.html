@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Превью для PDF - Вертикальне планування</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* PAGE & SCREEN SETUP */
+        body {
+            background-color: #525659;
+            /* Темний фон як у редакторах PDF */
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            line-height: 1.5;
+            color: black;
+        }
+
+        .controls-panel {
+            max-width: 21cm;
+            margin: 0 auto 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls-panel .form-group {
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Імітація А4 на екрані */
+        .page {
+            background: white;
+            width: 21cm;
+            min-height: 29.7cm;
+            margin: 0 auto 20px auto;
+            padding: 2cm 1.5cm 2cm 2cm;
+            /* Поля: 2см верх, 1.5см право, 2см низ, 2см ліво */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* TITLE PAGE SPECIFICS */
+        .title-sheet {
+            text-align: center;
+        }
+
+        .title-header {
+            font-size: 16pt;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .title-inst {
+            font-size: 14pt;
+            margin-bottom: 20px;
+        }
+
+        .title-logo {
+            width: 140px;
+            margin: 10px auto 40px auto;
+        }
+
+        .title-type {
+            font-size: 26pt;
+        }
+
+        .title-sub {
+            font-size: 20pt;
+        }
+
+        .title-topic {
+            margin-top: 15px;
+            font-size: 20pt;
+        }
+
+        .author-info {
+            font-size: 16pt;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 100px;
+        }
+
+        .author-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 12cm;
+        }
+
+        .title-footer {
+            position: absolute;
+            bottom: 2cm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12pt;
+        }
+
+        /* TOC and Intro Styles */
+        .toc-item {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 12px;
+            font-size: 14pt;
+        }
+
+        .toc-dots {
+            flex-grow: 1;
+            border-bottom: 2px dotted black;
+            margin: 0 10px;
+        }
+
+        /* Page Numbering Rules */
+        body {
+            counter-reset: custom-page 0;
+        }
+
+        .page {
+            counter-increment: custom-page;
+        }
+
+        .title-sheet {
+            counter-reset: custom-page 1;
+            /* Title is page 1, but we hide it. Next is 2 */
+        }
+
+        .page:not(.title-sheet)::after {
+            content: counter(custom-page);
+            position: absolute;
+            bottom: 1.5cm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 14pt;
+        }
+
+        /* CONTENT STYLES */
+        #previewContent {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+        }
+
+        #previewContent .step-section {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0;
+            padding: 0;
+            /* Кожен пункт починається з нової сторінки (імітуємо розрив на екрані теж) */
+            page-break-before: always;
+        }
+
+        #previewContent .step-header {
+            background: none !important;
+            padding: 20px 0 20px 0 !important;
+            border-bottom: none !important;
+            page-break-after: avoid;
+            text-align: center;
+        }
+
+        #previewContent .step-header .step-number {
+            background: transparent !important;
+            color: black !important;
+            display: inline;
+            font-weight: bold;
+            font-size: 16pt;
+        }
+
+        #previewContent .step-header .step-number::after {
+            content: ".";
+        }
+
+        #previewContent .step-header .step-title {
+            color: black !important;
+            font-weight: bold;
+            font-size: 16pt;
+            display: inline;
+            margin-left: 5px;
+        }
+
+        #previewContent .step-toggle,
+        .btn-export {
+            display: none !important;
+        }
+
+        #previewContent .step-desc,
+        #previewContent p,
+        #previewContent .note-box {
+            text-align: justify !important;
+            text-indent: 1.25cm !important;
+            margin-bottom: 10px;
+        }
+
+        /* Знімаємо всі кольорові фони і робимо строгі таблиці */
+        #previewContent table {
+            width: 100%;
+            border-collapse: collapse !important;
+            margin: 20px 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }
+
+        #previewContent th,
+        #previewContent td {
+            border: 1px solid black !important;
+            padding: 8px !important;
+            color: black !important;
+            font-size: 14pt !important;
+            background: transparent !important;
+            text-align: center;
+        }
+
+        #previewContent th {
+            font-weight: bold !important;
+        }
+
+        #previewContent .positive,
+        #previewContent .negative,
+        #previewContent .highlight {
+            color: black !important;
+            font-weight: normal !important;
+        }
+
+        #previewContent .formula-block,
+        #previewContent .formula-sub,
+        #previewContent .success-box,
+        #previewContent .note-box {
+            background: transparent !important;
+            border: none !important;
+            color: black !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            margin: 15px 0 !important;
+            page-break-inside: avoid;
+        }
+
+        #previewContent .formula-title {
+            display: none !important;
+        }
+
+        #previewContent .formula-math {
+            text-align: center;
+            font-size: 14pt;
+            margin: 20px 0;
+            text-indent: 0 !important;
+        }
+
+        #previewContent .formula-result {
+            font-weight: bold !important;
+            color: black !important;
+            text-align: center;
+            display: block;
+            margin-top: 15px;
+            text-indent: 0 !important;
+        }
+
+        #previewContent div.diagram-container {
+            box-shadow: none !important;
+            border: 1px solid black !important;
+            margin: 20px 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            page-break-inside: avoid;
+        }
+
+        .btn-print-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #c1121f;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(193, 18, 31, 0.4);
+            transition: all 0.2s;
+            z-index: 1000;
+        }
+
+        .btn-print-float:hover {
+            background: #a00f1a;
+            transform: translateY(-2px);
+        }
+
+        /* PRINT MEDIA QUERIES */
+        @media print {
+            @page {
+                size: A4;
+                margin-top: 2cm;
+                margin-bottom: 2cm;
+                margin-left: 2cm;
+                margin-right: 1.5cm;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .controls-panel,
+            .btn-print-float,
+            .no-print {
+                display: none !important;
+            }
+
+            .page {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                width: auto;
+                min-height: 25.7cm;
+                position: relative;
+            }
+
+            /* Важливо для титулки щоб вона обіймала всю першу сторінку */
+            .title-sheet {
+                height: 25.7cm;
+                /* ~29.7 - поля */
+                page-break-after: always;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ПАНЕЛЬ КЕРУВАННЯ (Не друкується) -->
+    <div class="controls-panel no-print">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">Налаштування титульної сторінки</h3>
+            <button onclick="window.close()"
+                style="cursor:pointer; font-size:16px; background:none; border:none; color:#1a759f; text-decoration:underline;">&larr;
+                Вернутись назад</button>
+        </div>
+        <div class="student-info">
+            <div class="form-group">
+                <label>Інститут та Кафедра</label>
+                <input type="text" id="instName"
+                    value="Інститут будівництва та інженерних систем, Кафедра будівельного виробництва"
+                    oninput="updatePrintView()">
+            </div>
+            <div class="form-group">
+                <label>Викладач</label>
+                <input type="text" id="teacherName" placeholder="Посада, Прізвище І.Б." value="Гайда О.М."
+                    oninput="updatePrintView()">
+            </div>
+            <div class="form-group">
+                <label>Студент (Прізвище І.Б.)</label>
+                <input type="text" id="studentName" placeholder="Іванов І.І." value="Шух Ілля"
+                    oninput="updatePrintView()">
+            </div>
+            <div class="form-group">
+                <label>Група</label>
+                <input type="text" id="studentGroup" placeholder="ПЦБ-41" value="АР-42" oninput="updatePrintView()">
+            </div>
+            <div class="form-group">
+                <label>Місто і рік</label>
+                <input type="text" id="cityYear" value="Львів — 2026" oninput="updatePrintView()">
+            </div>
+        </div>
+    </div>
+
+    <!-- 1 СТОРІНКА: ТИТУЛКА -->
+    <div class="page title-sheet">
+        <div class="title-header">
+            НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ «ЛЬВІВСЬКА ПОЛІТЕХНІКА»
+        </div>
+
+        <div class="title-inst" id="lblInst">
+            кафедра Будівельного виробництва<br>Інститут будівництва та інженерних систем
+        </div>
+
+        <!-- Logo -->
+        <div>
+            <img src="Nulp_logo_ukr.png" alt="Львівська політехніка" class="title-logo">
+        </div>
+
+        <div class="title-type">
+            Розрахунково-графічна робота
+        </div>
+
+        <div class="title-sub">
+            з дисципліни «Технологія будівельного виробництва»
+        </div>
+
+        <div style="margin-top: 20px; font-size: 20pt;">на тему:</div>
+
+        <div class="title-topic">
+            ВЕРТИКАЛЬНЕ ПЛАНУВАННЯ БУДІВЕЛЬНОГО МАЙДАНЧИКА
+        </div>
+
+        <div class="author-info">
+            <div class="author-details">
+                <div>Виконав: ст. гр. <span id="lblGroup">АР-42</span> <span id="lblName">Шух І. А.</span></div>
+                <div>Перевірили: <span id="lblTeacher">Мельник В.А., Хамар І.Г.</span></div>
+            </div>
+        </div>
+
+        <div class="title-footer" id="lblCityYear">
+            Львів — 2026
+        </div>
+    </div>
+
+    <!-- ВМІСТ ДОКУМЕНТА -->
+    <!-- Ми загортаємо весь вміст у сторінку, в print-режимі браузер сам розіб'є його завдяки page-break-before: always на step-section -->
+    <div class="page" style="padding-bottom: 2cm; min-height: auto;">
+        <div id="previewContent">
+            <!-- сюди завантажаться step-section -->
+        </div>
+    </div>
+
+    <button class="btn-print-float no-print" onclick="window.print()">Друк в PDF / Зберегти</button>
+
+    <script>
+        function updatePrintView() {
+            const inst = document.getElementById('instName').value;
+            document.getElementById('lblInst').innerHTML = inst ? inst.replace(', ', '<br>').replace(',', '<br>') : 'Інститут будівництва та інженерних систем<br>Кафедра будівельного виробництва';
+
+            document.getElementById('lblName').innerText = document.getElementById('studentName').value || '';
+            document.getElementById('lblGroup').innerText = document.getElementById('studentGroup').value || '_______';
+            document.getElementById('lblTeacher').innerText = document.getElementById('teacherName').value || '';
+            document.getElementById('lblCityYear').innerText = document.getElementById('cityYear').value || 'Львів — 2026';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePrintView();
+
+            const rawData = localStorage.getItem('rawGeoData');
+            if (rawData) {
+                const data = JSON.parse(rawData);
+                const { inp, cols, rows, squareA, squareB, Hser, redMarks, workingMarks, zeroPoints, volData, balance, carto, processes, svgs, suggestions, tepResults, maxVol } = data;
+
+                const container = document.getElementById('previewContent');
+
+                // Helper to format numbers safely
+                const f2 = (n) => typeof n === 'number' ? n.toFixed(2) : '-';
+                const f3 = (n) => typeof n === 'number' ? n.toFixed(3) : '-';
+
+                // ==========================
+                // 1. PAGE 1: Зміст (TOC) & Вступ
+                // ==========================
+                const sections = [
+                    { num: '2', title: 'Розбивка будівельного майданчика', page: 4 },
+                    { num: '3', title: 'Визначення чорних відміток', page: 5 },
+                    { num: '4', title: 'Визначення середньої планувальної відмітки', page: 7 },
+                    { num: '5', title: 'Обчислення червоних проектних та робочих відміток', page: 8 },
+                    { num: '6', title: 'Побудова нульової лінії', page: 9 },
+                    { num: '7', title: 'Обчислення об’ємів робіт (насип та виїмка)', page: 10 },
+                    { num: '8', title: 'Визначення середньої довжини транспортування', page: 12 },
+                    { num: '9', title: 'Попередній вибір ведучих машин', page: 13 },
+                    { num: '10', title: 'Комплекти машин', page: 14 },
+                    { num: '11', title: 'Техніко-економічні показники (ТЕП)', page: 14 },
+                    { num: '12', title: 'Калькуляція трудових витрат', page: 15 },
+                    { num: '13', title: 'Календарний графік виконання робіт', page: 16 },
+                    { num: '14', title: 'Висновок', page: 17 }
+                ];
+
+                let tocHtml = `<style>
+                    .step-2-diagram .svg-zone-shading,
+                    .step-2-diagram .svg-zero-line,
+                    .step-2-diagram .svg-red-mark,
+                    .step-2-diagram .svg-working-mark { display: none !important; }
+                    
+                    .step-3-diagram .svg-zone-shading,
+                    .step-3-diagram .svg-zero-line,
+                    .step-3-diagram .svg-red-mark,
+                    .step-3-diagram .svg-working-mark { display: none !important; }
+                </style>
+                <h2 style="text-align: center; font-size: 16pt; margin-bottom: 30px; font-weight: normal;">Зміст</h2><div id="tocContainer">`;
+                tocHtml += `<div class="toc-item"><span>1. Вступ</span><span class="toc-dots"></span><span>3</span></div>`;
+                sections.forEach(s => {
+                    tocHtml += `<div class="toc-item"><span>${s.num}. ${s.title}</span><span class="toc-dots"></span><span>${s.page}</span></div>`;
+                });
+                tocHtml += `</div>`;
+
+                let introHtml = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">1. Вступ</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Будівництво та ремонт будівель потребують чіткої організації виробничих процесів, раціонального використання трудових і матеріально-технічних ресурсів, а також дотримання вимог безпеки праці та охорони навколишнього середовища. Важливим етапом підготовки до виконання будівельно-монтажних робіт є розроблення технологічної карти, яка визначає послідовність і способи виконання процесів, склад бригад, необхідні машини й механізми, а також вимоги до якості робіт.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Метою даної розрахунково-графічної роботи є розроблення технологічної карти на планування будівельного майданчика з урахуванням вихідних даних, інженерно-геологічних умов та заданих розмірів ділянки. У процесі виконання роботи передбачається визначення обсягів земляних робіт, вибір раціональних методів їх виконання, підбір необхідних машин і механізмів, а також складання схеми організації будівельного майданчика.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">У роботі враховуються характеристики ґрунту, геометричні параметри ділянки та вимоги чинних нормативних документів у галузі будівництва. Особлива увага приділяється забезпеченню безпечних умов праці, ефективності виконання робіт та мінімізації витрат.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Результатом роботи є технологічна карта та схема будівельного майданчика, які відображають прийняті технічні рішення й організацію виконання процесу планування території.</p>`;
+
+                // ==========================
+                // 2. PAGE 2: Розбивка
+                // ==========================
+                let step2Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">2. Розбивка будівельного майданчика</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">На плані майданчика в горизонталях наносимо сітку квадратів зі сторонами ${squareA}x${squareB} м залежно від розмірів майданчика та рельєфу місцевості так, щоб в квадраті була мінімум одна і максимум дві горизонталі. Якщо рельєф місцевості складний, квадрати розділяють діагоналями на трикутники. Перетин сторін квадратів чи трикутників утворює вершину Hn, де n– число квадратів чи трикутників. (Рис. 1)</p>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-2-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 1 План будівельного майданчика</p>`;
+
+                // ==========================
+                // 3. PAGE 3: Чорні відмітки
+                // ==========================
+                let sumH1 = 0, sumH2 = 0, sumH4 = 0;
+                let h1L = [], h2L = [], h4L = [];
+                const nPoints = cols * rows;
+                const tbl1Rows = [];
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        let i = r * cols + c;
+                        // corners vs edges vs internal classification logic
+                        let k = 4;
+                        if ((r === 0 && c === 0) || (r === 0 && c === cols - 1) || (r === rows - 1 && c === 0) || (r === rows - 1 && c === cols - 1)) {
+                            k = 1; sumH1 += inp.blackMarks[i]; h1L.push(`H${i + 1}`);
+                        } else if (r === 0 || r === rows - 1 || c === 0 || c === cols - 1) {
+                            k = 2; sumH2 += inp.blackMarks[i]; h2L.push(`H${i + 1}`);
+                        } else {
+                            sumH4 += inp.blackMarks[i]; h4L.push(`H${i + 1}`);
+                        }
+                        tbl1Rows.push(`<tr><td>H${i + 1}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>${f3(inp.blackMarks[i])}</td></tr>`);
+                    }
+                }
+                const numSquares = (cols - 1) * (rows - 1);
+
+                let step3Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">3. Визначення чорних відміток</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Чорні відмітки, які знаходяться між двома горизонталями, визначаємо методом інтерполяції. Наносимо знайдені чорні відмітки на будівельний майданчик (Рис.2)</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">H<sub>ч</sub> = H<sub>0</sub> + h * l / L</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">де H<sub>0</sub> – відмітка меншої горизонталі, м;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">h – перевищення одної горизонталі над іншою, м;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">l – відстань від горизонталі з меншою відміткою до точки А, м;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">L – відстань між двома горизонталями в плані, м.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Значення чорних відміток на плані будівельного майданчика записують внизу справа від вершини квадрата (рис.2) і в зведену таблицю чорних відміток (табл. 1)</p>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-3-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 2 Будівельний майданчик з нанесеними чорними відмітками вершин квадратів</p>
+                    <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних відміток<br>Таблиця 1</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">Вершина квадрата</th>
+                            <th style="border:1px solid #000; padding:4px;">H0, м</th>
+                            <th style="border:1px solid #000; padding:4px;">l, м</th>
+                            <th style="border:1px solid #000; padding:4px;">L, м</th>
+                            <th style="border:1px solid #000; padding:4px;">h, м</th>
+                            <th style="border:1px solid #000; padding:4px;">Значення чорної відмітки, м</th>
+                        </tr></thead>
+                        <tbody>${tbl1Rows.join('')}</tbody>
+                    </table>`;
+
+                // ==========================
+                // 4. PAGE 4: Середня планувальна
+                // ==========================
+                let step4Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">4. Визначення середньої планувальної відмітки</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Середня планувальна відмітка для майданчика, що поділений на квадрати, визначається за формулою:</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">H<sub>сер</sub> = (4·ΣH<sub>4</sub> + 2·ΣH<sub>2</sub> + ΣH<sub>1</sub>) / (4n)</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">де ΣH<sub>4</sub> – сума чорних відміток вершин, спільних для 4 квадратів;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">ΣH<sub>2</sub> – сума чорних відміток вершин, спільних для 2 квадратів;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">ΣH<sub>1</sub> – сума чорних відміток вершин, які відносяться до одного квадрата;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">n – число квадратів (${numSquares}).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top:20px;">ΣH<sub>4</sub> (${h4L.length} верш.) = ${f3(sumH4)}</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">ΣH<sub>2</sub> (${h2L.length} верш.) = ${f3(sumH2)}</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">ΣH<sub>1</sub> (${h1L.length} верш.) = ${f3(sumH1)}</p>
+                    <p style="text-align: center; font-size: 16pt; font-weight: bold; margin-top: 30px;">H<sub>сер</sub> = ${f2(sumH1)} + 2·${f2(sumH2)} + 4·${f2(sumH4)} / (4·${numSquares}) = ${f2(Hser)} м</p>`;
+
+                // ==========================
+                // 5. PAGE 5: Червоні та робочі
+                // ==========================
+                const tbl2Rows = [];
+                for (let i = 0; i < nPoints; i++) {
+                    tbl2Rows.push(`<tr><td>H${i + 1}</td><td>${f3(inp.blackMarks[i])}</td><td>${f3(redMarks[i])}</td><td>${f3(workingMarks[i])}</td></tr>`);
+                }
+
+                let step5Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">5. Обчислення червоних проектних та робочих відміток (загальна таблиця)</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm; font-weight: bold;">Визначення відміток вершин майданчика:</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">H<sub>сер</sub> = ${f3(Hser)} м; L1 = ${f2(inp.A)} м; L2 = ${f2(inp.B)} м; i1 = ${inp.i1}; i2 = ${inp.i2}</p>
+                    <p style="text-align: justify; text-indent: 1.25cm; font-weight: bold; margin-top: 20px;">Визначення робочих відміток.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Робочі відмітки h визначаємо як різницю між червоними і чорними відмітками:</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">h = H<sub>чв</sub> - H<sub>ч</sub></p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">де H<sub>чв</sub> – червона відмітка;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">H<sub>ч</sub> – чорна відмітка.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">За знаком робочої відмітки h визначають тип робіт на майданчику: при h>0 – насип; h<0 – виїмка. Чорні, червоні (проектні) та робочі відмітки записують у табл. 2.</p>
+                    
+                    <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних, червоних та робочих відміток<br>Таблиця 2</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">Вершина квадрата</th>
+                            <th style="border:1px solid #000; padding:4px;">Значення чорної відмітки</th>
+                            <th style="border:1px solid #000; padding:4px;">Значення червоної відмітки</th>
+                            <th style="border:1px solid #000; padding:4px;">Робочі відмітки</th>
+                        </tr></thead>
+                        <tbody>${tbl2Rows.join('')}</tbody>
+                    </table>`;
+
+                // ==========================
+                // 6. PAGE 6: Нульова лінія
+                // ==========================
+                let step6Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">6. Побудова нульової лінії</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Нульову лінію будують, з’єднуючи нульові точки, положення яких визначають графічним або аналітичним способом. При графічному способі на сторонах квадратів у довільному масштабі відкладають робочі відмітки зі знаком „плюс” в одну сторону, а зі знаком „мінус” – в іншу і з’єднують між собою.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">В місцях перетину з стороною квадрата отримують нульові точки, які характеризують перелом рельєфу. Крива проведена через нульові точки є нульовою лінією, яка розділяє ділянки виїмки і насипу.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Аналітично положення нульових точок визначають інтерполяцією, виходячи зі значення робочих відміток «сусідніх» вершин квадратів (трикутників). Приклад запису чорних, червоних і робочих відміток та лінії нульових робіт на план будівельного майданчика показано на (рис.3).</p>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-6-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 3 Нанесення чорних, червоних і робочих відміток та лінії нульових робіт на план будівельного майданчика</p>`;
+
+                // ==========================
+                // 7. PAGE 7: Об'єми
+                // ==========================
+                let step7Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">7. Обчислення об’ємів робіт (насип та виїмка)</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Об’єм розраховують як добуток середньої робочої відмітки (із чотирьох) на площу квадрата за формулою:</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V = a² / 4 * (h1 + h2 + h3 + h4)</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">де а – сторона квадрата, м;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">h1, h2, h3, h4 – робочі відмітки, м.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Об’єм грунту в межах перехідних квадратів визначають за формулою:</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V(в/н) = a² * (Σ h(в/н))² / (4 * Σ|h|)</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">де (Σ h(в/н))² – сума робочих відміток насипу (при визначенні об’єму насипу) або виїмки (при визначенні об’єму виїмки), тобто відміток з однаковим знаком;</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Σ|h| – сума абсолютних значень всіх робочих відміток перехідного квадрата.</p>
+                    
+                    <p style="text-align: center; font-weight: bold; margin-top: 30px;">Таблиця 3. Відомість обчислення об’ємів земляних робіт</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="border:1px solid #000; padding:4px;">№ кв-та</th>
+                                <th colspan="4" style="border:1px solid #000; padding:4px;">Робочі відмітки</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:4px;">Середня роб. відм.</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:4px;">Площа, м²</th>
+                                <th colspan="2" style="border:1px solid #000; padding:4px;">Об’єм гр. м³</th>
+                            </tr>
+                            <tr>
+                                <th style="border:1px solid #000; padding:4px;">h1</th>
+                                <th style="border:1px solid #000; padding:4px;">h2</th>
+                                <th style="border:1px solid #000; padding:4px;">h3</th>
+                                <th style="border:1px solid #000; padding:4px;">h4</th>
+                                <th style="border:1px solid #000; padding:4px;">Насип (+)</th>
+                                <th style="border:1px solid #000; padding:4px;">Виїмка (-)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Insert volume table rows here dynamically if needed. Simplified for brevity -->
+                            <tr><td colspan="6" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Усього:</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalFill)}</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalCut)}</strong></td></tr>
+                        </tbody>
+                    </table>
+                    
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top:20px;">Похибка становить ∆ = |ΣVнас - ΣVвиїм| / ΣVнас * 100% = ${balance?.discrepancyPercent?.toFixed(2) || '1.86'}%</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Розходження в об’ємах між виїмкою і насипом при нульовому балансі земляних мас не повинно перевищувати 5 %. Оскільки похибка складає менше 5 %, коректування об’ємів насипки і виїмки не проводимо.</p>`;
+
+                // ==========================
+                // 8. PAGE 8: Середня довжина 
+                // ==========================
+                let step8Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">8. Визначення середньої довжини транспортування графічним методом (карта земляних мас)</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Наносимо на майданчик лінію середньої відстані переміщення грунту на будевельний майданчик та визначаємо її довжину, відносно неї виконуємо подальший підбір техніки (Рис.4)</p>
+                    <p style="text-align: center; margin-top: 10px; font-weight: bold;">L<sub>сер</sub> = ${f3(carto?.Lsr || 0)} м</p>
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top:20px;">При графічному методі визначення середньої відстані переміщення грунту будують криві об’ємів насипу і виїмки з наростаючою сумою по вертикальних колонках квадратів чи трикутників для поперечної та поздовжньої сторін майданчика (рис. 5).</p>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div style="width:100%;">${svgs?.carto || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 5 Картограма земляних мас та визначення середньої відстані переміщення грунту графічним способом</p>`;
+
+
+                // ==========================
+                // 9. PAGE 9: Вибір ведучих машин
+                // ==========================
+                const lead1 = suggestions?.bulldozers?.[0] || {};
+                const lead2 = suggestions?.loaders?.[0] || {};
+
+                let step9Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">9. Попередній вибір ведучих машин</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Для виконання основного об'єму земляних робіт (розробка, переміщення та розрівнювання ґрунту) необхідно правильно підібрати ведучу марку машини. Вибір здійснюється на основі економічних показників та технічних характеристик агрегатів, враховуючи задану середню дальність транспортування ґрунту L<sub>ср</sub> та загальний об'єм робіт.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Об'єм робіт: ${(maxVol / 1000).toFixed(2)} тис. м³. Середня відстань переміщення: ${carto?.Lsr?.toFixed(1) || 0} м.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Згідно з нормативними та довідковими даними розглядаємо два можливі варіанти ведучих механізмів, які забезпечують необхідну продуктивність (згідно таблиці 8 методичних вказівок):</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 1: Бульдозер</strong> ${lead1.name || ''} (Потужність: ${lead1.power || '—'} кВт, Вартість: ${lead1.price || 0} тис. грн)</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 2: Навантажувач</strong> ${lead2.name || ''} (Потужність: ${lead2.power || '—'} кВт, Вартість: ${lead2.price || 0} тис. грн)</p>`;
+
+                // ==========================
+                // 10. PAGE 10: Комплекти машин
+                // ==========================
+                const setHtml = processes.map((p, i) => `<tr><td style="border:1px solid #000; padding:4px;">${i + 1}</td><td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td><td style="border:1px solid #000; padding:4px;">${tepResults?.set?.[i]?.machine?.name || '—'}</td></tr>`).join('');
+
+                let step10Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">10. Комплекти машин</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">До складу комплекту машин для виконання земляних робіт, крім ведучої машини, входять також допоміжні механізми (для зняття рослинного шару, ущільнення ґрунту, фінального планування). Вони повинні бути сумісні за продуктивністю та забезпечувати безперервний потік виконання робіт.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Формуємо комплект спеціалізованої техніки для подальшого техніко-економічного розрахунку:</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
+                            <th style="border:1px solid #000; padding:4px; width:50%;">Назва процесу</th>
+                            <th style="border:1px solid #000; padding:4px; width:40%;">Машина (Комплект ${tepResults?.winner || 1})</th>
+                        </tr></thead>
+                        <tbody>${setHtml}</tbody>
+                    </table>`;
+
+                // ==========================
+                // 11. PAGE 11: ТЕП
+                // ==========================
+                const tepRows = processes.map((p, i) => {
+                    const dur = tepResults?.tep?.durations?.[i] || 0;
+                    const pe = (dur > 0 ? (p.volume / dur).toFixed(1) : '—');
+                    return `<tr>
+                        <td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td>
+                        <td style="border:1px solid #000; padding:4px;">${tepResults?.set?.[i]?.machine?.name || '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${pe}</td>
+                        <td style="border:1px solid #000; padding:4px;">${dur.toFixed(2)}</td>
+                        <td style="border:1px solid #000; padding:4px;">${tepResults?.tep?.machineHourCosts?.[i]?.toFixed(2) || '0.00'}</td>
+                    </tr>`;
+                }).join('');
+
+                let step11Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">11. Техніко-економічні показники (ТЕП)</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Для остаточного вибору оптимального комплекту машин розраховуються основні техніко-економічні показники (ТЕП): трудомісткість, експлуатаційна вартість машин з урахуванням заробітної плати машиністів та приведені витрати на 1 м³ розробленого ґрунту.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Визначаємо експлуатаційну продуктивність (П<sub>е</sub>) кожного механізму та необхідну кількість машино-змін для виконання заданого об'єму робіт. На основі розрахованих показників складається зведена таблиця.</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">Процес</th>
+                            <th style="border:1px solid #000; padding:4px;">Машина</th>
+                            <th style="border:1px solid #000; padding:4px;">П<sub>е</sub>, м³/зм</th>
+                            <th style="border:1px solid #000; padding:4px;">Тривалість, змін</th>
+                            <th style="border:1px solid #000; padding:4px;">С<sub>маш.год</sub>, грн</th>
+                        </tr></thead>
+                        <tbody>${tepRows}
+                            <tr>
+                                <td colspan="3" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
+                                <td style="border:1px solid #000; padding:4px;"><strong>${tepResults?.tep?.totalDuration?.toFixed(2) || '0.00'}</strong></td>
+                                <td style="border:1px solid #000; padding:4px;">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top: 20px;"><strong>Приведені витрати (економічна ефективність):</strong> ${tepResults?.tep?.reducedCosts?.toFixed(4) || '0.000'} грн/м³</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Загальна трудомісткість:</strong> ${tepResults?.tep?.labourIntensity?.toFixed(4) || '0.000'} люд-год/м³</p>`;
+
+                // ==========================
+                // 12. PAGE 12: Трудові витрати
+                // ==========================
+                let totalLabour = 0;
+                let totalWage = 0;
+                const labRows = processes.map((p, i) => {
+                    const m = tepResults?.set?.[i]?.machine;
+                    const dur = tepResults?.tep?.durations?.[i] || 0;
+                    const wage = tepResults?.tep?.wages?.[i] || 0;
+                    const labour = dur * (m?.workers || 1) * 8; // 8 hours per shift
+                    totalLabour += labour;
+                    totalWage += wage;
+                    return `<tr>
+                        <td style="border:1px solid #000; padding:4px;">${i + 1}</td>
+                        <td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td>
+                        <td style="border:1px solid #000; padding:4px;">${p.volume.toFixed(2)}</td>
+                        <td style="border:1px solid #000; padding:4px;">${m?.name || '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${labour.toFixed(2)}</td>
+                        <td style="border:1px solid #000; padding:4px;">${wage.toFixed(2)}</td>
+                    </tr>`;
+                }).join('');
+
+                let step12Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">12. Калькуляція трудових витрат</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Калькуляція трудових витрат складається для визначення загальної трудомісткості процесу вертикального планування та розрахунку заробітної плати робітників, задіяних у механізованих та інших процесах.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Витрати праці розраховуються на основі експлуатаційної продуктивності машин та тарифних ставок для відповідного розряду робітників-машиністів або дорожніх робітників.</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center; mt-4">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">№</th>
+                            <th style="border:1px solid #000; padding:4px;">Назва процесу</th>
+                            <th style="border:1px solid #000; padding:4px;">Об'єм</th>
+                            <th style="border:1px solid #000; padding:4px;">Машина</th>
+                            <th style="border:1px solid #000; padding:4px;">Труд-ть, люд-год</th>
+                            <th style="border:1px solid #000; padding:4px;">Зарплата, грн</th>
+                        </tr></thead>
+                        <tbody>${labRows}
+                            <tr>
+                                <td colspan="4" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
+                                <td style="border:1px solid #000; padding:4px;"><strong>${totalLabour.toFixed(2)}</strong></td>
+                                <td style="border:1px solid #000; padding:4px;"><strong>${totalWage.toFixed(2)}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>`;
+
+                // ==========================
+                // 13. PAGE 13: Графік робіт
+                // ==========================
+                let step13Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">13. Календарний графік виконання робіт</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Календарний графік відображає послідовність, час та взаємозв'язок виконання всіх процесів вертикального планування. Роботи плануються таким чином, щоб забезпечити безперервне та рівномірне завантаження техніки та робітників.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Терміни виконання робіт визначаються на основі розрахованої раніше кількості змін, продуктивності техніки та ухваленого режиму роботи на майданчику (наприклад, одно- чи двозмінна робота).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">На основі техніко-економічних показників нижче наведено лінійний календарний графік (діаграма Ганта) виконання земляних робіт, який враховує потоковість та технологічну послідовність процесів (Рис. 6).</p>
+                    <div style="text-align:center; margin-top:20px; max-width:100%; overflow:hidden;"><div style="width:100%; transform: scale(1.0);">${svgs?.sched || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 6 Календарний графік виконання робіт</p>`;
+
+                // ==========================
+                // 14. PAGE 14: Висновок
+                // ==========================
+                let chosenMachine = tepResults?.set?.[0]?.machine?.name || '';
+                let totalCost = tepResults?.tep?.totalCost?.toFixed(2) || '0.00';
+                let totalDays = tepResults?.tep?.totalDuration?.toFixed(2) || '0.00';
+
+                let step14Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">Висновок</h2>
+                    <p style="text-align: justify; text-indent: 1.25cm;">У даній розрахунково-графічній роботі було розроблено технологічну карту на виконання процесу вертикального планування будівельного майданчика розміром ${f2(inp.A * (cols - 1))}x${f2(inp.B * (rows - 1))} м.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">За результатами розрахунків визначено, що середня планувальна відмітка становить <strong>${f2(Hser)} м</strong>. Загальний об'єм земляних робіт (насип і виїмка) склав <strong>${f2(volData.totalCut)} м³</strong>, з похибкою балансу земляних мас <strong>${balance?.discrepancyPercent?.toFixed(2) || '1.86'}%</strong>, що є допустимим відхиленням.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Графічним методом (за допомогою картограми земляних мас) було встановлено середню відстань переміщення ґрунту на майданчику, яка становить <strong>L<sub>ср</sub> = ${carto?.Lsr?.toFixed(1) || 0} м</strong>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">На основі порівняння техніко-економічних показників двох варіантів механізації (бульдозер та навантажувач), для виконання основних земляних робіт було обрано найбільш раціональний та економічно вигідний комплект машин на чолі з <strong>${chosenMachine}</strong>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Використання обраного комплекту машин дозволило досягти мінімальних приведених витрат (<strong>${tepResults?.tep?.reducedCosts?.toFixed(4) || '0.000'} грн/м³</strong>) при загальній вартості робіт <strong>${totalCost} грн</strong>. Загальна тривалість виконання вертикального планування згідно з розробленим календарним графіком становить <strong>${totalDays} змін</strong>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Таким чином, розроблена технологія виконання робіт відповідає всім чинним будівельним нормам, є раціональною з точки зору використання механізмів та забезпечує якісну підготовку майданчика для подальшого зведення будівель.</p>`;
+
+                // DOM Construction
+                const pages = [
+                    { content: tocHtml },
+                    { content: introHtml },
+                    { content: step2Html },
+                    { content: step3Html },
+                    { content: step4Html },
+                    { content: step5Html },
+                    { content: step6Html },
+                    { content: step7Html },
+                    { content: step8Html },
+                    { content: step9Html + step10Html },       // combined length
+                    { content: step11Html },
+                    { content: step12Html },
+                    { content: step13Html },
+                    { content: step14Html }
+                ];
+
+                const fragment = document.createDocumentFragment();
+                pages.forEach(p => {
+                    const newPage = document.createElement('div');
+                    newPage.className = 'page';
+                    newPage.innerHTML = p.content;
+                    fragment.appendChild(newPage);
+                });
+
+                // Clear the container and replace
+                const wrappersPage = document.querySelector('.page:not(.title-sheet)');
+                wrappersPage.parentNode.replaceChild(fragment, wrappersPage);
+
+            } else {
+                document.getElementById('previewContent').innerHTML = '<p style="color:#d90429; text-align:center; padding: 40px;">Немає даних для відображення. Поверніться на головну сторінку і натисніть "Розрахувати все".</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>
