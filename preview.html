@@ -642,8 +642,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Insert volume table rows here dynamically if needed. Simplified for brevity -->
-                            <tr><td colspan="6" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Усього:</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalFill)}</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalCut)}</strong></td></tr>
+                            ${volData.squares.map(sq => {
+                    const avgH = (sq.h1 + sq.h2 + sq.h3 + sq.h4) / 4;
+                    const area = squareA * squareB;
+                    return `<tr>
+                                    <td style="border:1px solid #000; padding:4px;">${sq.num}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f3(sq.h1)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f3(sq.h2)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f3(sq.h3)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f3(sq.h4)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f3(avgH)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${f2(area)}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${sq.fill > 0.01 ? f3(sq.fill) : '—'}</td>
+                                    <td style="border:1px solid #000; padding:4px;">${sq.cut > 0.01 ? f3(sq.cut) : '—'}</td>
+                                </tr>`;
+                }).join('')}
+                            <tr><td colspan="7" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Усього:</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalFill)}</strong></td><td style="border:1px solid #000; padding:4px;"><strong>${f3(volData.totalCut)}</strong></td></tr>
                         </tbody>
                     </table>
                     
