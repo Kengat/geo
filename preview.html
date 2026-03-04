@@ -51,6 +51,12 @@
             position: relative;
         }
 
+        /* Content pages: flow naturally, no fixed height */
+        .page.content-page {
+            min-height: auto;
+            padding-bottom: 3cm;
+        }
+
         /* TITLE PAGE SPECIFICS */
         .title-sheet {
             text-align: center;
@@ -324,15 +330,24 @@
                 padding: 0;
                 box-shadow: none;
                 width: auto;
-                min-height: 25.7cm;
+                min-height: auto;
                 position: relative;
             }
 
-            /* Важливо для титулки щоб вона обіймала всю першу сторінку */
+            .page.content-page {
+                padding-bottom: 0;
+                page-break-before: always;
+            }
+
+            /* Title page fills the entire first page */
             .title-sheet {
                 height: 25.7cm;
-                /* ~29.7 - поля */
                 page-break-after: always;
+            }
+
+            /* Disable on-screen page number since browser handles it */
+            .page::after {
+                display: none !important;
             }
 
             * {
@@ -831,7 +846,7 @@
                 const fragment = document.createDocumentFragment();
                 pages.forEach(p => {
                     const newPage = document.createElement('div');
-                    newPage.className = 'page';
+                    newPage.className = 'page content-page';
                     newPage.innerHTML = p.content;
                     fragment.appendChild(newPage);
                 });
