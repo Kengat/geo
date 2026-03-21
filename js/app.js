@@ -348,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 10: Machine sets
     const c10 = makeStep(parent, 10, 'Комплекти машин');
     const topsoilBulldozer = lead1;
+    const ripperLoosening = Machines.suggestRipperBulldozer(maxVol, carto.Lsr, suggestions) || Machines.getById('dp15');
     const set1 = [
       { process: processes[0].name, machine: lead1 },
       { process: processes[1].name, machine: null },
@@ -358,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const set2 = [
       { process: processes[0].name, machine: lead2.type === 'loader' ? (suggestions.bulldozers[0] || lead1) : lead2 },
-      { process: processes[1].name, machine: null },
+      { process: processes[1].name, machine: ripperLoosening },
       { process: processes[2].name, machine: lead2 },
       { process: processes[3].name, machine: lead2 },
       { process: processes[4].name, machine: compact2 },

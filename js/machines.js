@@ -76,6 +76,58 @@ const Machines = (() => {
       workers: 1
     },
     {
+      id: 'dp9', name: 'ДП-9 (бульдозер-розпушувач)', type: 'bulldozer',
+      base: 'Т-74-С2', power: 59,
+      bladeLength: 2.52, bladeHeight: 0.8,
+      speedCut: 2.5, speedEmpty: 10.0, speedLoaded: 5,
+      cutAngle: 55, volumeMoved: 1.8,
+      kLoosening: 1.22, kUsage: 0.85, kSlope: 1.0,
+      price: 72.0, amort: 40, yearHours: 1890,
+      oneTime: 355.5,
+      Ce: 13.20 + 0.30 + 12.30 + 3.15 + 23.7,
+      workers: 1,
+      ripper: true
+    },
+    {
+      id: 'dp15', name: 'ДП-15 (бульдозер-розпушувач)', type: 'bulldozer',
+      base: 'Т-130М', power: 79,
+      bladeLength: 3.2, bladeHeight: 1.0,
+      speedCut: 2.2, speedEmpty: 9.8, speedLoaded: 4.8,
+      cutAngle: 55, volumeMoved: 2.8,
+      kLoosening: 1.22, kUsage: 0.85, kSlope: 1.0,
+      price: 118.5, amort: 40, yearHours: 2580,
+      oneTime: 450.0,
+      Ce: 21.0 + 0.45 + 16.35 + 4.05 + 26.8,
+      workers: 1,
+      ripper: true
+    },
+    {
+      id: 'dp25', name: 'ДП-25 (бульдозер-розпушувач)', type: 'bulldozer',
+      base: 'Т-180КС', power: 132,
+      bladeLength: 3.64, bladeHeight: 1.23,
+      speedCut: 2.5, speedEmpty: 11.5, speedLoaded: 5.5,
+      cutAngle: 55, volumeMoved: 4.0,
+      kLoosening: 1.22, kUsage: 0.85, kSlope: 1.0,
+      price: 198.0, amort: 25, yearHours: 2580,
+      oneTime: 450.0,
+      Ce: 21.0 + 4.5 + 29.40 + 7.35 + 26.8,
+      workers: 1,
+      ripper: true
+    },
+    {
+      id: 'dp34', name: 'ДП-34 (бульдозер-розпушувач)', type: 'bulldozer',
+      base: 'ДЕТ-250', power: 228,
+      bladeLength: 4.54, bladeHeight: 1.55,
+      speedCut: 2.0, speedEmpty: 11.5, speedLoaded: 4.5,
+      cutAngle: 55, volumeMoved: 6.5,
+      kLoosening: 1.22, kUsage: 0.85, kSlope: 1.0,
+      price: 780.0, amort: 25, yearHours: 2580,
+      oneTime: 450.0,
+      Ce: 21.0 + 0.75 + 40.95 + 10.20 + 26.8,
+      workers: 1,
+      ripper: true
+    },
+    {
       id: 'dz35b', name: 'ДЗ-35Б (Д-275)', type: 'bulldozer',
       base: 'Т-180КС', power: 132,
       bladeLength: 3.64, bladeHeight: 1.23,
@@ -425,6 +477,45 @@ const Machines = (() => {
     return suggestions;
   }
 
+  /** Підбір бульдозера-розпушувача за тими ж обсягом (тис. м³) і Lsr, що табл. 8 для ведучих бульдозерів; серед допустимих обирається найближчий за потужністю до рекомендованого бульдозера. */
+  function suggestRipperBulldozer(totalVolume, Lsr, cachedSuggestions) {
+    const vol = totalVolume / 1000;
+    const rippers = bulldozers.filter(b => b.ripper);
+    if (rippers.length === 0) return null;
+
+    const candidates = [];
+    for (const b of rippers) {
+      if (Lsr > 100 && b.power < 79) continue;
+      if (vol <= 1.5 && b.power <= 90) candidates.push(b);
+      else if (vol > 1.5 && vol <= 20 && b.power >= 40 && b.power <= 160) candidates.push(b);
+      else if (vol > 20 && vol <= 50 && b.power >= 90) candidates.push(b);
+      else if (vol > 50 && b.power >= 160) candidates.push(b);
+    }
+
+    const lead = (cachedSuggestions && cachedSuggestions.bulldozers && cachedSuggestions.bulldozers[0])
+      || suggestMachines(totalVolume, Lsr).bulldozers[0]
+      || null;
+
+    function pickClosest(pool) {
+      if (!pool.length) return null;
+      if (!lead) return pool[0];
+      let best = pool[0];
+      let bestD = Math.abs(best.power - lead.power);
+      for (let i = 1; i < pool.length; i++) {
+        const r = pool[i];
+        const d = Math.abs(r.power - lead.power);
+        if (d < bestD) {
+          best = r;
+          bestD = d;
+        }
+      }
+      return best;
+    }
+
+    if (candidates.length) return pickClosest(candidates);
+    return pickClosest(rippers);
+  }
+
   function getAllByType(type) {
     switch (type) {
       case 'bulldozer': return bulldozers;
@@ -439,5 +530,5 @@ const Machines = (() => {
     return [...bulldozers, ...scrapers, ...loaders, ...compactors].find(m => m.id === id);
   }
 
-  return { bulldozers, scrapers, loaders, compactors, soilTypes, suggestMachines, getAllByType, getById };
+  return { bulldozers, scrapers, loaders, compactors, soilTypes, suggestMachines, suggestRipperBulldozer, getAllByType, getById };
 })();
