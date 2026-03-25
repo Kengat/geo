@@ -398,33 +398,55 @@ const ContourEditor = (() => {
           r: contourRadiusAtAngle(ct, va, ox, oy)
         }));
 
-        let elev;
+        let elev, H0 = null, l = null, L_dist = null, h_val = null;
         if (vr <= radii[0].r) {
           // Inside the highest contour — extrapolate above
+          const rDiff = Math.max(radii[1].r - radii[0].r, 1);
           const grad = radii.length >= 2
-            ? (radii[0].elev - radii[1].elev) / Math.max(radii[1].r - radii[0].r, 1)
+            ? (radii[0].elev - radii[1].elev) / rDiff
             : 0.01;
           elev = radii[0].elev + grad * (radii[0].r - vr);
+          if (radii.length >= 2) {
+            H0 = radii[0].elev;
+            h_val = radii[0].elev - radii[1].elev;
+            L_dist = rDiff;
+            l = radii[0].r - vr;
+          }
         } else if (vr >= radii[radii.length - 1].r) {
           // Beyond the lowest contour — extrapolate below
           const n = radii.length - 1;
+          const rDiff = n >= 1 ? Math.max(radii[n].r - radii[n - 1].r, 1) : 1;
           const grad = n >= 1
-            ? (radii[n - 1].elev - radii[n].elev) / Math.max(radii[n].r - radii[n - 1].r, 1)
+            ? (radii[n - 1].elev - radii[n].elev) / rDiff
             : 0.01;
           elev = radii[n].elev - grad * (vr - radii[n].r);
+          if (n >= 1) {
+            h_val = radii[n - 1].elev - radii[n].elev;
+            H0 = radii[n].elev - h_val;
+            L_dist = rDiff;
+            l = L_dist - (vr - radii[n].r);
+          }
         } else {
           // Between two contours — linear interpolation
           elev = radii[0].elev; // fallback
           for (let i = 0; i < radii.length - 1; i++) {
             if (vr >= radii[i].r && vr <= radii[i + 1].r) {
-              const t = (vr - radii[i].r) / Math.max(radii[i + 1].r - radii[i].r, 1);
+              const rDiff = Math.max(radii[i + 1].r - radii[i].r, 1);
+              const t = (vr - radii[i].r) / rDiff;
               elev = radii[i].elev + t * (radii[i + 1].elev - radii[i].elev);
+              H0 = radii[i + 1].elev; // lower contour
+              h_val = radii[i].elev - radii[i + 1].elev;
+              L_dist = rDiff;
+              l = radii[i + 1].r - vr;
               break;
             }
           }
         }
 
-        marks.push(Math.round(elev * 100) / 100);
+        marks.push({
+          elev: Math.round(elev * 100) / 100,
+          H0: H0, l: l, L: L_dist, h: h_val
+        });
       }
     }
     return marks;

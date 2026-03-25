@@ -542,7 +542,12 @@
                         } else {
                             sumH4 += inp.blackMarks[i]; h4L.push(`H${i + 1}`);
                         }
-                        tbl1Rows.push(`<tr><td>H${i + 1}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>${f3(inp.blackMarks[i])}</td></tr>`);
+                        const det = inp.blackMarksDetails ? inp.blackMarksDetails[i] : { H0: '-', l: '-', L: '-', h: '-' };
+                        const vH0 = typeof det?.H0 === 'number' ? det.H0.toFixed(3) : (det?.H0 || '-');
+                        const vl = typeof det?.l === 'number' ? det.l.toFixed(2) : (det?.l || '-');
+                        const vL_dist = typeof det?.L === 'number' ? det.L.toFixed(2) : (det?.L || '-');
+                        const vh = typeof det?.h === 'number' ? det.h.toFixed(3) : (det?.h || '-');
+                        tbl1Rows.push(`<tr><td>H${i + 1}</td><td>${vH0}</td><td>${vl}</td><td>${vL_dist}</td><td>${vh}</td><td>${f3(inp.blackMarks[i])}</td></tr>`);
                     }
                 }
                 const numSquares = (cols - 1) * (rows - 1);

@@ -60,7 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
       blackMarks.push(!isNaN(v) && v > 0 ? v : 270);
     }
 
-    return { A, B, i1, i2, topsoil, soil, tShift, numShifts, blackMarks };
+    let blackMarksDetails = new Array(n).fill({ H0: '-', l: '-', L: '-', h: '-' });
+    if (typeof ContourEditor !== 'undefined') {
+      const { cols, rows, squareA, squareB } = state;
+      const W = (cols - 1) * squareA;
+      const H = (rows - 1) * squareB;
+      const computedMarks = ContourEditor.computeBlackMarks(W, H, cols, rows, squareA, squareB);
+      if (computedMarks) {
+        blackMarksDetails = computedMarks;
+      }
+    }
+
+    return { A, B, i1, i2, topsoil, soil, tShift, numShifts, blackMarks, blackMarksDetails };
   }
 
   // ===== Run all calculations =====
@@ -685,9 +696,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let i = 0; i < marks.length; i++) {
       const input = document.getElementById(`vDirect_${i}`);
-      if (input) input.value = marks[i].toFixed(2);
+      if (input) input.value = marks[i].elev.toFixed(2);
       const label = document.querySelector(`.bmark-label[data-idx="${i}"]`);
-      if (label) label.textContent = marks[i].toFixed(2);
+      if (label) label.textContent = marks[i].elev.toFixed(2);
     }
   }
 
