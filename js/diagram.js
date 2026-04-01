@@ -2,12 +2,139 @@
 
 const Diagram = (() => {
   const NS = 'http://www.w3.org/2000/svg';
+  let zeroLineLabelSeq = 0;
 
   function el(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
     for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
     if (parent) parent.appendChild(e);
     return e;
+  }
+
+  function buildPolylinePath(points, sx = 1, sy = 1) {
+    if (!points || points.length < 2) return '';
+    let d = `M ${points[0].x * sx} ${points[0].y * sy}`;
+    for (let i = 1; i < points.length; i++) d += ` L ${points[i].x * sx} ${points[i].y * sy}`;
+    return d;
+  }
+
+  function ensurePathId(path, prefix = 'path-label') {
+    if (!path.getAttribute('id')) path.setAttribute('id', `${prefix}-${++zeroLineLabelSeq}`);
+    return path.getAttribute('id');
+  }
+
+  function createOffsetPath(g, sourcePath, offset, prefix = 'path-offset') {
+    const total = typeof sourcePath.getTotalLength === 'function' ? sourcePath.getTotalLength() : 0;
+    if (!total || !Number.isFinite(total)) return sourcePath;
+
+    const steps = Math.max(24, Math.min(120, Math.round(total / 6)));
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const len = total * (i / steps);
+      const p = sourcePath.getPointAtLength(len);
+      const p0 = sourcePath.getPointAtLength(Math.max(0, len - 1));
+      const p1 = sourcePath.getPointAtLength(Math.min(total, len + 1));
+      let tx = p1.x - p0.x;
+      let ty = p1.y - p0.y;
+      const tLen = Math.hypot(tx, ty) || 1;
+      tx /= tLen;
+      ty /= tLen;
+      const nx = -ty;
+      const ny = tx;
+      pts.push({
+        x: p.x + nx * offset,
+        y: p.y + ny * offset
+      });
+    }
+
+    let d = '';
+    pts.forEach((pt, idx) => {
+      d += `${idx === 0 ? 'M' : 'L'} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)} `;
+    });
+
+    return el('path', {
+      id: `${prefix}-${++zeroLineLabelSeq}`,
+      d: d.trim(),
+      fill: 'none',
+      stroke: 'none',
+      opacity: '0',
+      'pointer-events': 'none'
+    }, g);
+  }
+
+  function attachTextToPath(g, pathOrId, label, options = {}) {
+    let pathEl = typeof pathOrId === 'string'
+      ? g.ownerSVGElement.getElementById(pathOrId)
+      : pathOrId;
+
+    if (pathEl && options.dy) {
+      pathEl = createOffsetPath(g, pathEl, Number(options.dy), options.prefix || 'path-offset');
+    }
+
+    const pathId = pathEl
+      ? ensurePathId(pathEl, options.prefix || 'path-label')
+      : String(pathOrId);
+
+    const text = el('text', {
+      'font-size': options.fontSize || 12,
+      fill: options.fill || '#333',
+      'font-weight': options.fontWeight || 'normal',
+      'font-style': options.fontStyle || 'normal',
+      'letter-spacing': options.letterSpacing || '0',
+      'paint-order': 'stroke fill',
+      stroke: options.haloColor || '#fff',
+      'stroke-width': options.haloWidth || 2,
+      'stroke-linejoin': 'round',
+      'dominant-baseline': 'central'
+    }, g);
+    const textPath = el('textPath', {
+      href: `#${pathId}`,
+      startOffset: options.startOffset || '50%',
+      'text-anchor': options.textAnchor || 'middle'
+    }, text);
+    textPath.textContent = label;
+    return text;
+  }
+
+  function placeLabelOnLongestZeroSegment(g, points, sx, sy, label, options = {}) {
+    if (!points || points.length < 2) return;
+
+    let best = null;
+    for (let i = 1; i < points.length; i++) {
+      const a = { x: points[i - 1].x * sx, y: points[i - 1].y * sy };
+      const b = { x: points[i].x * sx, y: points[i].y * sy };
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (!best || len > best.len) best = { a, b, len };
+    }
+
+    if (!best || best.len < (options.minLength || 70)) return;
+
+    let { a, b } = best;
+    if (b.x < a.x) [a, b] = [b, a];
+
+    const pathId = `zero-line-label-${++zeroLineLabelSeq}`;
+    el('path', {
+      id: pathId,
+      d: `M ${a.x} ${a.y} L ${b.x} ${b.y}`,
+      fill: 'none',
+      stroke: 'none',
+      opacity: '0',
+      'pointer-events': 'none'
+    }, g);
+
+    const text = el('text', {
+      'font-size': options.fontSize || 12,
+      fill: options.fill || '#333',
+      'font-weight': options.fontWeight || 'bold',
+      'letter-spacing': options.letterSpacing || '0',
+      dy: options.dy || '-2'
+    }, g);
+    const textPath = el('textPath', {
+      href: `#${pathId}`,
+      startOffset: '50%',
+      'text-anchor': 'middle'
+    }, text);
+    textPath.textContent = label;
   }
 
   // ========== Site preview (grid + vertices, NO contours — those come from ContourEditor) ==========
@@ -149,17 +276,14 @@ const Diagram = (() => {
     // zero line
     const gZero = el('g', { class: 'svg-zero-line' }, g);
     if (zeroPoints && zeroPoints.length >= 2) {
-      let zd = `M ${zeroPoints[0].x * scale} ${zeroPoints[0].y * scale}`;
-      for (let i = 1; i < zeroPoints.length; i++) {
-        zd += ` L ${zeroPoints[i].x * scale} ${zeroPoints[i].y * scale}`;
-      }
-      el('path', { d: zd, fill: 'none', stroke: '#e63946', 'stroke-width': 3, 'stroke-dasharray': '8,4' }, gZero);
-      const mid = zeroPoints[Math.floor(zeroPoints.length / 2)];
-      const txt = el('text', {
-        x: mid.x * scale + 8, y: mid.y * scale - 10,
-        'font-size': 13, fill: '#e63946', 'font-weight': 'bold'
-      }, gZero);
-      txt.textContent = 'Лінія нульових робіт';
+      const zd = buildPolylinePath(zeroPoints, scale, scale);
+      el('path', { d: zd, fill: 'none', stroke: '#e63946', 'stroke-width': 4 }, gZero);
+      placeLabelOnLongestZeroSegment(gZero, zeroPoints, scale, scale, 'Лінія нульових робіт', {
+        fontSize: 13,
+        fill: '#e63946',
+        minLength: 120,
+        dy: '-6'
+      });
     }
 
     // vertex marks
@@ -302,8 +426,10 @@ const Diagram = (() => {
     const totalW = padL + siteW + gap + chartW + tblH + 40;
     const totalH = padT + siteH + gap + chartH + tblH + 30;
 
+    const viewShiftLeft = 18;
+    const viewShiftTop = 14;
     const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+    svg.setAttribute('viewBox', `${-viewShiftLeft} ${-viewShiftTop} ${totalW} ${totalH}`);
     svg.setAttribute('width', '100%');
     svg.setAttribute('style', 'max-width:1000px');
     svg.setAttribute('class', 'diagram-svg diagram-svg-cartogram');
@@ -409,12 +535,15 @@ const Diagram = (() => {
 
     // zero line
     if (zeroPoints && zeroPoints.length >= 2) {
-      let zd = `M ${zeroPoints[0].x * sx} ${zeroPoints[0].y * sy}`;
-      for (let i = 1; i < zeroPoints.length; i++) zd += ` L ${zeroPoints[i].x * sx} ${zeroPoints[i].y * sy}`;
+      const zd = buildPolylinePath(zeroPoints, sx, sy);
       el('path', { d: zd, fill: 'none', stroke: '#333', 'stroke-width': 1.5, 'stroke-dasharray': '6,3' }, g);
-      const zm = zeroPoints[Math.floor(zeroPoints.length / 2)];
-      const zt = el('text', { x: zm.x * sx + 5, y: zm.y * sy - 6, 'font-size': 9, fill: '#333', 'font-style': 'italic' }, g);
-      zt.textContent = 'Нульова лінія';
+      placeLabelOnLongestZeroSegment(g, zeroPoints, sx, sy, 'Нульова лінія', {
+        fontSize: 9,
+        fill: '#333',
+        fontWeight: 'normal',
+        minLength: 70,
+        dy: '-4'
+      });
     }
 
     // squares content
@@ -501,18 +630,31 @@ const Diagram = (() => {
     const marker = el('marker', { id: 'arrowMN', markerWidth: 8, markerHeight: 6, refX: 8, refY: 3, orient: 'auto' }, defs);
     el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: '#264653' }, marker);
 
-    el('line', { x1: mxC, y1: myC, x2: mxF, y2: myF, stroke: '#264653', 'stroke-width': 1.5, 'stroke-dasharray': '5,3', 'marker-end': 'url(#arrowMN)' }, g);
+    el('line', { x1: mxC, y1: myC, x2: mxF, y2: myF, stroke: '#264653', 'stroke-width': 2.2, 'marker-end': 'url(#arrowMN)' }, g);
     el('circle', { cx: mxC, cy: myC, r: 5, fill: '#e76f51', stroke: '#fff', 'stroke-width': 1.5 }, g);
     el('circle', { cx: mxF, cy: myF, r: 5, fill: '#2a9d8f', stroke: '#fff', 'stroke-width': 1.5 }, g);
     const tm = el('text', { x: mxC + 8, y: myC - 6, 'font-size': 10, fill: '#e76f51', 'font-weight': 'bold' }, g);
     tm.textContent = 'M';
     const tn = el('text', { x: mxF + 8, y: myF - 6, 'font-size': 10, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
     tn.textContent = 'N';
-    const ml = el('text', { x: (mxF + mxC) / 2, y: (myF + myC) / 2 - 8, 'text-anchor': 'middle', 'font-size': 9.5, fill: '#264653', 'font-weight': 'bold' }, g);
-    ml.textContent = `L = ${carto.Lsr.toFixed(1)} м`;
+    const lPath = el('path', {
+      d: `M ${mxC} ${myC} L ${mxF} ${myF}`,
+      fill: 'none',
+      stroke: 'none',
+      opacity: '0',
+      'pointer-events': 'none'
+    }, g);
+    attachTextToPath(g, lPath, `L = ${carto.Lsr.toFixed(1)} м`, {
+      fontSize: 9.5,
+      fill: '#264653',
+      fontWeight: 'bold',
+      startOffset: '50%',
+      dy: '-7',
+      haloWidth: 2
+    });
 
-    [{ x: -2, y: -4, a: 'end', l: 'A' }, { x: siteW + 2, y: -4, a: 'start', l: 'B' },
-    { x: siteW + 2, y: siteH + 11, a: 'start', l: 'C' }, { x: -2, y: siteH + 11, a: 'end', l: 'D' }
+    [{ x: -4, y: 12, a: 'end', l: 'A' }, { x: siteW - 4, y: 12, a: 'end', l: 'B' },
+    { x: siteW - 4, y: siteH + 12, a: 'end', l: 'C' }, { x: -4, y: siteH + 12, a: 'end', l: 'D' }
     ].forEach(cr => {
       const t = el('text', { x: cr.x, y: cr.y, 'text-anchor': cr.a, 'font-size': 10, fill: '#555', 'font-weight': 'bold' }, g);
       t.textContent = cr.l;
@@ -546,26 +688,31 @@ const Diagram = (() => {
     hatchOnlyBetweenUp(gc, carto.cumColCut, carto.cumColFill, nC, stepW, vScale, bY, 'url(#hatchBetweenV)');
 
     // curve lines
-    curveUp(gc, carto.cumColCut, nC, stepW, vScale, bY, '#e76f51', 2);
-    curveUp(gc, carto.cumColFill, nC, stepW, vScale, bY, '#2a9d8f', 2);
+    const cutCurve = curveUp(gc, carto.cumColCut, nC, stepW, vScale, bY, '#e76f51', 2);
+    const fillCurve = curveUp(gc, carto.cumColFill, nC, stepW, vScale, bY, '#2a9d8f', 2);
 
     // ½V projections going UPWARD from curve toward site plan (M and N)
     const lastCut = carto.cumColCut[nC], lastFill = carto.cumColFill[nC];
     halfVProjUp(gc, carto.cumColCut, nC, stepW, vScale, bY, lastCut / 2, '#e76f51', "M'");
     halfVProjUp(gc, carto.cumColFill, nC, stepW, vScale, bY, lastFill / 2, '#2a9d8f', "N'");
 
-    // endpoint totals
-    const tc = el('text', { x: siteW + 4, y: bY - lastCut * vScale + 4, 'font-size': 9.5, fill: '#e76f51', 'font-weight': 'bold' }, g);
-    tc.textContent = lastCut.toFixed(1);
-    const tf = el('text', { x: siteW + 4, y: bY - lastFill * vScale + 4, 'font-size': 9.5, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
-    tf.textContent = lastFill.toFixed(1);
-
     // curve labels
-    const m = Math.floor(nC / 2);
-    const t1 = el('text', { x: m * stepW + 5, y: bY - carto.cumColCut[m] * vScale - 6, 'font-size': 8.5, fill: '#e76f51', 'font-style': 'italic' }, g);
-    t1.textContent = "Крива об'ємів виїмки";
-    const t2 = el('text', { x: m * stepW + 5, y: bY - carto.cumColFill[m] * vScale - 6, 'font-size': 8.5, fill: '#2a9d8f', 'font-style': 'italic' }, g);
-    t2.textContent = "Крива об'ємів насипу";
+    attachTextToPath(gc, cutCurve, "Крива об'ємів виїмки", {
+      fontSize: 8.5,
+      fill: '#e76f51',
+      fontStyle: 'italic',
+      startOffset: '42%',
+      dy: '-7',
+      haloWidth: 1.8
+    });
+    attachTextToPath(gc, fillCurve, "Крива об'ємів насипу", {
+      fontSize: 8.5,
+      fill: '#2a9d8f',
+      fontStyle: 'italic',
+      startOffset: '58%',
+      dy: '-7',
+      haloWidth: 1.8
+    });
   }
 
   // ── Bottom table ──
@@ -624,31 +771,30 @@ const Diagram = (() => {
     const gc = el('g', { 'clip-path': `url(#${clipId})` }, g);
 
     hatchOnlyBetweenVert(gc, carto.cumRowCut, carto.cumRowFill, nR, stepH, vScale, 'url(#hatchBetweenH)');
-    drawCurveVert(gc, carto.cumRowCut, nR, stepH, vScale, '#e76f51', 2);
-    drawCurveVert(gc, carto.cumRowFill, nR, stepH, vScale, '#2a9d8f', 2);
+    const cutCurve = drawCurveVert(gc, carto.cumRowCut, nR, stepH, vScale, '#e76f51', 2);
+    const fillCurve = drawCurveVert(gc, carto.cumRowFill, nR, stepH, vScale, '#2a9d8f', 2);
 
     // ½V projections — match M' and N' on site plan
     const lastCut = carto.cumRowCut[nR], lastFill = carto.cumRowFill[nR];
     halfVProjVert(gc, carto.cumRowCut, nR, stepH, vScale, lastCut / 2, '#e76f51');
     halfVProjVert(gc, carto.cumRowFill, nR, stepH, vScale, lastFill / 2, '#2a9d8f');
 
-    // endpoint totals
-    const tc = el('text', { x: lastCut * vScale + 3, y: siteH + 12, 'font-size': 9.5, fill: '#e76f51', 'font-weight': 'bold' }, g);
-    tc.textContent = lastCut.toFixed(1);
-    const tf = el('text', { x: lastFill * vScale + 3, y: siteH + 24, 'font-size': 9.5, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
-    tf.textContent = lastFill.toFixed(1);
-
-    const lY = siteH * 0.55;
-    const l1 = el('text', {
-      x: chartW - 4, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#e76f51',
-      transform: `rotate(90,${chartW - 4},${lY})`
-    }, g);
-    l1.textContent = 'Виїмка';
-    const l2 = el('text', {
-      x: chartW - 16, y: lY, 'text-anchor': 'end', 'font-size': 8.5, fill: '#2a9d8f',
-      transform: `rotate(90,${chartW - 16},${lY})`
-    }, g);
-    l2.textContent = 'Насип';
+    attachTextToPath(gc, cutCurve, "Крива об'ємів виїмки", {
+      fontSize: 8.3,
+      fill: '#e76f51',
+      fontStyle: 'italic',
+      startOffset: '44%',
+      dy: '8',
+      haloWidth: 1.7
+    });
+    attachTextToPath(gc, fillCurve, "Крива об'ємів насипу", {
+      fontSize: 8.3,
+      fill: '#2a9d8f',
+      fontStyle: 'italic',
+      startOffset: '56%',
+      dy: '-7',
+      haloWidth: 1.7
+    });
   }
 
   // ── Right table (rotated, beside right chart) ──
@@ -712,7 +858,7 @@ const Diagram = (() => {
   function curveUp(g, cumData, n, step, vScale, bY, color, width) {
     let d = '';
     for (let i = 0; i <= n; i++) d += (i === 0 ? 'M ' : ' L ') + (i * step).toFixed(1) + ' ' + (bY - cumData[i] * vScale).toFixed(1);
-    el('path', { d, fill: 'none', stroke: color, 'stroke-width': width }, g);
+    return el('path', { d, fill: 'none', stroke: color, 'stroke-width': width }, g);
   }
 
   // Hatched areas between two curves (bottom chart, upward Y).
@@ -771,7 +917,7 @@ const Diagram = (() => {
   function drawCurveVert(g, cumData, n, step, vScale, color, width) {
     let d = '';
     for (let i = 0; i <= n; i++) d += (i === 0 ? 'M ' : ' L ') + (cumData[i] * vScale).toFixed(1) + ' ' + (i * step).toFixed(1);
-    el('path', { d, fill: 'none', stroke: color, 'stroke-width': width }, g);
+    return el('path', { d, fill: 'none', stroke: color, 'stroke-width': width }, g);
   }
 
   // Hatched areas between two curves (right chart, rightward X).

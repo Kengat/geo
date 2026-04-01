@@ -75,7 +75,7 @@
         }
 
         .title-logo {
-            width: 140px;
+            width: 190px;
             margin: 10px auto 40px auto;
         }
 
@@ -95,15 +95,18 @@
         .author-info {
             font-size: 16pt;
             display: flex;
-            justify-content: flex-end;
+            justify-content: flex-start;
             margin-top: 100px;
+            padding-left: 50%;
         }
 
         .author-details {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            width: 12cm;
+            width: max-content;
+            max-width: 8cm;
+            text-align: left;
         }
 
         .title-footer {
@@ -1343,12 +1346,22 @@
                     node.setAttribute('stroke', theme.backgroundContourColor);
                     node.setAttribute('stroke-dasharray', theme.backgroundContourStyle === 'solid' ? 'none' : '5,3');
                 });
+                svg.querySelectorAll('[data-contour-kind="mid-label"]').forEach((node) => {
+                    node.setAttribute('fill', theme.backgroundContourColor);
+                });
 
                 ['K', 'L', 'M'].forEach((contourId) => {
                     const colorKey = `contour${contourId}Color`;
                     svg.querySelectorAll(`[data-contour-kind="main"][data-contour-id="${contourId}"]`).forEach((node) => {
                         if (node.tagName.toLowerCase() === 'path') node.setAttribute('stroke', theme[colorKey]);
-                        else node.setAttribute('fill', theme[colorKey]);
+                        else {
+                            node.setAttribute('fill', theme[colorKey]);
+                            const textPath = node.querySelector('textPath');
+                            if (textPath) {
+                                const num = parseFloat(textPath.textContent.match(/(\d+(?:\.\d+)?)/)?.[1] || '');
+                                if (Number.isFinite(num)) textPath.textContent = num.toFixed(2);
+                            }
+                        }
                     });
                 });
 
@@ -1942,6 +1955,7 @@
                 let tocHtml = `<style>
                     .step-2-diagram .svg-zone-shading,
                     .step-2-diagram .svg-zero-line,
+                    .step-2-diagram .svg-black-mark,
                     .step-2-diagram .svg-red-mark,
                     .step-2-diagram .svg-working-mark { display: none !important; }
                     
@@ -2103,7 +2117,7 @@
                 // ==========================
                 let step7Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">7. Обчислення об’ємів робіт (насип та виїмка)</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">Об’єм розраховують як добуток середньої робочої відмітки (із чотирьох) на площу квадрата за формулою:</p>
-                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V = aВІ / 4 * (h1 + h2 + h3 + h4)</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V = a² / 4 · (h1 + h2 + h3 + h4)</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">де а – сторона квадрата, м;</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">h1, h2, h3, h4 – робочі відмітки, м.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Об’єм грунту в межах перехідних квадратів визначають за формулою:</p>
@@ -2117,10 +2131,10 @@
                             <tr>
                                 <th rowspan="2" style="border:1px solid #000; padding:3px;">№ кв.</th>
                                 <th colspan="4" style="border:1px solid #000; padding:3px;">Робоча відмітка, м</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">ОЈ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">aВІ/4</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>Рќ</sub>)ВІ<br>/ОЈ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>Р’</sub>)ВІ<br>/ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>a²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>4</span></span></th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>(Σh<sub>н</sub>)²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>Σ|h|</span></span></th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>(Σh<sub>в</sub>)²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>Σ|h|</span></span></th>
                                 <th colspan="2" style="border:1px solid #000; padding:3px;">Об'єм робіт, м³</th>
                             </tr>
                             <tr>
@@ -2196,7 +2210,7 @@
                     <p style="text-align: justify; text-indent: 1.25cm;">Формуємо комплект спеціалізованої техніки для подальшого техніко-економічного та нормативного розрахунку. Для планувальних операцій застосовуємо окремі допоміжні машини, а для ущільнення — коток.</p>
                     <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px; width:10%;">в„–</th>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
                             <th style="border:1px solid #000; padding:4px; width:50%;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px; width:40%;">Машина (Комплект ${tepResults?.winner || 1})</th>
                         </tr></thead>
@@ -2291,7 +2305,7 @@
                     <div class="scaled-table-wrap"><div class="scaled-table-inner">
                     <table class="ultra-compact-table" style="width:100%; border-collapse: collapse; text-align:center; mt-4">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px;">в„–</th>
+                            <th style="border:1px solid #000; padding:4px;">№</th>
                             <th style="border:1px solid #000; padding:4px;">Пункт ЕН</th>
                             <th style="border:1px solid #000; padding:4px;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px;">Об'єм робіт</th>
@@ -2459,7 +2473,7 @@
                     <table class="step13-schedule-table">
                         <thead>
                             <tr>
-                                <th class="num-col">в„–</th>
+                                <th class="num-col">№</th>
                                 <th class="process-col">Назва процесу</th>
                                 <th class="volume-col">Об'єм</th>
                                 <th class="machine-col">Машина</th>
@@ -2517,7 +2531,7 @@
                     return clipped;
                 };
                 const svgColumns = [
-                    { key: 'num', label: 'в„–', width: 20, chars: 2, align: 'middle' },
+                    { key: 'num', label: '№', width: 20, chars: 2, align: 'middle' },
                     { key: 'name', label: "Назва процесу", width: 58, chars: 7, align: 'start' },
                     { key: 'volume', label: "Об'єм", width: 54, chars: 9, align: 'middle' },
                     { key: 'machine', label: 'Машина', width: 48, chars: 7, align: 'start' },
@@ -2726,7 +2740,7 @@
                     ${mathLine(row(sub(mi('H'), mt('A-D')), mo('='), sub(mi('H'), mt('сер')), mo('±'), frac(row(sub(mi('L'), mn('1')), mo('·'), sub(mi('i'), mn('1'))), mn('2')), mo('±'), frac(row(sub(mi('L'), mn('2')), mo('·'), sub(mi('i'), mn('2'))), mn('2'))))}
                     ${paragraph(`Для будь-якої проміжної вершини зручніше користуватися еквівалентним записом через відстані від центра майданчика: Δx та Δy.`)}
                     ${mathLine(row(sub(mi('H'), mt('черв')), mo('='), sub(mi('H'), mt('сер')), mo('+'), row(mi('Δy'), mo('·'), sub(mi('i'), mn('1'))), mo('+'), row(mi('Δx'), mo('·'), sub(mi('i'), mn('2')))))}
-                    ${paragraph(`Для даного варіанта прийнято: H<sub>сер</sub> = ${f3(Hser)} м, A = ${f2(inp.A)} м, B = ${f2(inp.B)} м, i<sub>1</sub> = ${fmt(inp.i1, 4)}, i<sub>2</sub> = ${fmt(inp.i2, 4)}. Половини розмірів майданчика становлять A/2 = ${f2(inp.A / 2)} м та B/2 = ${f2(inp.B / 2)} м.`)}
+                    ${paragraph(`Для даного варіанта прийнято: H<sub>сер</sub> = ${f3(Hser)} м, A = ${f2(inp.A)} м, B = ${f2(inp.B)} м, i<sub>1</sub> = ${fmt(inp.i1, 4)}, i<sub>2</sub> = ${fmt(inp.i2, 4)}. Половини розмірів майданчика становлять A ÷ 2 = ${f2(inp.A / 2)} м та B ÷ 2 = ${f2(inp.B / 2)} м.`)}
                     ${paragraph(`Знак перед кожним доданком залежить від положення вершини відносно центра майданчика. Для контролю наводимо розрахунок кутових червоних відміток.`)}
                     ${cornerExamplesHtml}
                     ${paragraph(`Після визначення червоних відміток для кожної вершини обчислюємо робочу відмітку як різницю між червоною і чорною відмітками.`)}
@@ -2756,10 +2770,10 @@
                             <tr>
                                 <th rowspan="2" style="border:1px solid #000; padding:3px;">№ кв.</th>
                                 <th colspan="4" style="border:1px solid #000; padding:3px;">Робоча відмітка, м</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">ОЈ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">aВІ/4</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>РЅ</sub>)ВІ / ОЈ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>РІ</sub>)ВІ / ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>a²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>4</span></span></th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>(Σh<sub>н</sub>)²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>Σ|h|</span></span></th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;"><span style="display:inline-flex; flex-direction:column; align-items:center; line-height:1.05;"><span>(Σh<sub>в</sub>)²</span><span style="width:100%; border-top:1px solid #000; margin:2px 0 1px;"></span><span>Σ|h|</span></span></th>
                                 <th colspan="2" style="border:1px solid #000; padding:3px;">Об'єм робіт, м³</th>
                             </tr>
                             <tr>
@@ -2832,7 +2846,7 @@
                     ${paragraph(`Комплектування машин виконуємо для двох конкурентних варіантів ведучої техніки. Для кожного процесу добираємо сумісні допоміжні машини, після чого порівнюємо комплекти за техніко-економічними показниками.`)}
                     <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px; width:10%;">в„–</th>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
                             <th style="border:1px solid #000; padding:4px; width:40%;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px; width:${top2Available ? '25%' : '50%'};">Комплект 1</th>
                             ${top2Available ? '<th style="border:1px solid #000; padding:4px; width:25%;">Комплект 2</th>' : ''}

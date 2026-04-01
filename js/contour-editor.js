@@ -2,12 +2,79 @@
 
 const ContourEditor = (() => {
   const NS = 'http://www.w3.org/2000/svg';
+  let contourLabelSeq = 0;
 
   function svgEl(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
     for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
     if (parent) parent.appendChild(e);
     return e;
+  }
+
+  function ensurePathId(path, prefix = 'contour-path') {
+    if (!path.getAttribute('id')) path.setAttribute('id', `${prefix}-${++contourLabelSeq}`);
+    return path.getAttribute('id');
+  }
+
+  function createOffsetPath(g, sourcePath, offset, prefix = 'contour-offset') {
+    const total = typeof sourcePath.getTotalLength === 'function' ? sourcePath.getTotalLength() : 0;
+    if (!total || !Number.isFinite(total)) return sourcePath;
+
+    const steps = Math.max(30, Math.min(140, Math.round(total / 6)));
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const len = total * (i / steps);
+      const p = sourcePath.getPointAtLength(len);
+      const p0 = sourcePath.getPointAtLength(Math.max(0, len - 1));
+      const p1 = sourcePath.getPointAtLength(Math.min(total, len + 1));
+      let tx = p1.x - p0.x;
+      let ty = p1.y - p0.y;
+      const tLen = Math.hypot(tx, ty) || 1;
+      tx /= tLen;
+      ty /= tLen;
+      const nx = -ty;
+      const ny = tx;
+      pts.push({ x: p.x + nx * offset, y: p.y + ny * offset });
+    }
+
+    let d = '';
+    pts.forEach((pt, idx) => {
+      d += `${idx === 0 ? 'M' : 'L'} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)} `;
+    });
+
+    return svgEl('path', {
+      id: `${prefix}-${++contourLabelSeq}`,
+      d: d.trim(),
+      fill: 'none',
+      stroke: 'none',
+      opacity: '0',
+      'pointer-events': 'none'
+    }, g);
+  }
+
+  function attachLabelToContour(g, path, label, options = {}) {
+    const targetPath = options.offset
+      ? createOffsetPath(g, path, options.offset, 'contour-label-offset')
+      : path;
+    const pathId = ensurePathId(targetPath, 'contour-label-path');
+    const text = svgEl('text', {
+      'font-size': options.fontSize || 12,
+      fill: options.fill || '#333',
+      'font-weight': options.fontWeight || 'normal',
+      'font-style': options.fontStyle || 'italic',
+      'paint-order': 'stroke fill',
+      stroke: options.haloColor || '#fff',
+      'stroke-width': options.haloWidth || 2,
+      'stroke-linejoin': 'round',
+      opacity: options.opacity == null ? 1 : options.opacity
+    }, g);
+    const textPath = svgEl('textPath', {
+      href: `#${pathId}`,
+      startOffset: options.startOffset || '38%',
+      'text-anchor': options.textAnchor || 'middle'
+    }, text);
+    textPath.textContent = label;
+    return text;
   }
 
   // Default contour positions — circular-arc tangent-intersection model
@@ -165,30 +232,26 @@ const ContourEditor = (() => {
       const mid = midContour(a, b, cfg.gridW, cfg.gridH);
       const midElev = ((a.elevation + b.elevation) / 2).toFixed(1);
       const gM = svgEl('g', {}, cfg.g);
-      svgEl('path', {
+      const midPath = svgEl('path', {
         d: qPath(mid, s),
         fill: 'none', stroke: '#999', 'stroke-width': 1, 'stroke-dasharray': '6,4', opacity: 0.6
       }, gM);
-      const lt = 0.5;
-      const lx = qB(lt, mid.start.x, mid.control.x, mid.end.x) * s;
-      const ly = qB(lt, mid.start.y, mid.control.y, mid.end.y) * s;
-      const dx = qBd(lt, mid.start.x, mid.control.x, mid.end.x);
-      const dy = qBd(lt, mid.start.y, mid.control.y, mid.end.y);
-      const len = Math.hypot(dx, dy) || 1;
-      const nx = -dy / len * 11, ny = dx / len * 11;
-      const txt = svgEl('text', {
-        x: lx + nx, y: ly + ny,
-        'font-size': 10, fill: '#999', 'font-style': 'italic',
-        'text-anchor': 'middle', 'dominant-baseline': 'central', opacity: 0.7
-      }, gM);
-      txt.textContent = midElev;
+      attachLabelToContour(gM, midPath, midElev, {
+        fontSize: 10,
+        fill: '#999',
+        fontStyle: 'italic',
+        startOffset: '50%',
+        offset: 11,
+        haloWidth: 1.6,
+        opacity: 0.7
+      });
     }
 
     // draw main contours
     cfg.contours.forEach((c, ci) => {
       const gC = svgEl('g', {}, cfg.g);
 
-      svgEl('path', {
+      const contourPath = svgEl('path', {
         d: qPath(c, s),
         fill: 'none', stroke: c.color, 'stroke-width': 2.5, 'stroke-linecap': 'round'
       }, gC);
@@ -200,19 +263,15 @@ const ContourEditor = (() => {
         }, gC);
       }
 
-      const lt = 0.38;
-      const lx = qB(lt, c.start.x, c.control.x, c.end.x) * s;
-      const ly = qB(lt, c.start.y, c.control.y, c.end.y) * s;
-      const dx = qBd(lt, c.start.x, c.control.x, c.end.x);
-      const dy = qBd(lt, c.start.y, c.control.y, c.end.y);
-      const len = Math.hypot(dx, dy) || 1;
-      const nx = -dy / len * 15, ny = dx / len * 15;
-      const txt = svgEl('text', {
-        x: lx + nx, y: ly + ny,
-        'font-size': 14, fill: c.color, 'font-weight': 'bold', 'font-style': 'italic',
-        'text-anchor': 'middle', 'dominant-baseline': 'central'
-      }, gC);
-      txt.textContent = c.label;
+      attachLabelToContour(gC, contourPath, c.label, {
+        fontSize: 14,
+        fill: c.color,
+        fontWeight: 'bold',
+        fontStyle: 'italic',
+        startOffset: '38%',
+        offset: 15,
+        haloWidth: 2
+      });
 
       if (!cfg.editing) return;
 
@@ -505,35 +564,42 @@ const ContourEditor = (() => {
     const sorted = [...contourParams].sort((a, b) => a.elevation - b.elevation);
     for (let i = 0; i < sorted.length - 1; i++) {
       const mid = midContour(sorted[i], sorted[i + 1], gW, gH);
-      svgEl('path', {
+      const midPath = svgEl('path', {
         d: `M ${mid.start.x * s} ${mid.start.y * s} Q ${mid.control.x * s} ${mid.control.y * s} ${mid.end.x * s} ${mid.end.y * s}`,
         fill: 'none', stroke: '#999', 'stroke-width': 0.8, 'stroke-dasharray': '5,3',
         opacity: op * 0.6,
         'data-contour-kind': 'mid'
       }, g);
+      const midLabel = attachLabelToContour(g, midPath, ((sorted[i].elevation + sorted[i + 1].elevation) / 2).toFixed(1), {
+        fontSize: 10,
+        fill: '#999',
+        fontStyle: 'italic',
+        startOffset: '50%',
+        offset: 10,
+        haloWidth: 1.5,
+        opacity: op * 0.7
+      });
+      midLabel.setAttribute('data-contour-kind', 'mid-label');
     }
 
     // main contours
     contourParams.forEach(c => {
-      svgEl('path', {
+      const contourPath = svgEl('path', {
         d: `M ${c.start.x * s} ${c.start.y * s} Q ${c.control.x * s} ${c.control.y * s} ${c.end.x * s} ${c.end.y * s}`,
         fill: 'none', stroke: c.color, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: op,
         'data-contour-kind': 'main', 'data-contour-id': c.id
       }, g);
-      const t = 0.38;
-      const lx = qB(t, c.start.x, c.control.x, c.end.x) * s;
-      const ly = qB(t, c.start.y, c.control.y, c.end.y) * s;
-      const dx = qBd(t, c.start.x, c.control.x, c.end.x);
-      const dy = qBd(t, c.start.y, c.control.y, c.end.y);
-      const len = Math.hypot(dx, dy) || 1;
-      const nx = -dy / len * 12, ny = dx / len * 12;
-      const txt = svgEl('text', {
-        x: lx + nx, y: ly + ny,
-        'font-size': 12, fill: c.color, 'font-style': 'italic', opacity: op,
-        'text-anchor': 'middle',
-        'data-contour-kind': 'main', 'data-contour-id': c.id
-      }, g);
-      txt.textContent = c.label;
+      const txt = attachLabelToContour(g, contourPath, c.label, {
+        fontSize: 12,
+        fill: c.color,
+        fontStyle: 'italic',
+        startOffset: '38%',
+        offset: 12,
+        haloWidth: 1.8,
+        opacity: op
+      });
+      txt.setAttribute('data-contour-kind', 'main');
+      txt.setAttribute('data-contour-id', c.id);
     });
   }
 
