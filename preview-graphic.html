@@ -931,6 +931,259 @@
             dimGroup.appendChild(axisLabel);
         }
 
+        function shiftGraphicRightChart(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const rightChartGroup = groups[3];
+            if (!rightChartGroup) return;
+
+            const transform = rightChartGroup.getAttribute('transform') || '';
+            const match = transform.match(/translate\(([-\d.]+)[ ,]([-\d.]+)\)/);
+            if (!match) return;
+
+            const x = Number(match[1]);
+            const y = Number(match[2]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+            rightChartGroup.setAttribute('transform', `translate(${x + 34},${y})`);
+        }
+
+        function parseGraphicTranslate(node) {
+            const transform = node?.getAttribute('transform') || '';
+            const match = transform.match(/translate\(([-\d.]+)[ ,]([-\d.]+)\)/);
+            if (!match) return null;
+
+            const x = Number(match[1]);
+            const y = Number(match[2]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+            return { x, y };
+        }
+
+        function sampleGraphicPathXAtY(path, targetY, steps = 240) {
+            if (!path || !Number.isFinite(targetY) || typeof path.getTotalLength !== 'function') return null;
+            try {
+                const total = path.getTotalLength();
+                if (!Number.isFinite(total) || total <= 0) return null;
+
+                let bestPoint = null;
+                let bestDiff = Number.POSITIVE_INFINITY;
+                for (let i = 0; i <= steps; i++) {
+                    const point = path.getPointAtLength(total * (i / steps));
+                    const diff = Math.abs(point.y - targetY);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestPoint = point;
+                    }
+                }
+
+                return bestPoint && bestDiff < 8 ? bestPoint.x : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function swapGraphicRightChartAxis(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const rightChartGroup = groups[3];
+            if (!rightChartGroup) return;
+
+            const directLines = Array.from(rightChartGroup.children).filter((node) => node.tagName?.toLowerCase() === 'line');
+            const topLine = directLines.find((line) => {
+                const y1 = parseFloat(line.getAttribute('y1'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                const x2 = parseFloat(line.getAttribute('x2'));
+                return Number.isFinite(y1) && Number.isFinite(y2) && Number.isFinite(x2) && Math.abs(y1) < 0.01 && Math.abs(y2) < 0.01 && x2 > 0;
+            });
+            const axisLine = directLines.find((line) => {
+                const x1 = parseFloat(line.getAttribute('x1'));
+                const x2 = parseFloat(line.getAttribute('x2'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                return Number.isFinite(x1) && Number.isFinite(x2) && Number.isFinite(y2) && Math.abs(x1) < 0.01 && Math.abs(x2) < 0.01 && y2 > 0;
+            });
+
+            const clippedGroup = Array.from(rightChartGroup.children).find((node) => node.tagName?.toLowerCase() === 'g');
+            if (!topLine || !axisLine || !clippedGroup) return;
+
+            const curvePaths = Array.from(clippedGroup.querySelectorAll('path')).filter((node) => {
+                const stroke = normalizeColorToken(node.getAttribute('stroke'));
+                const strokeWidth = parseFloat(node.getAttribute('stroke-width'));
+                return stroke && stroke !== 'none' && Number.isFinite(strokeWidth) && strokeWidth >= 1.5;
+            });
+            if (!curvePaths.length) return;
+
+            let axisX = 0;
+            curvePaths.forEach((path) => {
+                try {
+                    const bbox = path.getBBox();
+                    if (Number.isFinite(bbox.x) && Number.isFinite(bbox.width)) {
+                        axisX = Math.max(axisX, bbox.x + bbox.width);
+                    }
+                } catch (error) {
+                }
+            });
+
+            if (!Number.isFinite(axisX) || axisX <= 0) return;
+
+            axisLine.setAttribute('x1', String(axisX));
+            axisLine.setAttribute('x2', String(axisX));
+            topLine.setAttribute('x2', String(axisX));
+
+            const chartLabel = Array.from(rightChartGroup.children).find((node) => node.tagName?.toLowerCase() === 'text');
+            if (chartLabel) {
+                chartLabel.setAttribute('x', String((axisX / 2).toFixed(2).replace(/\.?0+$/, '')));
+            }
+        }
+
+        function alignGraphicRightTableToAxis(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const rightChartGroup = groups[3];
+            const rightTableGroup = groups[4];
+            if (!rightChartGroup || !rightTableGroup) return;
+
+            const chartTranslate = parseGraphicTranslate(rightChartGroup);
+            const tableTranslate = parseGraphicTranslate(rightTableGroup);
+            if (!chartTranslate || !tableTranslate) return;
+
+            const axisLine = Array.from(rightChartGroup.children).find((line) => {
+                if (line.tagName?.toLowerCase() !== 'line') return false;
+                const x1 = parseFloat(line.getAttribute('x1'));
+                const x2 = parseFloat(line.getAttribute('x2'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                return Number.isFinite(x1) && Number.isFinite(x2) && Number.isFinite(y2) && Math.abs(x1 - x2) < 0.01 && y2 > 0;
+            });
+            if (!axisLine) return;
+
+            const axisXLocal = parseFloat(axisLine.getAttribute('x1'));
+            if (!Number.isFinite(axisXLocal)) return;
+
+            rightTableGroup.setAttribute('transform', `translate(${chartTranslate.x + axisXLocal},${tableTranslate.y})`);
+        }
+
+        function extendGraphicRightProjectionLines(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const siteGroup = groups[0];
+            const rightChartGroup = groups[3];
+            const connectorGroup = groups[5];
+            if (!siteGroup || !rightChartGroup || !connectorGroup) return;
+
+            const chartTranslate = parseGraphicTranslate(rightChartGroup);
+            const siteTranslate = parseGraphicTranslate(siteGroup);
+            if (!chartTranslate || !siteTranslate) return;
+
+            const siteBorderRect = Array.from(siteGroup.querySelectorAll('rect'))
+                .map((node) => ({
+                    node,
+                    fill: normalizeColorToken(node.getAttribute('fill')),
+                    width: parseFloat(node.getAttribute('width')),
+                    height: parseFloat(node.getAttribute('height'))
+                }))
+                .filter(({ fill, width, height }) => fill === 'none' && Number.isFinite(width) && Number.isFinite(height) && width > 300 && height > 120)
+                .sort((a, b) => (b.width * b.height) - (a.width * a.height))[0]?.node;
+            if (!siteBorderRect) return;
+
+            const siteRectX = parseFloat(siteBorderRect.getAttribute('x')) || 0;
+            const siteRectW = parseFloat(siteBorderRect.getAttribute('width'));
+            if (!Number.isFinite(siteRectW)) return;
+
+            const siteRightX = siteTranslate.x + siteRectX + siteRectW;
+            const targetX = chartTranslate.x;
+
+            svg.querySelectorAll('[data-graphic-right-projection-ext="1"]').forEach((node) => node.remove());
+
+            const extGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            extGroup.setAttribute('data-graphic-right-projection-ext', '1');
+            svg.appendChild(extGroup);
+
+            const makeLine = (x1, y1, x2, y2, source, dash = '') => {
+                const extLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                extLine.setAttribute('x1', String(x1));
+                extLine.setAttribute('y1', String(y1));
+                extLine.setAttribute('x2', String(x2));
+                extLine.setAttribute('y2', String(y2));
+                extLine.setAttribute('stroke', source?.getAttribute('stroke') || '#333');
+                extLine.setAttribute('stroke-width', source?.getAttribute('stroke-width') || '1');
+                if (dash) extLine.setAttribute('stroke-dasharray', dash);
+                extLine.setAttribute('opacity', source?.getAttribute('opacity') || '1');
+                extLine.setAttribute('fill', 'none');
+                extGroup.appendChild(extLine);
+            };
+
+            const clippedGroup = Array.from(rightChartGroup.children).find((node) => node.tagName?.toLowerCase() === 'g');
+            const curvePaths = clippedGroup
+                ? Array.from(clippedGroup.querySelectorAll('path')).filter((node) => {
+                    const stroke = normalizeColorToken(node.getAttribute('stroke'));
+                    const strokeWidth = parseFloat(node.getAttribute('stroke-width'));
+                    return stroke && stroke !== 'none' && Number.isFinite(strokeWidth) && strokeWidth >= 0.8;
+                })
+                : [];
+
+            const dashedGuides = Array.from(connectorGroup.querySelectorAll('line'))
+                .map((line) => {
+                    const dash = line.getAttribute('stroke-dasharray') || '';
+                    if (!dash) return null;
+                    const x1 = parseFloat(line.getAttribute('x1'));
+                    const x2 = parseFloat(line.getAttribute('x2'));
+                    const y1 = parseFloat(line.getAttribute('y1'));
+                    const y2 = parseFloat(line.getAttribute('y2'));
+                    if (![x1, x2, y1, y2].every(Number.isFinite)) return null;
+                    if (Math.abs(y1 - y2) > 0.2) return null;
+
+                    const rightEnd = Math.max(x1, x2);
+                    const leftEnd = Math.min(x1, x2);
+                    if (Math.abs(rightEnd - siteRightX) > 12) return null;
+                    if (rightEnd - leftEnd < 6) return null;
+
+                    return { line, y: y1, dash };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.y - b.y);
+
+            dashedGuides.forEach(({ line, y, dash }) => {
+                const guideRole = line.dataset.cartoStrokeRole || '';
+                const roleCurves = curvePaths.filter((path) => {
+                    const pathRole = path.dataset.cartoStrokeRole || '';
+                    return guideRole && pathRole === guideRole;
+                });
+                const localY = y - chartTranslate.y;
+                const hitXs = (roleCurves.length ? roleCurves : curvePaths)
+                    .map((path) => sampleGraphicPathXAtY(path, localY))
+                    .filter((value) => Number.isFinite(value));
+                const endX = hitXs.length ? chartTranslate.x + Math.min(...hitXs) : targetX + 36;
+                makeLine(siteRightX, y, endX, y, line, dash);
+            });
+        }
+
+        function removeGraphicProjectionLines(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const rightChartGroup = groups[3];
+            if (rightChartGroup) {
+                const clippedGroup = Array.from(rightChartGroup.children).find((node) => node.tagName?.toLowerCase() === 'g');
+                if (clippedGroup) {
+                    clippedGroup.querySelectorAll('line').forEach((line) => {
+                        const dash = line.getAttribute('stroke-dasharray') || '';
+                        if (!dash) return;
+                        const x1 = parseFloat(line.getAttribute('x1'));
+                        const x2 = parseFloat(line.getAttribute('x2'));
+                        const y1 = parseFloat(line.getAttribute('y1'));
+                        const y2 = parseFloat(line.getAttribute('y2'));
+                        if (![x1, x2, y1, y2].every(Number.isFinite)) return;
+                        if (Math.abs(y1 - y2) < 0.2) line.remove();
+                    });
+                }
+            }
+
+            svg.querySelectorAll('[data-graphic-right-projection-ext="1"]').forEach((node) => node.remove());
+        }
+
         function refineGraphicRightTable(svg, data) {
             if (!svg) return;
 
@@ -1087,6 +1340,301 @@
             dimGroup.appendChild(axisLabel);
         }
 
+        function getGraphicNiceStep(maxValue, targetTicks = 5) {
+            if (!Number.isFinite(maxValue) || maxValue <= 0) return 1;
+            const rough = maxValue / Math.max(1, targetTicks);
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+            const normalized = rough / magnitude;
+            let factor = 1;
+            if (normalized > 5) factor = 10;
+            else if (normalized > 2) factor = 5;
+            else if (normalized > 1) factor = 2;
+            return factor * magnitude;
+        }
+
+        function getGraphicVolumeTickValues(maxValue) {
+            if (!Number.isFinite(maxValue) || maxValue <= 0) return [0];
+
+            const roundedMax = Math.round(maxValue);
+            const step = roundedMax >= 5000 ? 5000 : getGraphicNiceStep(roundedMax, 5);
+            const values = [];
+
+            for (let value = 0; value < roundedMax; value += step) {
+                values.push(value);
+            }
+
+            if (!values.length || values[values.length - 1] !== roundedMax) {
+                values.push(roundedMax);
+            }
+
+            return values;
+        }
+
+        function addGraphicVolumeScales(svg, data) {
+            if (!svg) return;
+
+            const carto = data?.carto;
+            if (!carto) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const bottomChartGroup = groups[1];
+            const rightChartGroup = groups[3];
+            if (!bottomChartGroup || !rightChartGroup) return;
+
+            bottomChartGroup.querySelector('[data-graphic-bottom-volscale="1"]')?.remove();
+            rightChartGroup.querySelector('[data-graphic-right-volscale="1"]')?.remove();
+
+            const NS = 'http://www.w3.org/2000/svg';
+
+            const maxBottom = Math.max(...(carto.cumColFill || []), ...(carto.cumColCut || []), 0);
+            if (maxBottom > 0) {
+                const yAxis = Array.from(bottomChartGroup.querySelectorAll('line')).find((line) => {
+                    const x1 = parseFloat(line.getAttribute('x1'));
+                    const x2 = parseFloat(line.getAttribute('x2'));
+                    const y2 = parseFloat(line.getAttribute('y2'));
+                    return Number.isFinite(x1) && Number.isFinite(x2) && Number.isFinite(y2) && Math.abs(x1) < 0.01 && Math.abs(x2) < 0.01 && y2 > 0;
+                });
+                if (yAxis) {
+                    const chartHeight = parseFloat(yAxis.getAttribute('y2'));
+                    const axisX = parseFloat(yAxis.getAttribute('x1'));
+                    if (Number.isFinite(chartHeight) && Number.isFinite(axisX) && chartHeight > 0) {
+                        const scaleGroup = document.createElementNS(NS, 'g');
+                        scaleGroup.setAttribute('data-graphic-bottom-volscale', '1');
+                        bottomChartGroup.appendChild(scaleGroup);
+
+                        const tickValues = getGraphicVolumeTickValues(maxBottom);
+                        const tickLen = 4.5;
+                        const topPadding = 20;
+                        const usableHeight = Math.max(1, chartHeight - topPadding);
+
+                        const scaleAxis = document.createElementNS(NS, 'line');
+                        scaleAxis.setAttribute('x1', String(axisX));
+                        scaleAxis.setAttribute('y1', String(topPadding));
+                        scaleAxis.setAttribute('x2', String(axisX));
+                        scaleAxis.setAttribute('y2', String(chartHeight));
+                        scaleAxis.setAttribute('stroke', '#333');
+                        scaleAxis.setAttribute('stroke-width', '0.55');
+                        scaleGroup.appendChild(scaleAxis);
+
+                        tickValues.forEach((value) => {
+                            const y = chartHeight - (value / maxBottom) * usableHeight;
+                            const tick = document.createElementNS(NS, 'line');
+                            tick.setAttribute('x1', String(axisX - tickLen));
+                            tick.setAttribute('y1', String(y));
+                            tick.setAttribute('x2', String(axisX));
+                            tick.setAttribute('y2', String(y));
+                            tick.setAttribute('stroke', '#333');
+                            tick.setAttribute('stroke-width', '0.55');
+                            scaleGroup.appendChild(tick);
+
+                            const label = document.createElementNS(NS, 'text');
+                            label.setAttribute('x', String(axisX - tickLen - 2.2));
+                            label.setAttribute('y', String(y + 2.2));
+                            label.setAttribute('text-anchor', 'end');
+                            label.setAttribute('font-size', '6.8');
+                            label.setAttribute('fill', '#333');
+                            label.textContent = String(value);
+                            scaleGroup.appendChild(label);
+                        });
+                    }
+                }
+            }
+
+            const maxRight = Math.max(...(carto.cumRowFill || []), ...(carto.cumRowCut || []), 0);
+            if (maxRight > 0) {
+                const axisLine = Array.from(rightChartGroup.querySelectorAll(':scope > line')).find((line) => {
+                    const x1 = parseFloat(line.getAttribute('x1'));
+                    const x2 = parseFloat(line.getAttribute('x2'));
+                    const y2 = parseFloat(line.getAttribute('y2'));
+                    return Number.isFinite(x1) && Number.isFinite(x2) && Number.isFinite(y2) && Math.abs(x1 - x2) < 0.01 && y2 > 0;
+                });
+                if (axisLine) {
+                    const axisX = parseFloat(axisLine.getAttribute('x1'));
+                    const chartHeight = parseFloat(axisLine.getAttribute('y2'));
+                    if (Number.isFinite(axisX) && Number.isFinite(chartHeight) && axisX > 0 && chartHeight > 0) {
+                        const scaleGroup = document.createElementNS(NS, 'g');
+                        scaleGroup.setAttribute('data-graphic-right-volscale', '1');
+                        rightChartGroup.appendChild(scaleGroup);
+
+                        const baseY = chartHeight;
+                        const tickLen = 4.2;
+                        const textY = baseY + 14;
+                        const tickValues = getGraphicVolumeTickValues(maxRight);
+
+                        const baseLine = document.createElementNS(NS, 'line');
+                        baseLine.setAttribute('x1', '0');
+                        baseLine.setAttribute('y1', String(baseY));
+                        baseLine.setAttribute('x2', String(axisX));
+                        baseLine.setAttribute('y2', String(baseY));
+                        baseLine.setAttribute('stroke', '#333');
+                        baseLine.setAttribute('stroke-width', '0.55');
+                        scaleGroup.appendChild(baseLine);
+
+                        tickValues.forEach((value) => {
+                            const x = axisX - (value / maxRight) * axisX;
+                            const tick = document.createElementNS(NS, 'line');
+                            tick.setAttribute('x1', String(x));
+                            tick.setAttribute('y1', String(baseY));
+                            tick.setAttribute('x2', String(x));
+                            tick.setAttribute('y2', String(baseY + tickLen));
+                            tick.setAttribute('stroke', '#333');
+                            tick.setAttribute('stroke-width', '0.55');
+                            scaleGroup.appendChild(tick);
+
+                            const label = document.createElementNS(NS, 'text');
+                            label.setAttribute('x', String(x));
+                            label.setAttribute('y', String(textY));
+                            label.setAttribute('text-anchor', 'middle');
+                            label.setAttribute('dominant-baseline', 'middle');
+                            label.setAttribute('font-size', '6.8');
+                            label.setAttribute('fill', '#333');
+                            label.setAttribute('transform', `rotate(-90,${x},${textY})`);
+                            label.textContent = String(value);
+                            scaleGroup.appendChild(label);
+                        });
+                    }
+                }
+            }
+        }
+
+        function relocateGraphicBottomVolumeLabel(svg) {
+            if (!svg) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const bottomChartGroup = groups[1];
+            if (!bottomChartGroup) return;
+
+            const label = Array.from(bottomChartGroup.querySelectorAll('text')).find((node) => {
+                const transform = node.getAttribute('transform') || '';
+                const x = parseFloat(node.getAttribute('x'));
+                return transform.includes('rotate(') && Number.isFinite(x) && x < 0;
+            });
+            const baseLine = Array.from(bottomChartGroup.querySelectorAll('line')).find((line) => {
+                const x2 = parseFloat(line.getAttribute('x2'));
+                const y1 = parseFloat(line.getAttribute('y1'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                return Number.isFinite(x2) && Number.isFinite(y1) && Number.isFinite(y2) && Math.abs(y1 - y2) < 0.01 && x2 > 100;
+            });
+            const yAxis = Array.from(bottomChartGroup.querySelectorAll('line')).find((line) => {
+                const x1 = parseFloat(line.getAttribute('x1'));
+                const x2 = parseFloat(line.getAttribute('x2'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                return Number.isFinite(x1) && Number.isFinite(x2) && Number.isFinite(y2) && Math.abs(x1) < 0.01 && Math.abs(x2) < 0.01 && y2 > 0;
+            });
+            if (!label || !baseLine || !yAxis) return;
+
+            const chartWidth = parseFloat(baseLine.getAttribute('x2'));
+            const chartHeight = parseFloat(yAxis.getAttribute('y2'));
+            if (!Number.isFinite(chartWidth) || !Number.isFinite(chartHeight)) return;
+
+            yAxis.setAttribute('x1', String(chartWidth));
+            yAxis.setAttribute('x2', String(chartWidth));
+
+            const x = chartWidth + 9;
+            const y = chartHeight / 2;
+            label.setAttribute('x', String(x));
+            label.setAttribute('y', String(y));
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('transform', `rotate(90,${x},${y})`);
+        }
+
+        function refineGraphicBottomMidProjection(svg, data) {
+            if (!svg || !data?.carto) return;
+
+            const groups = getGraphicTopLevelGroups(svg);
+            const bottomChartGroup = groups[1];
+            if (!bottomChartGroup) return;
+
+            const clippedGroup = Array.from(bottomChartGroup.children).find((node) => node.tagName?.toLowerCase() === 'g');
+            if (!clippedGroup) return;
+
+            clippedGroup.querySelectorAll('[data-graphic-bottom-mid-proj="1"]').forEach((node) => node.remove());
+            bottomChartGroup.querySelector('[data-graphic-bottom-mid-proj-overlay="1"]')?.remove();
+            const horizontalDashLines = Array.from(clippedGroup.querySelectorAll('line'))
+                .map((line) => {
+                    const dash = line.getAttribute('stroke-dasharray') || '';
+                    const x1 = parseFloat(line.getAttribute('x1'));
+                    const x2 = parseFloat(line.getAttribute('x2'));
+                    const y1 = parseFloat(line.getAttribute('y1'));
+                    const y2 = parseFloat(line.getAttribute('y2'));
+                    if (!dash || ![x1, x2, y1, y2].every(Number.isFinite)) return null;
+                    if (Math.abs(y1 - y2) > 0.2) return null;
+                    return { line, x1, x2, y: y1 };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.y - b.y);
+
+            const baseLine = Array.from(bottomChartGroup.querySelectorAll('line')).find((line) => {
+                const x2 = parseFloat(line.getAttribute('x2'));
+                const y1 = parseFloat(line.getAttribute('y1'));
+                const y2 = parseFloat(line.getAttribute('y2'));
+                return Number.isFinite(x2) && Number.isFinite(y1) && Number.isFinite(y2) && Math.abs(y1 - y2) < 0.01 && x2 > 100;
+            });
+            if (!baseLine) return;
+
+            const chartWidth = parseFloat(baseLine.getAttribute('x2'));
+            const chartHeight = parseFloat(baseLine.getAttribute('y1'));
+            const nC = Math.max(1, (Number(data.cols) || 1) - 1);
+            const stepW = chartWidth / nC;
+            const maxV = Math.max(...(data.carto.cumColFill || []), ...(data.carto.cumColCut || []), 1);
+            const vScale = (chartHeight - 20) / maxV;
+
+            const findHalfX = (cumData, halfV) => {
+                for (let i = 0; i < nC; i++) {
+                    const a = cumData[i];
+                    const b = cumData[i + 1];
+                    if ((a <= halfV && b >= halfV) || (a >= halfV && b <= halfV)) {
+                        const t = (halfV - a) / ((b - a) || 0.01);
+                        return (i + t) * stepW;
+                    }
+                }
+                return null;
+            };
+
+            const findXAtY = (cumData, targetY) => {
+                const targetValue = (chartHeight - targetY) / vScale;
+                for (let i = 0; i < nC; i++) {
+                    const a = cumData[i];
+                    const b = cumData[i + 1];
+                    if ((a <= targetValue && b >= targetValue) || (a >= targetValue && b <= targetValue)) {
+                        const t = (targetValue - a) / ((b - a) || 0.01);
+                        return (i + t) * stepW;
+                    }
+                }
+                return null;
+            };
+
+            const halfCut = (data.carto.cumColCut?.[nC] || 0) / 2;
+            const halfFill = (data.carto.cumColFill?.[nC] || 0) / 2;
+            const cutX = findHalfX(data.carto.cumColCut || [], halfCut);
+            const cutY = chartHeight - halfCut * vScale;
+            if (![cutX, cutY].every(Number.isFinite)) return;
+
+            const fillXAtCutY = findXAtY(data.carto.cumColFill || [], cutY);
+            const fallbackFillX = findHalfX(data.carto.cumColFill || [], halfFill);
+            let rightX = Number.isFinite(fillXAtCutY) ? fillXAtCutY : fallbackFillX;
+            if (!Number.isFinite(rightX) || rightX <= cutX + 6) rightX = chartWidth - 2;
+            if (!Number.isFinite(rightX)) return;
+
+            horizontalDashLines.forEach(({ line }) => line.remove());
+
+            const NS = 'http://www.w3.org/2000/svg';
+            const overlay = document.createElementNS(NS, 'g');
+            overlay.setAttribute('data-graphic-bottom-mid-proj-overlay', '1');
+            bottomChartGroup.appendChild(overlay);
+
+            const proj = document.createElementNS(NS, 'line');
+            proj.setAttribute('data-graphic-bottom-mid-proj', '1');
+            proj.setAttribute('x1', String(cutX));
+            proj.setAttribute('y1', String(cutY));
+            proj.setAttribute('x2', String(Math.max(rightX, chartWidth - 2)));
+            proj.setAttribute('y2', String(cutY));
+            proj.setAttribute('stroke', '#666');
+            proj.setAttribute('stroke-width', '0.9');
+            proj.setAttribute('stroke-dasharray', '3,2');
+            overlay.appendChild(proj);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const rawData = localStorage.getItem('rawGeoData');
             const emptyState = document.getElementById('emptyState');
@@ -1121,8 +1669,16 @@
                     normalizeGraphicContourLabels(svg, data);
                     refineGraphicMnMarkers(svg);
                     refineGraphicBottomTable(svg, data);
+                    shiftGraphicRightChart(svg);
+                    swapGraphicRightChartAxis(svg);
+                    alignGraphicRightTableToAxis(svg);
+                    removeGraphicProjectionLines(svg);
                     refineGraphicRightTable(svg, data);
+                    addGraphicVolumeScales(svg, data);
+                    relocateGraphicBottomVolumeLabel(svg);
+                    refineGraphicBottomMidProjection(svg, data);
                     resolveGraphicCartogramLabelOverlaps(svg);
+                    extendGraphicRightProjectionLines(svg);
                 });
             } catch (error) {
                 console.error(error);
