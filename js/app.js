@@ -148,6 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnPdf = document.getElementById('btnPreviewPdf');
     if (btnPdf) btnPdf.style.display = 'inline-block';
+    const btnGraphic = document.getElementById('btnPreviewGraphic');
+    if (btnGraphic) btnGraphic.style.display = 'inline-block';
   }
 
   // ===== Step renderers =====
@@ -1120,26 +1122,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== Event bindings =====
   document.getElementById('btnCalculate').addEventListener('click', runCalculations);
 
+  function savePreviewPayload() {
+    const resultsDiv = document.getElementById('results');
+    const svgs = {};
+    const allSvgs = resultsDiv.querySelectorAll('svg');
+    if (allSvgs.length >= 3) {
+      svgs.site = allSvgs[0].outerHTML;
+      svgs.carto = allSvgs[1].outerHTML;
+      svgs.sched = allSvgs[2].outerHTML;
+    }
+    window.geoData.svgs = svgs;
+    localStorage.setItem('rawGeoData', JSON.stringify(window.geoData));
+  }
+
   const btnPdf = document.getElementById('btnPreviewPdf');
   if (btnPdf) {
     btnPdf.addEventListener('click', () => {
-      // Gather SVGs
-      const resultsDiv = document.getElementById('results');
-      const svgs = {};
-      const allSvgs = resultsDiv.querySelectorAll('svg');
-      if (allSvgs.length >= 3) {
-        svgs.site = allSvgs[0].outerHTML;
-        svgs.carto = allSvgs[1].outerHTML;
-        svgs.sched = allSvgs[2].outerHTML;
-      }
-      window.geoData.svgs = svgs;
-
       try {
-        localStorage.setItem('rawGeoData', JSON.stringify(window.geoData));
+        savePreviewPayload();
         window.open('preview.html', '_blank');
       } catch (e) {
         console.error(e);
         alert('Помилка збереження даних для прев\'ю. Можливо завеликий розмір.');
+      }
+    });
+  }
+
+  const btnGraphic = document.getElementById('btnPreviewGraphic');
+  if (btnGraphic) {
+    btnGraphic.addEventListener('click', () => {
+      try {
+        savePreviewPayload();
+        window.open('preview-graphic.html', '_blank');
+      } catch (e) {
+        console.error(e);
+        alert('Помилка збереження даних для графічного прев\'ю.');
       }
     });
   }

@@ -554,13 +554,15 @@ const ContourEditor = (() => {
 
   /* ── draw contours in external SVG (non-interactive, for the full diagram) ── */
 
-  function drawStatic(g, contourParams, scale, opacity) {
+  function drawStatic(g, contourParams, scale, opacity, options) {
     if (!contourParams) return;
     const s = scale;
     const op = opacity || 0.5;
+    const opts = options || {};
 
     // intermediate contours (extended to edges)
-    const gW = cfg.gridW, gH = cfg.gridH;
+    const gW = Number.isFinite(opts.gridW) ? opts.gridW : cfg.gridW;
+    const gH = Number.isFinite(opts.gridH) ? opts.gridH : cfg.gridH;
     const sorted = [...contourParams].sort((a, b) => a.elevation - b.elevation);
     for (let i = 0; i < sorted.length - 1; i++) {
       const mid = midContour(sorted[i], sorted[i + 1], gW, gH);
