@@ -243,12 +243,12 @@ const Calc = (() => {
   // -------- Process structure volumes --------
   function processVolumes(A, B, totalFill, totalCut, kInitial, kResidual) {
     return [
-      { name: 'Зрізання рослинного шару ґрунту', unit: 'м²', volume: A * B },
-      { name: 'Розпушування ґрунту', unit: 'м³', volume: totalCut },
-      { name: 'Розроблення та переміщення ґрунту', unit: 'м³', volume: totalCut },
-      { name: 'Розрівнювання ґрунту', unit: 'м³', volume: totalFill * kInitial },
-      { name: 'Ущільнення ґрунту', unit: 'м³', volume: totalFill * kResidual },
-      { name: 'Остаточне планування майданчика', unit: 'м²', volume: A * B }
+      { id: 'topsoil_cut', name: 'Зрізання рослинного шару ґрунту', unit: 'м²', volume: A * B },
+      { id: 'soil_loosening', name: 'Розпушування ґрунту', unit: 'м³', volume: totalCut },
+      { id: 'soil_development_move', name: 'Розроблення та переміщення ґрунту', unit: 'м³', volume: totalCut },
+      { id: 'soil_spreading', name: 'Розрівнювання ґрунту', unit: 'м³', volume: totalFill * kInitial },
+      { id: 'soil_compaction', name: 'Ущільнення ґрунту', unit: 'м³', volume: totalFill * kResidual },
+      { id: 'final_grading', name: 'Остаточне планування майданчика', unit: 'м²', volume: A * B }
     ];
   }
 

@@ -21,9 +21,16 @@ const Schedule = (() => {
     container.innerHTML = '';
 
     const rowH = 44;
-    const labelW = 340;
     const headerH = 50;
     const pad = 20;
+    const cols = [
+      { label: '№', w: 32 },
+      { label: 'Назва процесу', w: 180 },
+      { label: 'Об\'єм', w: 86 },
+      { label: 'Машина', w: 120 },
+      { label: 'Роб./зм.', w: 60 }
+    ];
+    const labelW = cols.reduce((sum, col) => sum + col.w, 0);
 
     let totalShifts = 0;
     const startShifts = [];
@@ -50,13 +57,6 @@ const Schedule = (() => {
     const g = el('g', { transform: `translate(${pad},${pad})` }, svg);
 
     // header columns
-    const cols = [
-      { label: '№', w: 30 },
-      { label: 'Назва процесу', w: 140 },
-      { label: 'Об\'єм', w: 60 },
-      { label: 'Машина', w: 70 },
-      { label: 'Роб./зм.', w: 50 }
-    ];
     let cx = 0;
     for (const col of cols) {
       el('rect', { x: cx, y: 0, width: col.w, height: headerH, fill: '#264653', stroke: '#fff', 'stroke-width': 1 }, g);
@@ -84,7 +84,7 @@ const Schedule = (() => {
       // data cells
       const vals = [
         (i + 1).toString(),
-        p.name.length > 22 ? p.name.substring(0, 20) + '…' : p.name,
+        p.name.length > 28 ? p.name.substring(0, 26) + '…' : p.name,
         p.volumeStr || '',
         p.machine || '',
         `${p.workers}×${p.shifts}`
@@ -120,7 +120,7 @@ const Schedule = (() => {
         x: barX + barW / 2, y: barY + barH / 2 + 4,
         'text-anchor': 'middle', 'font-size': 10, fill: '#fff', 'font-weight': 'bold'
       }, g);
-      dt.textContent = `${durDays} дн.`;
+      dt.textContent = p.durationLabel || `${durDays} дн.`;
 
       cumulativeDay += durDays;
     }

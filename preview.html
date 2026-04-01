@@ -49,12 +49,13 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
             position: relative;
+            overflow-x: hidden;
         }
 
-        /* Content pages: flow naturally, no fixed height */
         .page.content-page {
-            min-height: auto;
-            padding-bottom: 3cm;
+            height: 29.7cm;
+            min-height: 29.7cm;
+            overflow: hidden;
         }
 
         /* TITLE PAGE SPECIFICS */
@@ -217,6 +218,7 @@
             background: transparent !important;
             box-shadow: none !important;
             page-break-inside: avoid;
+            table-layout: fixed;
         }
 
         #previewContent th,
@@ -227,10 +229,281 @@
             font-size: 14pt !important;
             background: transparent !important;
             text-align: center;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
 
         #previewContent th {
             font-weight: bold !important;
+        }
+
+        #previewContent table.compact-table th,
+        #previewContent table.compact-table td {
+            font-size: 11pt !important;
+            padding: 4px !important;
+            line-height: 1.25 !important;
+        }
+
+        #previewContent table.ultra-compact-table th,
+        #previewContent table.ultra-compact-table td {
+            font-size: 10pt !important;
+            padding: 3px !important;
+            line-height: 1.2 !important;
+        }
+
+        #previewContent .scaled-table-wrap {
+            width: 100%;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        #previewContent .scaled-table-wrap .scaled-table-inner {
+            display: inline-block;
+            width: max-content;
+            max-width: none;
+            transform: scale(var(--fit-scale, 1));
+            transform-origin: top left;
+        }
+
+        #previewContent .scaled-table-wrap .scaled-table-inner>table {
+            width: max-content !important;
+            min-width: 100%;
+            max-width: none !important;
+            margin: 0 !important;
+            table-layout: auto !important;
+        }
+
+        #previewContent .step12-table-wrap {
+            width: 100%;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        #previewContent .step12-table-wrap > table.step12-table {
+            width: 100% !important;
+            zoom: 0.9;
+            margin: 0 !important;
+        }
+
+        #previewContent table.step12-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            margin: 0 !important;
+        }
+
+        #previewContent table.step12-table th,
+        #previewContent table.step12-table td {
+            font-size: 9.2pt !important;
+            padding: 1px !important;
+            line-height: 1 !important;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
+            hyphens: auto !important;
+        }
+
+        #previewContent table.step12-table th:nth-child(1),
+        #previewContent table.step12-table td:nth-child(1) {
+            width: 3%;
+        }
+
+        #previewContent table.step12-table th:nth-child(2),
+        #previewContent table.step12-table td:nth-child(2) {
+            width: 8%;
+        }
+
+        #previewContent table.step12-table th:nth-child(3),
+        #previewContent table.step12-table td:nth-child(3) {
+            width: 18%;
+        }
+
+        #previewContent table.step12-table th:nth-child(4),
+        #previewContent table.step12-table td:nth-child(4) {
+            width: 11%;
+        }
+
+        #previewContent table.step12-table th:nth-child(5),
+        #previewContent table.step12-table td:nth-child(5) {
+            width: 8%;
+        }
+
+        #previewContent table.step12-table th:nth-child(6),
+        #previewContent table.step12-table td:nth-child(6),
+        #previewContent table.step12-table th:nth-child(7),
+        #previewContent table.step12-table td:nth-child(7) {
+            width: 7%;
+        }
+
+        #previewContent table.step12-table th:nth-child(8),
+        #previewContent table.step12-table td:nth-child(8),
+        #previewContent table.step12-table th:nth-child(9),
+        #previewContent table.step12-table td:nth-child(9) {
+            width: 8%;
+        }
+
+        #previewContent table.step12-table th:nth-child(10),
+        #previewContent table.step12-table td:nth-child(10) {
+            width: 9%;
+        }
+
+        #previewContent table.step12-table th:nth-child(11),
+        #previewContent table.step12-table td:nth-child(11) {
+            width: 12%;
+        }
+
+        #previewContent table.step12-table th:nth-child(2),
+        #previewContent table.step12-table td:nth-child(2),
+        #previewContent table.step12-table th:nth-child(3),
+        #previewContent table.step12-table td:nth-child(3),
+        #previewContent table.step12-table th:nth-child(11),
+        #previewContent table.step12-table td:nth-child(11) {
+            overflow-wrap: anywhere !important;
+            word-break: break-all !important;
+            hyphens: auto !important;
+        }
+
+        #previewContent table.step11-table th,
+        #previewContent table.step11-table td,
+        #previewContent table.step11-summary-table th,
+        #previewContent table.step11-summary-table td {
+            font-size: 8pt !important;
+            padding: 2px !important;
+            line-height: 1.05 !important;
+        }
+
+        #previewContent table.step11-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+
+        #previewContent table.step11-table th:nth-child(1),
+        #previewContent table.step11-table td:nth-child(1) {
+            width: 22%;
+        }
+
+        #previewContent table.step11-table th:nth-child(2),
+        #previewContent table.step11-table td:nth-child(2) {
+            width: 19%;
+        }
+
+        #previewContent table.step11-table th:nth-child(3),
+        #previewContent table.step11-table td:nth-child(3) {
+            width: 13%;
+        }
+
+        #previewContent table.step11-table th:nth-child(4),
+        #previewContent table.step11-table td:nth-child(4) {
+            width: 10%;
+        }
+
+        #previewContent table.step11-table th:nth-child(5),
+        #previewContent table.step11-table td:nth-child(5),
+        #previewContent table.step11-table th:nth-child(6),
+        #previewContent table.step11-table td:nth-child(6),
+        #previewContent table.step11-table th:nth-child(7),
+        #previewContent table.step11-table td:nth-child(7),
+        #previewContent table.step11-table th:nth-child(8),
+        #previewContent table.step11-table td:nth-child(8) {
+            width: 9%;
+        }
+
+        #previewContent table.step11-summary-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+
+        #previewContent table.step13-schedule-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            margin-top: 12px !important;
+            border: 1.4px solid #000 !important;
+            background: #fff !important;
+        }
+
+        #previewContent table.step13-schedule-table th,
+        #previewContent table.step13-schedule-table td {
+            font-size: 6pt !important;
+            padding: 0.8px !important;
+            line-height: 1 !important;
+            border: 0 !important;
+            outline: 1.5px solid #000 !important;
+            outline-offset: -1px !important;
+            box-shadow: inset 0 0 0 1px #000 !important;
+            background: #fff !important;
+            vertical-align: middle !important;
+        }
+
+        #previewContent table.step13-schedule-table th.process-col,
+        #previewContent table.step13-schedule-table td.process-col {
+            width: 23%;
+            text-align: left !important;
+        }
+
+        #previewContent table.step13-schedule-table th.volume-col,
+        #previewContent table.step13-schedule-table td.volume-col {
+            width: 11%;
+        }
+
+        #previewContent table.step13-schedule-table th.machine-col,
+        #previewContent table.step13-schedule-table td.machine-col {
+            width: 16%;
+        }
+
+        #previewContent table.step13-schedule-table th.crew-col,
+        #previewContent table.step13-schedule-table td.crew-col {
+            width: 7%;
+        }
+
+        #previewContent table.step13-schedule-table th.num-col,
+        #previewContent table.step13-schedule-table td.num-col {
+            width: 4%;
+        }
+
+        #previewContent table.step13-schedule-table td.day-cell,
+        #previewContent table.step13-schedule-table th.day-cell {
+            width: 3.9%;
+            text-align: center !important;
+        }
+
+        #previewContent table.step13-schedule-table td.day-cell.active {
+            background: #d9d9d9 !important;
+            font-weight: bold !important;
+        }
+
+        #previewContent table.step13-schedule-table td.day-cell.empty {
+            background: white !important;
+        }
+
+        #previewContent .step13-rotated-wrap {
+            position: relative;
+            width: 100%;
+            height: 24.0cm;
+            margin: 2px 0 2px;
+            overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        #previewContent .step13-rotated-inner {
+            position: absolute;
+            top: 22.5cm;
+            left: 2.2cm;
+            width: 24.1cm;
+            transform-origin: top left;
+            transform: rotate(-90deg) scale(0.91);
+        }
+
+        #previewContent .step13-rotated-inner table.step13-schedule-table {
+            width: 24.1cm !important;
+            margin-top: 0 !important;
+        }
+
+        #previewContent .step13-rotated-inner .step13-schedule-svg {
+            display: block;
+            width: 24.1cm !important;
+            height: auto !important;
+            background: #fff !important;
         }
 
         #previewContent .positive,
@@ -263,6 +536,14 @@
             font-size: 14pt;
             margin: 20px 0;
             text-indent: 0 !important;
+        }
+
+        #previewContent .formula-math math {
+            font-size: 1.08em;
+        }
+
+        #previewContent .formula-math mtext {
+            font-family: 'Times New Roman', Times, serif;
         }
 
         #previewContent .formula-result {
@@ -308,10 +589,7 @@
         @media print {
             @page {
                 size: A4;
-                margin-top: 2cm;
-                margin-bottom: 2cm;
-                margin-left: 2cm;
-                margin-right: 1.5cm;
+                margin: 0;
             }
 
             body {
@@ -327,21 +605,29 @@
 
             .page {
                 margin: 0;
-                padding: 0;
                 box-shadow: none;
-                width: auto;
-                min-height: auto;
+                width: 21cm;
+                min-height: 29.7cm;
                 position: relative;
+                overflow-x: hidden;
+                break-after: page;
+                page-break-after: always;
             }
 
             .page.content-page {
-                padding-bottom: 0;
-                page-break-before: always;
+                height: 29.7cm;
+                min-height: 29.7cm;
+                overflow: hidden;
+            }
+
+            .page:last-of-type {
+                break-after: auto;
+                page-break-after: auto;
             }
 
             /* Title page fills the entire first page */
             .title-sheet {
-                height: 25.7cm;
+                min-height: 29.7cm;
                 page-break-after: always;
             }
 
@@ -353,6 +639,26 @@
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+            }
+
+            #previewContent .step13-rotated-wrap {
+                height: 24.0cm !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+            }
+
+            #previewContent .step13-rotated-inner {
+                top: 22.2cm !important;
+                left: 2.0cm !important;
+                width: 24.1cm !important;
+                transform-origin: top left !important;
+                transform: rotate(-90deg) scale(0.89) !important;
+            }
+
+            #previewContent .step13-rotated-inner table.step13-schedule-table,
+            #previewContent .step13-rotated-inner table.step13-schedule-table th,
+            #previewContent .step13-rotated-inner table.step13-schedule-table td {
+                border-color: #000 !important;
             }
         }
     </style>
@@ -372,17 +678,17 @@
             <div class="form-group">
                 <label>Інститут та Кафедра</label>
                 <input type="text" id="instName"
-                    value="Інститут будівництва та інженерних систем, Кафедра будівельного виробництва"
+                    value="Інститут будівництва та інженерних систем"
                     oninput="updatePrintView()">
             </div>
             <div class="form-group">
                 <label>Викладач</label>
-                <input type="text" id="teacherName" placeholder="Посада, Прізвище І.Б." value="Гайда О.М."
+                <input type="text" id="teacherName" placeholder="Посада, Прізвище І.Б." value="Костюк І.Г."
                     oninput="updatePrintView()">
             </div>
             <div class="form-group">
                 <label>Студент (Прізвище І.Б.)</label>
-                <input type="text" id="studentName" placeholder="Іванов І.І." value="Шух Ілля"
+                <input type="text" id="studentName" placeholder="Іванов І.І." value="Шух І. А."
                     oninput="updatePrintView()">
             </div>
             <div class="form-group">
@@ -391,7 +697,7 @@
             </div>
             <div class="form-group">
                 <label>Місто і рік</label>
-                <input type="text" id="cityYear" value="Львів — 2026" oninput="updatePrintView()">
+                <input type="text" id="cityYear" value="Львів - 2026" oninput="updatePrintView()">
             </div>
         </div>
     </div>
@@ -403,7 +709,7 @@
         </div>
 
         <div class="title-inst" id="lblInst">
-            кафедра Будівельного виробництва<br>Інститут будівництва та інженерних систем
+            Інститут будівництва та інженерних систем
         </div>
 
         <!-- Logo -->
@@ -428,12 +734,12 @@
         <div class="author-info">
             <div class="author-details">
                 <div>Виконав: ст. гр. <span id="lblGroup">АР-42</span> <span id="lblName">Шух І. А.</span></div>
-                <div>Перевірили: <span id="lblTeacher">Мельник В.А., Хамар І.Г.</span></div>
+                <div>Перевірив: <span id="lblTeacher">Костюк І.Г.</span></div>
             </div>
         </div>
 
         <div class="title-footer" id="lblCityYear">
-            Львів — 2026
+            Львів - 2026
         </div>
     </div>
 
@@ -447,15 +753,162 @@
 
     <button class="btn-print-float no-print" onclick="window.print()">Друк в PDF / Зберегти</button>
 
+    <script src="js/machines.js"></script>
+    <script src="js/en-norms.js"></script>
+    <script src="js/calc.js"></script>
     <script>
         function updatePrintView() {
             const inst = document.getElementById('instName').value;
-            document.getElementById('lblInst').innerHTML = inst ? inst.replace(', ', '<br>').replace(',', '<br>') : 'Інститут будівництва та інженерних систем<br>Кафедра будівельного виробництва';
+            document.getElementById('lblInst').innerHTML = inst ? inst.replace(', ', '<br>').replace(',', '<br>') : 'Інститут будівництва та інженерних систем';
 
             document.getElementById('lblName').innerText = document.getElementById('studentName').value || '';
             document.getElementById('lblGroup').innerText = document.getElementById('studentGroup').value || '_______';
             document.getElementById('lblTeacher').innerText = document.getElementById('teacherName').value || '';
-            document.getElementById('lblCityYear').innerText = document.getElementById('cityYear').value || 'Львів — 2026';
+            document.getElementById('lblCityYear').innerText = document.getElementById('cityYear').value || 'Львів - 2026';
+        }
+
+        function fitScaledTablesIn(root = document) {
+            const wraps = root.querySelectorAll('#previewContent .scaled-table-wrap, .scaled-table-wrap');
+            wraps.forEach((wrap) => {
+                const inner = wrap.querySelector('.scaled-table-inner');
+                const table = inner?.querySelector('table');
+                if (!inner || !table) return;
+
+                wrap.style.height = '';
+                inner.style.setProperty('--fit-scale', '1');
+                table.style.width = 'max-content';
+                table.style.minWidth = '100%';
+                table.style.tableLayout = 'auto';
+
+                const availableWidth = wrap.clientWidth;
+                const naturalWidth = Math.max(inner.scrollWidth, table.scrollWidth, table.getBoundingClientRect().width);
+                const naturalHeight = Math.max(inner.scrollHeight, table.scrollHeight, table.getBoundingClientRect().height);
+
+                if (!availableWidth || !naturalWidth) return;
+
+                const forcedMaxScale = wrap.dataset.forceScale ? Number(wrap.dataset.forceScale) : 1;
+                const scale = Math.min(forcedMaxScale, 1, availableWidth / naturalWidth);
+                inner.style.setProperty('--fit-scale', String(scale));
+                wrap.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+            });
+        }
+
+        function fitScaledTables() {
+            fitScaledTablesIn(document);
+        }
+
+        function getScreenPageHeightPx() {
+            const probe = document.createElement('div');
+            probe.style.position = 'absolute';
+            probe.style.visibility = 'hidden';
+            probe.style.pointerEvents = 'none';
+            probe.style.width = '21cm';
+            probe.style.height = '29.7cm';
+            document.body.appendChild(probe);
+            const height = probe.getBoundingClientRect().height || 1;
+            probe.remove();
+            return height;
+        }
+
+        function createMeasuredPage(sectionId) {
+            const page = document.createElement('div');
+            page.className = 'page content-page';
+            if (sectionId) page.dataset.sectionId = sectionId;
+            page.style.position = 'absolute';
+            page.style.visibility = 'hidden';
+            page.style.pointerEvents = 'none';
+            page.style.left = '-99999px';
+            page.style.top = '0';
+            page.style.margin = '0';
+            page.style.zIndex = '-1';
+            document.body.appendChild(page);
+            return page;
+        }
+
+        function collectNonEmptyNodes(container) {
+            return Array.from(container.childNodes).filter((node) => {
+                if (node.nodeType === Node.TEXT_NODE) return node.textContent.trim().length > 0;
+                return true;
+            });
+        }
+
+        function paginateHtmlContent(html, sectionId) {
+            const source = document.createElement('div');
+            source.innerHTML = html;
+            const nodes = collectNonEmptyNodes(source);
+            const pageHeight = getScreenPageHeightPx();
+            const pages = [];
+
+            let currentPage = document.createElement('div');
+            currentPage.className = 'page content-page';
+            currentPage.dataset.sectionId = sectionId;
+
+            let measurePage = createMeasuredPage(sectionId);
+
+            const resetMeasurePage = () => {
+                const next = createMeasuredPage();
+                measurePage.remove();
+                measurePage = next;
+            };
+
+            const commitCurrentPage = () => {
+                if (!currentPage.childNodes.length) return;
+                pages.push(currentPage);
+                currentPage = document.createElement('div');
+                currentPage.className = 'page content-page';
+                resetMeasurePage();
+            };
+
+            nodes.forEach((node) => {
+                const visibleClone = node.cloneNode(true);
+                const measureClone = node.cloneNode(true);
+                currentPage.appendChild(visibleClone);
+                measurePage.appendChild(measureClone);
+                fitScaledTablesIn(measurePage);
+
+                if (measurePage.scrollHeight > pageHeight + 1) {
+                    currentPage.removeChild(visibleClone);
+                    measurePage.removeChild(measureClone);
+
+                    if (currentPage.childNodes.length) {
+                        commitCurrentPage();
+                    }
+
+                    const newVisibleClone = node.cloneNode(true);
+                    const newMeasureClone = node.cloneNode(true);
+                    currentPage.appendChild(newVisibleClone);
+                    measurePage.appendChild(newMeasureClone);
+                    fitScaledTablesIn(measurePage);
+                }
+            });
+
+            if (measurePage.isConnected) measurePage.remove();
+            if (currentPage.childNodes.length) pages.push(currentPage);
+            if (pages.length && sectionId) pages[0].dataset.sectionId = sectionId;
+            return pages;
+        }
+
+        function updateTocPageNumbers() {
+            const tocTargets = document.querySelectorAll('[data-toc-target]');
+            if (!tocTargets.length) return;
+
+            const pageHeight = getScreenPageHeightPx();
+            let currentPage = 2;
+            const pageMap = {};
+
+            document.querySelectorAll('.page.content-page').forEach((pageEl) => {
+                const sectionId = pageEl.dataset.sectionId;
+                if (sectionId && pageMap[sectionId] == null) {
+                    pageMap[sectionId] = currentPage;
+                }
+
+                const consumedPages = Math.max(1, Math.ceil(pageEl.getBoundingClientRect().height / pageHeight));
+                currentPage += consumedPages;
+            });
+
+            tocTargets.forEach((node) => {
+                node.textContent = pageMap[node.dataset.tocTarget] ?? '—';
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -471,24 +924,368 @@
                 // Helper to format numbers safely
                 const f2 = (n) => typeof n === 'number' ? n.toFixed(2) : '-';
                 const f3 = (n) => typeof n === 'number' ? n.toFixed(3) : '-';
+                const fmt = (n, d = 2) => typeof n === 'number' && isFinite(n) ? n.toFixed(d) : '—';
+                const leadTypeLabel = (machine) => {
+                    if (!machine) return 'машина не визначена';
+                    if (machine.type === 'scraper') return 'скрепер';
+                    if (machine.type === 'loader') return 'навантажувач';
+                    return 'бульдозер';
+                };
+                const machineCell = (machine, count) => {
+                    if (!machine) return '—';
+                    return count > 1 ? `${machine.name} × ${count}` : machine.name;
+                };
+                const formatNumber = (value, digits = 2) => Number.isFinite(value) ? value.toFixed(digits) : '—';
+                const hasComparisonEngine = typeof Calc !== 'undefined' && typeof ENNorms !== 'undefined' && typeof Machines !== 'undefined';
+                const getMethodologyBand = (volumeThousand) => {
+                    if (volumeThousand <= 1.5) return { bulldozerPower: [20, 60], scraperBucket: [0, 3], loaderBucket: [0.2, 0.6] };
+                    if (volumeThousand <= 20) return { bulldozerPower: [60, 90], scraperBucket: [4, 8], loaderBucket: [0.7, 1.5] };
+                    if (volumeThousand <= 50) return { bulldozerPower: [90, 160], scraperBucket: [9, 18], loaderBucket: [1.6, 2.5] };
+                    if (volumeThousand <= 100) return { bulldozerPower: [160, 220], scraperBucket: [20, 30], loaderBucket: [2.6, 4] };
+                    return { bulldozerPower: [220, 440], scraperBucket: [30, 40], loaderBucket: [4, Infinity] };
+                };
+                const rangePenalty = (value, [min, max]) => {
+                    if (value >= min && value <= max) return 0;
+                    if (value < min) return (min - value) / Math.max(min, 1);
+                    if (!isFinite(max)) return 0;
+                    return (value - max) / Math.max(max, 1);
+                };
+                const distancePenalty = (machine, Lsr) => {
+                    if (!machine) return 0;
+                    if (machine.type === 'bulldozer') {
+                        if (Lsr <= 70) return 0;
+                        if (Lsr <= 100) return 0.5;
+                        if (Lsr <= 150 && (machine.power || 0) >= 200) return 1.0;
+                        return 4 + Math.max(0, (Lsr - 100) / 50);
+                    }
+                    if (machine.type === 'scraper') {
+                        if (Lsr < 80) return 1.0;
+                        if (Lsr <= 300) return 0;
+                        if ((machine.bucketVolume || 0) <= 5 && Lsr <= 400) return 0.7;
+                        if ((machine.bucketVolume || 0) <= 10 && Lsr <= 750) return 0.2;
+                        if ((machine.bucketVolume || 0) <= 15 && Lsr <= 1000) return 0.2;
+                        return 3 + Math.max(0, (Lsr - 750) / 250);
+                    }
+                    if (machine.type === 'loader') {
+                        if (Lsr <= 40) return 0.3;
+                        if (Lsr <= 80) return 1.2;
+                        return 4 + Math.max(0, (Lsr - 80) / 40);
+                    }
+                    return 0;
+                };
+                const methodologyPenalty = (machine, volume, Lsr) => {
+                    if (!machine) return 0;
+                    const band = getMethodologyBand(volume / 1000);
+                    let penalty = distancePenalty(machine, Lsr);
+                    if (machine.type === 'bulldozer') penalty += 2 * rangePenalty(machine.power || 0, band.bulldozerPower);
+                    if (machine.type === 'scraper') penalty += 2 * rangePenalty(machine.bucketVolume || 0, band.scraperBucket);
+                    if (machine.type === 'loader') penalty += 2 * rangePenalty(machine.bucketVolume || 0, band.loaderBucket);
+                    return penalty;
+                };
+                const pickPreferredMachine = (machineIds, fallbackList, fallbackMachine) => {
+                    for (const machineId of machineIds || []) {
+                        const machine = Machines.getById(machineId);
+                        if (machine) return machine;
+                    }
+                    return fallbackList?.[0] || fallbackMachine || null;
+                };
+                const getMachineSpecificNorm = (norm, machineType, fieldPrefix) => {
+                    const mapName = fieldPrefix === 'machineDay' ? 'machineDayByType' : 'laborDayByType';
+                    const baseName = fieldPrefix === 'machineDay' ? 'machineDayNorm' : 'laborDayNorm';
+                    return norm?.[mapName]?.[machineType] ?? norm?.[baseName];
+                };
+                const getProductionExecutionData = (process, index, machine) => {
+                    const isAreaProcess = index === 0 || index === 5;
+                    const layerThickness = inp.topsoil || 0.2;
+                    const calcVolume = isAreaProcess ? process.volume * layerThickness : process.volume;
+                    const calcUnit = isAreaProcess ? 'м³' : process.unit;
+                    return {
+                        mode: 'production',
+                        norm: null,
+                        isAreaProcess,
+                        mainVolume: process.volume,
+                        mainUnit: process.unit,
+                        calcVolume,
+                        calcUnit,
+                        sourceLabel: `${formatNumber(process.volume)} ${process.unit}`,
+                        calcLabel: `${formatNumber(calcVolume)} ${calcUnit}`,
+                        normUnitLabel: '—',
+                        normUnits: null,
+                        machineDays: null,
+                        laborDays: null,
+                        machineDayNorm: null,
+                        laborDayNorm: null,
+                        enCode: '—',
+                        crewLabel: machine ? `${machine.workers || 1} маш.` : '—'
+                    };
+                };
+                const getNormativeExecutionData = (process, index, machine) => {
+                    const norm = ENNorms.getByProcessId(process.id);
+                    if (!norm) return getProductionExecutionData(process, index, machine);
+                    const machineType = machine?.type || 'bulldozer';
+                    const machineDayNorm = getMachineSpecificNorm(norm, machineType, 'machineDay');
+                    const laborDayNorm = getMachineSpecificNorm(norm, machineType, 'laborDay');
+                    const normUnits = process.volume / norm.unitSize;
+                    const machineDays = normUnits * machineDayNorm;
+                    const laborDays = normUnits * laborDayNorm;
+                    const crewCount = Math.max(machine?.workers || 1, Math.ceil(laborDayNorm / Math.max(machineDayNorm, 0.01)));
+                    return {
+                        mode: 'normative',
+                        norm,
+                        isAreaProcess: norm.unitBase === 'м²',
+                        mainVolume: process.volume,
+                        mainUnit: process.unit,
+                        calcVolume: process.volume,
+                        calcUnit: process.unit,
+                        sourceLabel: `${formatNumber(process.volume)} ${process.unit}`,
+                        calcLabel: `${formatNumber(process.volume)} ${process.unit}`,
+                        normUnitLabel: `${norm.unitSize} ${norm.unitBase}`,
+                        normUnits,
+                        machineDays,
+                        laborDays,
+                        machineDayNorm,
+                        laborDayNorm,
+                        enCode: norm.enCode || 'ЕН',
+                        crewLabel: `${crewCount} роб. у зміну`
+                    };
+                };
+                const getProcessExecutionData = (process, index, machine) => inp.calcMode === 'production'
+                    ? getProductionExecutionData(process, index, machine)
+                    : getNormativeExecutionData(process, index, machine);
+                const computeProductionBaseDuration = (machine, procData, Lsr, tShift, index) => {
+                    const vol = procData.calcVolume;
+                    const isLocalOperation = procData.isAreaProcess || index === 1 || index === 3;
+                    const workDistance = isLocalOperation ? 30 : Lsr;
+                    if (!machine) return 0;
+                    if (machine.type === 'bulldozer') return vol / Calc.bulldozerProductivity(machine, workDistance, tShift).Pe;
+                    if (machine.type === 'scraper') return vol / Calc.scraperProductivity(machine, Lsr, tShift).Pe;
+                    if (machine.type === 'loader') return vol / Calc.loaderProductivity(machine, workDistance, tShift).Pe;
+                    if (machine.type === 'compactor') return vol / (machine.productivityPerShift || 1000);
+                    return vol / 500;
+                };
+                const targetScheduleDays = (volume, Lsr) => Math.max(18, Math.min(45, 12 + 1.5 * (volume / 1000) + 0.03 * Lsr));
+                const maxMachinesForProcess = (machine, processIndex) => {
+                    if (!machine) return 1;
+                    if (machine.type === 'scraper' || machine.type === 'loader') return 4;
+                    if (machine.type === 'compactor') return 3;
+                    if (machine.type === 'bulldozer') {
+                        if (processIndex === 2) return 4;
+                        if (processIndex === 1) return 2;
+                        return 3;
+                    }
+                    return 2;
+                };
+                const optimizeMachineCounts = (baseDurations, machines, numShifts, volume, Lsr) => {
+                    const counts = baseDurations.map(dur => dur > 0 ? 1 : 0);
+                    const targetDays = targetScheduleDays(volume, Lsr);
+                    const score = (currentCounts) => {
+                        const totalDays = baseDurations.reduce((sum, dur, idx) => {
+                            if (!dur || !machines[idx]) return sum;
+                            return sum + dur / Math.max(currentCounts[idx], 1) / Math.max(numShifts, 1);
+                        }, 0);
+                        const overrun = Math.max(0, totalDays - targetDays);
+                        const extraMachinesPenalty = currentCounts.reduce((sum, count, idx) => {
+                            const machine = machines[idx];
+                            if (!machine || count <= 1) return sum;
+                            return sum + (count - 1) * (1 + (machine.price || 0) / 250);
+                        }, 0);
+                        return Math.abs(totalDays - targetDays) * 20 + overrun * 10 + extraMachinesPenalty * 3;
+                    };
+                    let bestScore = score(counts);
+                    let improved = true;
+                    while (improved) {
+                        improved = false;
+                        let bestIdx = -1;
+                        let candidateBest = bestScore;
+                        for (let i = 0; i < counts.length; i++) {
+                            if (!machines[i]) continue;
+                            if (counts[i] >= maxMachinesForProcess(machines[i], i)) continue;
+                            if (baseDurations[i] / Math.max(counts[i], 1) < 2.5) continue;
+                            const trial = [...counts];
+                            trial[i] += 1;
+                            const trialScore = score(trial);
+                            if (trialScore + 1e-6 < candidateBest) {
+                                candidateBest = trialScore;
+                                bestIdx = i;
+                            }
+                        }
+                        if (bestIdx >= 0) {
+                            counts[bestIdx] += 1;
+                            bestScore = candidateBest;
+                            improved = true;
+                        }
+                    }
+                    return counts.map((count, idx) => machines[idx] ? Math.max(count, 1) : 0);
+                };
+                const buildMachineSetForLead = (leadMachine) => {
+                    const bulldozers = suggestions?.bulldozers || [];
+                    const compactors = suggestions?.compactors || [];
+                    const helperBulldozer = bulldozers[0] || Machines.bulldozers?.[0] || null;
+                    const gradingBulldozer = pickPreferredMachine(ENNorms.getByProcessId('topsoil_cut')?.recommendedMachines, bulldozers, helperBulldozer);
+                    const finalBulldozer = pickPreferredMachine(ENNorms.getByProcessId('final_grading')?.recommendedMachines, bulldozers, gradingBulldozer);
+                    const spreadingBulldozer = pickPreferredMachine(ENNorms.getByProcessId('soil_spreading')?.recommendedMachines, bulldozers, helperBulldozer);
+                    const ripperLoosening = Machines.suggestRipperBulldozer(maxVol, carto.Lsr, suggestions) || Machines.getById('dp15');
+                    const compactor = compactors.length > 1 ? compactors[1] : compactors[0];
+                    return [
+                        { process: processes[0]?.name, machine: gradingBulldozer },
+                        { process: processes[1]?.name, machine: ripperLoosening },
+                        { process: processes[2]?.name, machine: leadMachine },
+                        { process: processes[3]?.name, machine: spreadingBulldozer },
+                        { process: processes[4]?.name, machine: compactor },
+                        { process: processes[5]?.name, machine: finalBulldozer }
+                    ];
+                };
+                const computePreviewTEP = (set, leadMachine) => {
+                    const baseDurations = [];
+                    const previewExecutionData = [];
+                    const machines = set.map(item => item.machine);
+                    const isPreviewNormative = inp.calcMode !== 'production';
+                    for (let i = 0; i < processes.length; i++) {
+                        const procData = getProcessExecutionData(processes[i], i, machines[i]);
+                        previewExecutionData.push(procData);
+                        const baseDuration = isPreviewNormative
+                            ? procData.machineDays || 0
+                            : computeProductionBaseDuration(machines[i], procData, carto.Lsr, inp.tShift, i);
+                        baseDurations.push(Number.isFinite(baseDuration) && baseDuration > 0 ? baseDuration : 0);
+                    }
+                    const machineCounts = optimizeMachineCounts(baseDurations, machines, inp.numShifts || 1, maxVol, carto.Lsr);
+                    const durations = [];
+                    const machineHourCosts = [];
+                    const wages = [];
+                    let sumMachineCost = 0;
+                    let totalLabourHours = 0;
+                    for (let i = 0; i < processes.length; i++) {
+                        const machine = machines[i];
+                        const count = Math.max(machineCounts[i], 1);
+                        const procData = previewExecutionData[i];
+                        let durationDays = 0;
+                        let machineHoursPerMachine = 0;
+                        let labourHours = 0;
+                        if (machine && baseDurations[i] > 0) {
+                            if (isPreviewNormative) {
+                                durationDays = (procData.machineDays || 0) / (count * Math.max(inp.numShifts || 1, 1));
+                                machineHoursPerMachine = ((procData.machineDays || 0) / count) * inp.tShift;
+                                labourHours = (procData.laborDays || 0) * inp.tShift;
+                            } else {
+                                const durationShifts = baseDurations[i] / count;
+                                durationDays = durationShifts / Math.max(inp.numShifts || 1, 1);
+                                machineHoursPerMachine = durationShifts * inp.tShift;
+                                labourHours = durationShifts * count * inp.tShift * (machine.workers || 1);
+                            }
+                        }
+                        durations.push(durationDays);
+                        if (machine && machineHoursPerMachine > 0) {
+                            const Cmh = Calc.machineHourCost(machine.oneTime || 0, machineHoursPerMachine, machine.price, machine.amort, machine.yearHours, machine.Ce);
+                            machineHourCosts.push(Cmh);
+                            wages.push(labourHours * 30);
+                            totalLabourHours += labourHours;
+                            sumMachineCost += count * Cmh * machineHoursPerMachine;
+                        } else {
+                            machineHourCosts.push(0);
+                            wages.push(0);
+                        }
+                    }
+                    const totalDuration = durations.reduce((sum, value) => sum + value, 0);
+                    const totalCost = 1.08 * sumMachineCost + 1.5 * wages.reduce((sum, value) => sum + value, 0);
+                    const reducedCosts = maxVol > 0 ? (totalCost + 0.12 * machines.reduce((sum, machine, index) => {
+                        if (!machine) return sum;
+                        const count = machineCounts[index];
+                        const machineHours = isPreviewNormative
+                            ? ((previewExecutionData[index].machineDays || 0) / Math.max(count, 1)) * inp.tShift
+                            : (baseDurations[index] / Math.max(count, 1)) * inp.tShift;
+                        return sum + count * (machine.price * 1000) * machineHours / Math.max(machine.yearHours, 1);
+                    }, 0)) / maxVol : 0;
+                    return {
+                        mode: inp.calcMode,
+                        executionData: previewExecutionData,
+                        machineCounts,
+                        baseDurations,
+                        durations,
+                        machineHourCosts,
+                        wages,
+                        totalDuration,
+                        labourIntensity: maxVol > 0 ? totalLabourHours / maxVol : 0,
+                        totalCost,
+                        reducedCosts
+                    };
+                };
+                const evaluateLeadCandidate = (leadMachine) => {
+                    const set = buildMachineSetForLead(leadMachine);
+                    const tep = computePreviewTEP(set, leadMachine);
+                    const logicPenalty = methodologyPenalty(leadMachine, maxVol, carto.Lsr);
+                    const score = logicPenalty * 1000 + tep.reducedCosts * 100 + tep.totalDuration;
+                    return { leadMachine, leadType: leadMachine?.type, set, tep, logicPenalty, score };
+                };
+                const pickPreviewMachineVariants = () => {
+                    const candidates = [
+                        ...(suggestions?.bulldozers || []),
+                        ...(suggestions?.scrapers || []),
+                        ...(suggestions?.loaders || [])
+                    ];
+                    const unique = [];
+                    const seen = new Set();
+                    candidates.forEach((candidate) => {
+                        if (!candidate || seen.has(candidate.id)) return;
+                        seen.add(candidate.id);
+                        unique.push(candidate);
+                    });
+                    const evaluated = unique.map(evaluateLeadCandidate).sort((a, b) => a.score - b.score);
+                    const primary = evaluated[0];
+                    const alternative = evaluated.find(v => v.leadType !== primary?.leadType) || evaluated[1] || null;
+                    return { primary, alternative, evaluated };
+                };
+                const rankedVariants = hasComparisonEngine ? pickPreviewMachineVariants() : null;
+                const fallbackVariant = {
+                    leadMachine: tepResults?.set?.[2]?.machine || tepResults?.set?.[0]?.machine || null,
+                    set: tepResults?.set || [],
+                    tep: tepResults?.tep || {},
+                    logicPenalty: 0,
+                    score: 0
+                };
+                const top1 = rankedVariants?.primary || fallbackVariant;
+                const top2 = rankedVariants?.alternative && rankedVariants.alternative !== rankedVariants.primary ? rankedVariants.alternative : null;
+                const selectedSet = top1.set || [];
+                const selectedTep = top1.tep || {};
+                const executionData = selectedTep.executionData || [];
+                const isNormative = inp?.calcMode !== 'production';
+                const selectedLeadMachine = top1.leadMachine || selectedSet?.[2]?.machine || selectedSet?.[0]?.machine || null;
+                const top2Available = !!(top2?.leadMachine && top2?.leadMachine?.id !== top1?.leadMachine?.id);
+                const formulaLine = (html) => `<div class="formula-math" style="font-size:16pt; text-align:center; text-indent:0; margin:16px 0;">${html}</div>`;
+                const mathLine = (body) => formulaLine(`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">${body}</math>`);
+                const row = (...parts) => `<mrow>${parts.join('')}</mrow>`;
+                const frac = (a, b) => `<mfrac>${a}${b}</mfrac>`;
+                const sub = (a, b) => `<msub>${a}${b}</msub>`;
+                const sup = (a, b) => `<msup>${a}${b}</msup>`;
+                const sqrt = (a) => `<msqrt>${a}</msqrt>`;
+                const mo = (v) => `<mo>${v}</mo>`;
+                const mi = (v) => `<mi>${v}</mi>`;
+                const mn = (v) => `<mn>${v}</mn>`;
+                const mt = (v) => `<mtext>${v}</mtext>`;
+                const paragraph = (html, extra = '') => `<p style="text-align: justify; text-indent: 1.25cm;${extra}">${html}</p>`;
+                const resultLine = (html) => `<p style="text-align:center; text-indent:0; margin-top:12px; font-weight:bold;">${html}</p>`;
+                const sampleVertexCount = Math.min(cols * rows, 4);
+                const sampleSquare = volData?.squares?.[0] || null;
 
                 // ==========================
                 // 1. PAGE 1: Зміст (TOC) & Вступ
                 // ==========================
                 const sections = [
-                    { num: '2', title: 'Розбивка будівельного майданчика', page: 4 },
-                    { num: '3', title: 'Визначення чорних відміток', page: 5 },
-                    { num: '4', title: 'Визначення середньої планувальної відмітки', page: 7 },
-                    { num: '5', title: 'Обчислення червоних проектних та робочих відміток', page: 8 },
-                    { num: '6', title: 'Побудова нульової лінії', page: 9 },
-                    { num: '7', title: 'Обчислення об’ємів робіт (насип та виїмка)', page: 10 },
-                    { num: '8', title: 'Визначення середньої довжини транспортування', page: 12 },
-                    { num: '9', title: 'Попередній вибір ведучих машин', page: 13 },
-                    { num: '10', title: 'Комплекти машин', page: 14 },
-                    { num: '11', title: 'Техніко-економічні показники (ТЕП)', page: 14 },
-                    { num: '12', title: 'Калькуляція трудових витрат', page: 15 },
-                    { num: '13', title: 'Календарний графік виконання робіт', page: 16 },
-                    { num: '14', title: 'Висновок', page: 17 }
+                    { num: '1', title: 'Вступ', sectionId: 'intro' },
+                    { num: '2', title: 'Розбивка будівельного майданчика', sectionId: 'step2' },
+                    { num: '3', title: 'Визначення чорних відміток', sectionId: 'step3' },
+                    { num: '4', title: 'Визначення середньої планувальної відмітки', sectionId: 'step4' },
+                    { num: '5', title: 'Обчислення червоних проектних та робочих відміток', sectionId: 'step5' },
+                    { num: '6', title: 'Побудова нульової лінії', sectionId: 'step6' },
+                    { num: '7', title: 'Обчислення об’ємів робіт (насип та виїмка)', sectionId: 'step7' },
+                    { num: '8', title: 'Визначення середньої довжини транспортування', sectionId: 'step8' },
+                    { num: '9', title: 'Попередній вибір ведучих машин', sectionId: 'step9' },
+                    { num: '10', title: 'Комплекти машин', sectionId: 'step10' },
+                    { num: '11', title: 'Техніко-економічні показники (ТЕП)', sectionId: 'step11' },
+                    { num: '12', title: 'Калькуляція трудових витрат', sectionId: 'step12' },
+                    { num: '13', title: 'Календарний графік виконання робіт', sectionId: 'step13' },
+                    { num: '14', title: 'Охорона праці на майданчику', sectionId: 'step14safety' },
+                    { num: '15', title: 'Висновок', sectionId: 'step15' },
+                    { num: '16', title: 'Використана література', sectionId: 'step16' }
                 ];
 
                 let tocHtml = `<style>
@@ -503,9 +1300,8 @@
                     .step-3-diagram .svg-working-mark { display: none !important; }
                 </style>
                 <h2 style="text-align: center; font-size: 16pt; margin-bottom: 30px; font-weight: normal;">Зміст</h2><div id="tocContainer">`;
-                tocHtml += `<div class="toc-item"><span>1. Вступ</span><span class="toc-dots"></span><span>3</span></div>`;
                 sections.forEach(s => {
-                    tocHtml += `<div class="toc-item"><span>${s.num}. ${s.title}</span><span class="toc-dots"></span><span>${s.page}</span></div>`;
+                    tocHtml += `<div class="toc-item"><span>${s.num}. ${s.title}</span><span class="toc-dots"></span><span data-toc-target="${s.sectionId}">—</span></div>`;
                 });
                 tocHtml += `</div>`;
 
@@ -707,25 +1503,25 @@
                 // ==========================
                 // 9. PAGE 9: Вибір ведучих машин
                 // ==========================
-                const lead1 = suggestions?.bulldozers?.[0] || {};
-                const lead2 = suggestions?.loaders?.[0] || {};
+                const rankedLead1 = top1?.leadMachine || {};
+                const rankedLead2 = top2?.leadMachine || {};
 
                 let step9Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">9. Попередній вибір ведучих машин</h2>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Для виконання основного об'єму земляних робіт (розробка, переміщення та розрівнювання ґрунту) необхідно правильно підібрати ведучу марку машини. Вибір здійснюється на основі економічних показників та технічних характеристик агрегатів, враховуючи задану середню дальність транспортування ґрунту L<sub>ср</sub> та загальний об'єм робіт.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Об'єм робіт: ${(maxVol / 1000).toFixed(2)} тис. м³. Середня відстань переміщення: ${carto?.Lsr?.toFixed(1) || 0} м.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Згідно з нормативними та довідковими даними розглядаємо два можливі варіанти ведучих механізмів, які забезпечують необхідну продуктивність (згідно таблиці 8 методичних вказівок):</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 1: Бульдозер</strong> ${lead1.name || ''} (Потужність: ${lead1.power || '—'} кВт, Вартість: ${lead1.price || 0} тис. грн)</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 2: Навантажувач</strong> ${lead2.name || ''} (Потужність: ${lead2.power || '—'} кВт, Вартість: ${lead2.price || 0} тис. грн)</p>`;
+                    <p style="text-align: justify; text-indent: 1.25cm;">Для виконання основного об'єму земляних робіт ведучу машину підбираємо за таблицею 8 методичних вказівок з урахуванням загального об'єму робіт та середньої відстані переміщення ґрунту L<sub>ср</sub>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Прийнято: V = ${(maxVol / 1000).toFixed(2)} тис. м³; L<sub>ср</sub> = ${fmt(carto?.Lsr, 1)} м. Для цього діапазону розглядаємо два конкурентні варіанти ведучих машин і надалі порівнюємо їх за техніко-економічними показниками.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 1:</strong> ${leadTypeLabel(rankedLead1)} ${rankedLead1.name || ''} (потужність ${rankedLead1.power || '—'} кВт, вартість ${rankedLead1.price || '—'} тис. грн).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Варіант 2:</strong> ${leadTypeLabel(rankedLead2)} ${rankedLead2.name || ''} (потужність ${rankedLead2.power || '—'} кВт, вартість ${rankedLead2.price || '—'} тис. грн).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">За результатами ранжування та подальшого розрахунку до остаточного опрацювання прийнято комплект на чолі з машиною <strong>${selectedLeadMachine?.name || '—'}</strong>.</p>`;
 
                 // ==========================
                 // 10. PAGE 10: Комплекти машин
                 // ==========================
-                const setHtml = processes.map((p, i) => `<tr><td style="border:1px solid #000; padding:4px;">${i + 1}</td><td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td><td style="border:1px solid #000; padding:4px;">${tepResults?.set?.[i]?.machine?.name || '—'}</td></tr>`).join('');
+                const setHtml = processes.map((p, i) => `<tr><td style="border:1px solid #000; padding:4px;">${i + 1}</td><td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td><td style="border:1px solid #000; padding:4px;">${machineCell(selectedSet?.[i]?.machine, selectedTep?.machineCounts?.[i] || 0)}</td></tr>`).join('');
 
                 let step10Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">10. Комплекти машин</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">До складу комплекту машин для виконання земляних робіт, крім ведучої машини, входять також допоміжні механізми (для зняття рослинного шару, ущільнення ґрунту, фінального планування). Вони повинні бути сумісні за продуктивністю та забезпечувати безперервний потік виконання робіт.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Формуємо комплект спеціалізованої техніки для подальшого техніко-економічного розрахунку:</p>
-                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                    <p style="text-align: justify; text-indent: 1.25cm;">Формуємо комплект спеціалізованої техніки для подальшого техніко-економічного та нормативного розрахунку. Для планувальних операцій застосовуємо окремі допоміжні машини, а для ущільнення — коток.</p>
+                    <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
                             <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
                             <th style="border:1px solid #000; padding:4px; width:50%;">Назва процесу</th>
@@ -738,140 +1534,809 @@
                 // 11. PAGE 11: ТЕП
                 // ==========================
                 const tepRows = processes.map((p, i) => {
-                    const dur = tepResults?.tep?.durations?.[i] || 0;
-                    const pe = (dur > 0 ? (p.volume / dur).toFixed(1) : '—');
+                    const dur = selectedTep?.durations?.[i] || 0;
+                    const proc = executionData?.[i] || {};
                     return `<tr>
                         <td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td>
-                        <td style="border:1px solid #000; padding:4px;">${tepResults?.set?.[i]?.machine?.name || '—'}</td>
-                        <td style="border:1px solid #000; padding:4px;">${pe}</td>
-                        <td style="border:1px solid #000; padding:4px;">${dur.toFixed(2)}</td>
-                        <td style="border:1px solid #000; padding:4px;">${tepResults?.tep?.machineHourCosts?.[i]?.toFixed(2) || '0.00'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${machineCell(selectedSet?.[i]?.machine, selectedTep?.machineCounts?.[i] || 0)}</td>
+                        <td style="border:1px solid #000; padding:4px;">${isNormative ? proc.normUnitLabel || '—' : proc.calcLabel || '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(proc.normUnits, 3) : fmt(proc.calcVolume, 2)}</td>
+                        <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(proc.machineDays, 2) : '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(proc.laborDays, 2) : '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${selectedTep?.machineCounts?.[i] || '—'}</td>
+                        <td style="border:1px solid #000; padding:4px;">${fmt(dur)}</td>
                     </tr>`;
                 }).join('');
 
                 let step11Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">11. Техніко-економічні показники (ТЕП)</h2>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Для остаточного вибору оптимального комплекту машин розраховуються основні техніко-економічні показники (ТЕП): трудомісткість, експлуатаційна вартість машин з урахуванням заробітної плати машиністів та приведені витрати на 1 м³ розробленого ґрунту.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Визначаємо експлуатаційну продуктивність (П<sub>е</sub>) кожного механізму та необхідну кількість машино-змін для виконання заданого об'єму робіт. На основі розрахованих показників складається зведена таблиця.</p>
-                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                    <p style="text-align: justify; text-indent: 1.25cm;">Для остаточного вибору комплекту машин визначаємо нормативні техніко-економічні показники за ЕН. Для кожного процесу встановлюємо основний об'єм, нормативну одиницю, кількість нормо-одиниць, потребу в днмаш і днлюд, кількість машин та тривалість виконання.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Розрахунок ведемо за формулами: N = V / q<sub>н</sub>; днмаш = N · H<sub>маш</sub>; днлюд = N · H<sub>люд</sub>; T = днмаш / (n · z), де q<sub>н</sub> — нормативна одиниця, n — кількість машин, z — число змін на добу.</p>
+                    <table class="ultra-compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
                             <th style="border:1px solid #000; padding:4px;">Процес</th>
                             <th style="border:1px solid #000; padding:4px;">Машина</th>
-                            <th style="border:1px solid #000; padding:4px;">П<sub>е</sub>, м³/зм</th>
-                            <th style="border:1px solid #000; padding:4px;">Тривалість, змін</th>
-                            <th style="border:1px solid #000; padding:4px;">С<sub>маш.год</sub>, грн</th>
+                            <th style="border:1px solid #000; padding:4px;">Нормативна одиниця</th>
+                            <th style="border:1px solid #000; padding:4px;">К-сть нормо-од.</th>
+                            <th style="border:1px solid #000; padding:4px;">днмаш</th>
+                            <th style="border:1px solid #000; padding:4px;">днлюд</th>
+                            <th style="border:1px solid #000; padding:4px;">К-сть машин</th>
+                            <th style="border:1px solid #000; padding:4px;">Тривалість, днів</th>
                         </tr></thead>
                         <tbody>${tepRows}
                             <tr>
-                                <td colspan="3" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
+                                <td colspan="7" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
                                 <td style="border:1px solid #000; padding:4px;"><strong>${tepResults?.tep?.totalDuration?.toFixed(2) || '0.00'}</strong></td>
-                                <td style="border:1px solid #000; padding:4px;">—</td>
                             </tr>
                         </tbody>
                     </table>
-                    <p style="text-align: justify; text-indent: 1.25cm; margin-top: 20px;"><strong>Приведені витрати (економічна ефективність):</strong> ${tepResults?.tep?.reducedCosts?.toFixed(4) || '0.000'} грн/м³</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Загальна трудомісткість:</strong> ${tepResults?.tep?.labourIntensity?.toFixed(4) || '0.000'} люд-год/м³</p>`;
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top: 20px;"><strong>Собівартість робіт:</strong> ${fmt(tepResults?.tep?.totalCost)} грн.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Приведені витрати:</strong> ${fmt(tepResults?.tep?.reducedCosts, 4)} грн/м³.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;"><strong>Загальна трудомісткість:</strong> ${fmt(tepResults?.tep?.labourIntensity, 4)} люд-год/м³.</p>`;
 
                 // ==========================
                 // 12. PAGE 12: Трудові витрати
                 // ==========================
-                let totalLabour = 0;
+                let totalMachineDays = 0;
+                let totalLabourDays = 0;
                 let totalWage = 0;
                 const labRows = processes.map((p, i) => {
-                    const m = tepResults?.set?.[i]?.machine;
-                    const dur = tepResults?.tep?.durations?.[i] || 0;
-                    const wage = tepResults?.tep?.wages?.[i] || 0;
-                    const labour = dur * (m?.workers || 1) * 8; // 8 hours per shift
-                    totalLabour += labour;
+                    const m = selectedSet?.[i]?.machine;
+                    const proc = executionData?.[i] || {};
+                    const wage = selectedTep?.wages?.[i] || 0;
+                    const compactCrewLabel = (proc.crewLabel || '—')
+                        .replace(' роб. у зміну', ' роб./зм.')
+                        .replace(' маш.', ' маш.');
+                    const compactProcessName = p.name
+                        .replace('Зрізання рослинного шару ґрунту', 'Зріз. росл. шару')
+                        .replace('Розпушування ґрунту', 'Розпуш. ґрунту')
+                        .replace('Розроблення та переміщення ґрунту', 'Розробл. і переміщ.')
+                        .replace('Розрівнювання ґрунту', 'Розрівнюв. ґрунту')
+                        .replace('Ущільнення ґрунту', 'Ущільн. ґрунту')
+                        .replace('Остаточне планування майданчика', 'Остат. планув.');
+                    const compactVolume = Number.isFinite(proc.mainVolume) ? fmt(proc.mainVolume, 2) : (proc.sourceLabel || '—');
+                    totalMachineDays += proc.machineDays || 0;
+                    totalLabourDays += proc.laborDays || 0;
                     totalWage += wage;
                     return `<tr>
-                        <td style="border:1px solid #000; padding:4px;">${i + 1}</td>
-                        <td style="border:1px solid #000; padding:4px; text-align:left;">${p.name}</td>
-                        <td style="border:1px solid #000; padding:4px;">${p.volume.toFixed(2)}</td>
-                        <td style="border:1px solid #000; padding:4px;">${m?.name || '—'}</td>
-                        <td style="border:1px solid #000; padding:4px;">${labour.toFixed(2)}</td>
-                        <td style="border:1px solid #000; padding:4px;">${wage.toFixed(2)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${i + 1}</td>
+                        <td style="border:1px solid #000; padding:3px;">${proc.enCode || '—'}</td>
+                        <td style="border:1px solid #000; padding:3px; text-align:left;">${compactProcessName}</td>
+                        <td style="border:1px solid #000; padding:3px;">${compactVolume}</td>
+                        <td style="border:1px solid #000; padding:3px;">${proc.normUnitLabel || '—'}</td>
+                        <td style="border:1px solid #000; padding:3px;">${fmt(proc.machineDayNorm, 3)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${fmt(proc.laborDayNorm, 3)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${fmt(proc.machineDays, 2)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${fmt(proc.laborDays, 2)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${fmt(wage, 2)}</td>
+                        <td style="border:1px solid #000; padding:3px;">${compactCrewLabel}</td>
                     </tr>`;
                 }).join('');
 
                 let step12Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">12. Калькуляція трудових витрат</h2>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Калькуляція трудових витрат складається для визначення загальної трудомісткості процесу вертикального планування та розрахунку заробітної плати робітників, задіяних у механізованих та інших процесах.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Витрати праці розраховуються на основі експлуатаційної продуктивності машин та тарифних ставок для відповідного розряду робітників-машиністів або дорожніх робітників.</p>
-                    <table style="width:100%; border-collapse: collapse; text-align:center; mt-4">
+                    <p style="text-align: justify; text-indent: 1.25cm;">Калькуляцію трудових витрат складаємо за прийнятими пунктами ЕН. Для кожного процесу вказуємо нормативну одиницю, норму часу, трудомісткість у днмаш і днлюд, а також суму заробітної плати.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Трудомісткість визначаємо за формулами: Т<sub>маш</sub> = N · H<sub>маш</sub>, Т<sub>люд</sub> = N · H<sub>люд</sub>, де N — кількість нормо-одиниць процесу.</p>
+                    <div class="scaled-table-wrap"><div class="scaled-table-inner">
+                    <table class="ultra-compact-table" style="width:100%; border-collapse: collapse; text-align:center; mt-4">
                         <thead><tr>
                             <th style="border:1px solid #000; padding:4px;">№</th>
+                            <th style="border:1px solid #000; padding:4px;">Пункт ЕН</th>
                             <th style="border:1px solid #000; padding:4px;">Назва процесу</th>
-                            <th style="border:1px solid #000; padding:4px;">Об'єм</th>
-                            <th style="border:1px solid #000; padding:4px;">Машина</th>
-                            <th style="border:1px solid #000; padding:4px;">Труд-ть, люд-год</th>
+                            <th style="border:1px solid #000; padding:4px;">Об'єм робіт</th>
+                            <th style="border:1px solid #000; padding:4px;">Нормативна одиниця</th>
+                            <th style="border:1px solid #000; padding:4px;">Норма днмаш</th>
+                            <th style="border:1px solid #000; padding:4px;">Норма днлюд</th>
+                            <th style="border:1px solid #000; padding:4px;">Трудомісткість днмаш</th>
+                            <th style="border:1px solid #000; padding:4px;">Трудомісткість днлюд</th>
                             <th style="border:1px solid #000; padding:4px;">Зарплата, грн</th>
+                            <th style="border:1px solid #000; padding:4px;">Склад ланки</th>
                         </tr></thead>
                         <tbody>${labRows}
                             <tr>
-                                <td colspan="4" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
-                                <td style="border:1px solid #000; padding:4px;"><strong>${totalLabour.toFixed(2)}</strong></td>
+                                <td colspan="7" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
+                                <td style="border:1px solid #000; padding:4px;"><strong>${fmt(totalMachineDays)}</strong></td>
+                                <td style="border:1px solid #000; padding:4px;"><strong>${fmt(totalLabourDays)}</strong></td>
                                 <td style="border:1px solid #000; padding:4px;"><strong>${totalWage.toFixed(2)}</strong></td>
+                                <td style="border:1px solid #000; padding:4px;">—</td>
                             </tr>
                         </tbody>
-                    </table>`;
+                    </table>
+                    </div></div>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Пункти ЕН, прийняті для розрахунку: 2.1.6-04-б; 2.1.1-04-в; 2.1.21-02-б; 2.1.28-06-а; 2.1.29-01-а; 2.1.36-05-б.</p>`;
 
                 // ==========================
                 // 13. PAGE 13: Графік робіт
                 // ==========================
                 let step13Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">13. Календарний графік виконання робіт</h2>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Календарний графік відображає послідовність, час та взаємозв'язок виконання всіх процесів вертикального планування. Роботи плануються таким чином, щоб забезпечити безперервне та рівномірне завантаження техніки та робітників.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Терміни виконання робіт визначаються на основі розрахованої раніше кількості змін, продуктивності техніки та ухваленого режиму роботи на майданчику (наприклад, одно- чи двозмінна робота).</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">На основі техніко-економічних показників нижче наведено лінійний календарний графік (діаграма Ганта) виконання земляних робіт, який враховує потоковість та технологічну послідовність процесів (Рис. 6).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Календарний графік складаємо на основі нормативних трудових витрат, кількості машин та прийнятої змінності роботи. Для кожного процесу тривалість визначається за формулою T = днмаш / (n · z).</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Суцільною лінією в графіку позначено роботу в першу зміну. Умовне позначення типу «4×1» означає чотири робітники в одну зміну.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Нижче наведено календарний графік виконання земляних робіт та графік руху робітників, складені за підсумками нормативного розрахунку (рис. 6).</p>
                     <div style="text-align:center; margin-top:20px; max-width:100%; overflow:hidden;"><div style="width:100%; transform: scale(1.0);">${svgs?.sched || ''}</div></div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 6 Календарний графік виконання робіт</p>`;
 
                 // ==========================
                 // 14. PAGE 14: Висновок
                 // ==========================
-                let chosenMachine = tepResults?.set?.[0]?.machine?.name || '';
-                let totalCost = tepResults?.tep?.totalCost?.toFixed(2) || '0.00';
-                let totalDays = tepResults?.tep?.totalDuration?.toFixed(2) || '0.00';
+                let chosenMachine = selectedLeadMachine?.name || '';
+                let totalCost = selectedTep?.totalCost?.toFixed(2) || '0.00';
+                let totalDays = selectedTep?.totalDuration?.toFixed(2) || '0.00';
 
                 let step14Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">Висновок</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">У даній розрахунково-графічній роботі було розроблено технологічну карту на виконання процесу вертикального планування будівельного майданчика розміром ${f2(inp.A)}x${f2(inp.B)} м.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">За результатами розрахунків визначено, що середня планувальна відмітка становить <strong>${f2(Hser)} м</strong>. Загальний об'єм земляних робіт (насип і виїмка) склав <strong>${f2(volData.totalCut)} м³</strong>, з похибкою балансу земляних мас <strong>${balance?.error?.toFixed(2) || '1.86'}%</strong>, що є допустимим відхиленням.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Графічним методом (за допомогою картограми земляних мас) було встановлено середню відстань переміщення ґрунту на майданчику, яка становить <strong>L<sub>ср</sub> = ${carto?.Lsr?.toFixed(1) || 0} м</strong>.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">На основі порівняння техніко-економічних показників двох варіантів механізації (бульдозер та навантажувач), для виконання основних земляних робіт було обрано найбільш раціональний та економічно вигідний комплект машин на чолі з <strong>${chosenMachine}</strong>.</p>
-                    <p style="text-align: justify; text-indent: 1.25cm;">Використання обраного комплекту машин дозволило досягти мінімальних приведених витрат (<strong>${tepResults?.tep?.reducedCosts?.toFixed(4) || '0.000'} грн/м³</strong>) при загальній вартості робіт <strong>${totalCost} грн</strong>. Загальна тривалість виконання вертикального планування згідно з розробленим календарним графіком становить <strong>${totalDays} змін</strong>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">На основі порівняння техніко-економічних показників та нормативних трудових витрат було обрано найбільш раціональний комплект машин на чолі з <strong>${chosenMachine}</strong>.</p>
+                    <p style="text-align: justify; text-indent: 1.25cm;">Використання обраного комплекту машин дозволило досягти приведених витрат <strong>${tepResults?.tep?.reducedCosts?.toFixed(4) || '0.000'} грн/м³</strong> при загальній вартості робіт <strong>${totalCost} грн</strong>. Загальна тривалість виконання вертикального планування згідно з календарним графіком становить <strong>${totalDays} днів</strong>.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Таким чином, розроблена технологія виконання робіт відповідає всім чинним будівельним нормам, є раціональною з точки зору використання механізмів та забезпечує якісну підготовку майданчика для подальшого зведення будівель.</p>`;
+
+                const vertexOffsets = Array.from({ length: nPoints }, (_, idx) => {
+                    const r = Math.floor(idx / cols);
+                    const c = idx % cols;
+                    return {
+                        dx: (c - (cols - 1) / 2) * squareA,
+                        dy: (r - (rows - 1) / 2) * squareB
+                    };
+                });
+                const cornerSamples = [
+                    { label: 'A', index: 0 },
+                    { label: 'B', index: cols - 1 },
+                    { label: 'C', index: nPoints - 1 },
+                    { label: 'D', index: (rows - 1) * cols }
+                ];
+                const cornerExamplesHtml = cornerSamples.map(({ label, index }) => {
+                    const offsets = vertexOffsets[index];
+                    return paragraph(
+                        `<strong>${label} (H${index + 1})</strong>: ` +
+                        `H<sub>черв</sub> = H<sub>сер</sub> + Δy·i<sub>1</sub> + Δx·i<sub>2</sub> = ` +
+                        `${f3(Hser)} + (${f3(offsets.dy)} · ${fmt(inp.i1, 4)}) + (${f3(offsets.dx)} · ${fmt(inp.i2, 4)}) = ${f3(redMarks[index])} м.`,
+                        'text-indent:0;'
+                    );
+                }).join('');
+                const sampleVerticesHtml = Array.from({ length: sampleVertexCount }, (_, idx) => {
+                    const black = inp.blackMarks[idx];
+                    const red = redMarks[idx];
+                    const work = workingMarks[idx];
+                    return paragraph(
+                        `<strong>Вершина H${idx + 1}.</strong> ` +
+                        `h = H<sub>черв</sub> - H<sub>ч</sub> = ${f3(red)} - ${f3(black)} = ${f3(work)} м.`
+                    );
+                }).join('');
+
+                const tepFormulaDetails = processes.map((p, i) => {
+                    const proc = executionData?.[i] || {};
+                    const machineCount = selectedTep?.machineCounts?.[i] || 1;
+                    const duration = selectedTep?.durations?.[i] || 0;
+                    const normUnits = fmt(proc.normUnits, 3);
+                    const machineDays = fmt(proc.machineDays, 2);
+                    const laborDays = fmt(proc.laborDays, 2);
+                    return `
+                        ${paragraph(`<strong>${i + 1}) ${p.name}.</strong> Для процесу прийнято норму ${proc.enCode || '—'} та машину ${machineCell(selectedSet?.[i]?.machine, machineCount)}.`)}
+                        ${mathLine(row(mi('N'), mo('='), frac(mi('V'), sub(mi('q'), mt('н'))), mo('='), mn(normUnits)))}
+                        ${mathLine(row(sub(mi('T'), mt('маш')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('маш')), mo('='), mn(machineDays)))}
+                        ${mathLine(row(sub(mi('T'), mt('люд')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('люд')), mo('='), mn(laborDays)))}
+                        ${mathLine(row(mi('t'), mo('='), frac(sub(mi('T'), mt('маш')), row(mi('n'), mo('·'), mi('z'))), mo('='), frac(mn(machineDays), row(mn(machineCount), mo('·'), mn(inp.numShifts || 1))), mo('='), mn(fmt(duration, 2)), mt(' дн.')))}
+                    `;
+                }).join('');
+
+                const labourFormulaDetails = processes.map((p, i) => {
+                    const proc = executionData?.[i] || {};
+                    const wage = selectedTep?.wages?.[i] || 0;
+                    return `
+                        ${paragraph(`<strong>${i + 1}) ${p.name}.</strong> Розрахунок трудомісткості та оплати праці виконуємо за даними ЕН.`)}
+                        ${mathLine(row(sub(mi('T'), mt('маш')), mo('='), mn(fmt(proc.normUnits, 3)), mo('·'), mn(fmt(proc.machineDayNorm, 3)), mo('='), mn(fmt(proc.machineDays, 2))))}
+                        ${mathLine(row(sub(mi('T'), mt('люд')), mo('='), mn(fmt(proc.normUnits, 3)), mo('·'), mn(fmt(proc.laborDayNorm, 3)), mo('='), mn(fmt(proc.laborDays, 2))))}
+                        ${resultLine(`Заробітна плата за процес: ${fmt(wage, 2)} грн.`)}
+                    `;
+                }).join('');
+
+                const scheduleFormulaDetails = processes.map((p, i) => {
+                    const proc = executionData?.[i] || {};
+                    const machineCount = selectedTep?.machineCounts?.[i] || 1;
+                    const duration = selectedTep?.durations?.[i] || 0;
+                    return `
+                        ${paragraph(`<strong>${i + 1}) ${p.name}.</strong> Розрахунок тривалості процесу:`)}
+                        ${mathLine(row(
+                            mi('t'),
+                            mo('='),
+                            frac(sub(mi('T'), mt('маш')), row(mi('n'), mo('·'), mi('z'))),
+                            mo('='),
+                            frac(mn(fmt(proc.machineDays, 2)), row(mn(machineCount), mo('·'), mn(inp.numShifts || 1))),
+                            mo('='),
+                            mn(fmt(duration, 2)),
+                            mt(' дн.')
+                        ))}
+                    `;
+                }).join('');
+                const numShifts = Math.max(inp.numShifts || 1, 1);
+                const scheduleRows = [];
+                let scheduleStartDay = 1;
+                for (let i = 0; i < processes.length; i++) {
+                    const durationDays = selectedTep?.durations?.[i] || 0;
+                    if (!durationDays || durationDays <= 0) continue;
+                    const proc = executionData?.[i] || {};
+                    const machine = selectedSet?.[i]?.machine;
+                    const machineCount = selectedTep?.machineCounts?.[i] || 1;
+                    const workersPerShift = isNormative
+                        ? Math.max(machineCount * (machine?.workers || 1), Math.ceil((proc.laborDays || 0) / Math.max(durationDays * numShifts, 0.1)))
+                        : Math.max(1, machineCount * (machine?.workers || 1));
+                    const daysSpan = Math.max(1, Math.ceil(durationDays));
+                    const startDay = scheduleStartDay;
+                    const endDay = startDay + daysSpan - 1;
+                    const volumeLabel = isNormative ? `${fmt(proc.normUnits, 2)} норм.` : (proc.calcLabel || '—');
+                    scheduleRows.push({
+                        index: i + 1,
+                        name: processes[i].name
+                            .replace('Зрізання рослинного шару ґрунту', 'Зрізання рослинного шару')
+                            .replace('Розроблення та переміщення ґрунту', 'Розроблення та переміщення')
+                            .replace('Остаточне планування майданчика', 'Остаточне планування майданчика'),
+                        volumeLabel,
+                        machine: machineCell(machine, machineCount),
+                        crew: `${workersPerShift}×${numShifts}`,
+                        startDay,
+                        endDay,
+                        durationLabel: `${fmt(durationDays, 2)} дн.`,
+                        workersPerShift
+                    });
+                    scheduleStartDay = endDay + 1;
+                }
+                const totalScheduleDays = Math.max(1, scheduleRows.reduce((max, row) => Math.max(max, row.endDay), 0));
+                const workersByDay = Array.from({ length: totalScheduleDays }, (_, idx) =>
+                    scheduleRows.reduce((sum, row) => sum + ((idx + 1) >= row.startDay && (idx + 1) <= row.endDay ? row.workersPerShift : 0), 0)
+                );
+                const scheduleTableHtml = `
+                    <table class="step13-schedule-table">
+                        <thead>
+                            <tr>
+                                <th class="num-col">№</th>
+                                <th class="process-col">Назва процесу</th>
+                                <th class="volume-col">Об'єм</th>
+                                <th class="machine-col">Машина</th>
+                                <th class="crew-col">Роб./зм.</th>
+                                ${Array.from({ length: totalScheduleDays }, (_, idx) => `<th class="day-cell">${idx + 1}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${scheduleRows.map((row) => `
+                                <tr>
+                                    <td class="num-col">${row.index}</td>
+                                    <td class="process-col">${row.name}</td>
+                                    <td class="volume-col">${row.volumeLabel}</td>
+                                    <td class="machine-col">${row.machine}</td>
+                                    <td class="crew-col">${row.crew}</td>
+                                    ${Array.from({ length: totalScheduleDays }, (_, idx) => {
+                                        const day = idx + 1;
+                                        const active = day >= row.startDay && day <= row.endDay;
+                                        const showLabel = active && day === Math.floor((row.startDay + row.endDay) / 2);
+                                        return `<td class="day-cell ${active ? 'active' : 'empty'}">${showLabel ? row.durationLabel : '&nbsp;'}</td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <td colspan="5" style="text-align:right;"><strong>Робітники</strong></td>
+                                ${workersByDay.map((value) => `<td class="day-cell ${value > 0 ? 'active' : 'empty'}">${value > 0 ? value : '&nbsp;'}</td>`).join('')}
+                            </tr>
+                        </tbody>
+                    </table>`;
+                const escapeSvg = (value) => String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+                const wrapSvgText = (value, maxChars, maxLines = 3) => {
+                    const words = String(value ?? '').split(/\s+/).filter(Boolean);
+                    if (!words.length) return [''];
+                    const lines = [];
+                    let current = '';
+                    for (const word of words) {
+                        const next = current ? `${current} ${word}` : word;
+                        if (next.length <= maxChars || !current) current = next;
+                        else {
+                            lines.push(current);
+                            current = word;
+                        }
+                    }
+                    if (current) lines.push(current);
+                    const clipped = lines.slice(0, maxLines);
+                    if (lines.length > maxLines) {
+                        const last = clipped[maxLines - 1] || '';
+                        clipped[maxLines - 1] = `${last.slice(0, Math.max(1, maxChars - 1))}…`;
+                    }
+                    return clipped;
+                };
+                const svgColumns = [
+                    { key: 'num', label: '№', width: 20, chars: 2, align: 'middle' },
+                    { key: 'name', label: "Назва процесу", width: 58, chars: 7, align: 'start' },
+                    { key: 'volume', label: "Об'єм", width: 54, chars: 9, align: 'middle' },
+                    { key: 'machine', label: 'Машина', width: 48, chars: 7, align: 'start' },
+                    { key: 'crew', label: 'Роб./зм.', width: 44, chars: 6, align: 'middle' }
+                ];
+                const dayColWidth = totalScheduleDays > 30 ? 13 : 15;
+                const headerHeight = 28;
+                const rowHeight = 36;
+                const workersHeight = 56;
+                const leftBlockWidth = svgColumns.reduce((sum, col) => sum + col.width, 0);
+                const scheduleSvgWidth = leftBlockWidth + totalScheduleDays * dayColWidth;
+                const scheduleSvgHeight = headerHeight + scheduleRows.length * rowHeight + workersHeight;
+                let runningX = 0;
+                const svgColumnPositions = svgColumns.map((col) => {
+                    const start = runningX;
+                    runningX += col.width;
+                    return { ...col, x: start, cx: start + col.width / 2 };
+                });
+                const svgDaysStartX = leftBlockWidth;
+                const svgParts = [];
+                const scheduleHorizontalLine = '#a8a8a8';
+                const scheduleVerticalLine = '#dddddd';
+
+                svgParts.push(`<defs>
+                    <pattern id="workersStepHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <line x1="0" y1="0" x2="0" y2="6" stroke="#9a9a9a" stroke-width="1"/>
+                    </pattern>
+                </defs>`);
+                svgParts.push(`<rect x="0.5" y="0.5" width="${scheduleSvgWidth - 1}" height="${scheduleSvgHeight - 1}" fill="#fff" stroke="#000" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`);
+
+                scheduleRows.forEach((row, rowIndex) => {
+                    const y = headerHeight + rowIndex * rowHeight;
+                    const xStart = svgDaysStartX + (row.startDay - 1) * dayColWidth;
+                    const xEnd = svgDaysStartX + row.endDay * dayColWidth;
+                    const yMid = y + rowHeight / 2;
+                    svgParts.push(`<line x1="${xStart + 2}" y1="${yMid}" x2="${xEnd - 2}" y2="${yMid}" stroke="#000" stroke-width="4.2" stroke-linecap="square" vector-effect="non-scaling-stroke"/>`);
+                });
+                const workersGraphTop = headerHeight + scheduleRows.length * rowHeight + 2;
+                const workersGraphBottom = headerHeight + scheduleRows.length * rowHeight + workersHeight - 2;
+                const maxWorkers = Math.max(...workersByDay, 1);
+                const workersScale = (workersGraphBottom - workersGraphTop - 4) / maxWorkers;
+                let workersPath = `M ${svgDaysStartX} ${workersGraphBottom}`;
+                for (let idx = 0; idx < workersByDay.length; idx++) {
+                    const dayValue = workersByDay[idx];
+                    const yLevel = workersGraphBottom - dayValue * workersScale;
+                    workersPath += ` L ${svgDaysStartX + idx * dayColWidth} ${yLevel} L ${svgDaysStartX + (idx + 1) * dayColWidth} ${yLevel}`;
+                }
+                workersPath += ` L ${svgDaysStartX + workersByDay.length * dayColWidth} ${workersGraphBottom} Z`;
+                svgParts.push(`<path d="${workersPath}" fill="url(#workersStepHatch)" stroke="none" vector-effect="non-scaling-stroke"/>`);
+                svgParts.push(`<path d="${workersPath}" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="miter" stroke-linecap="square" vector-effect="non-scaling-stroke"/>`);
+
+                svgParts.push(`<line x1="0" y1="0" x2="${scheduleSvgWidth}" y2="0" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                for (let i = 0; i <= scheduleRows.length; i++) {
+                    const y = headerHeight + i * rowHeight;
+                    svgParts.push(`<line x1="0" y1="${y}" x2="${leftBlockWidth}" y2="${y}" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                    svgParts.push(`<line x1="${svgDaysStartX}" y1="${y}" x2="${scheduleSvgWidth}" y2="${y}" stroke="${scheduleHorizontalLine}" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                }
+                svgParts.push(`<line x1="0" y1="${headerHeight + scheduleRows.length * rowHeight + workersHeight}" x2="${leftBlockWidth}" y2="${headerHeight + scheduleRows.length * rowHeight + workersHeight}" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                svgParts.push(`<line x1="${svgDaysStartX}" y1="${headerHeight + scheduleRows.length * rowHeight + workersHeight}" x2="${scheduleSvgWidth}" y2="${headerHeight + scheduleRows.length * rowHeight + workersHeight}" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+
+                svgColumnPositions.forEach((col) => {
+                    svgParts.push(`<line x1="${col.x}" y1="0" x2="${col.x}" y2="${scheduleSvgHeight}" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                });
+                svgParts.push(`<line x1="${leftBlockWidth}" y1="0" x2="${leftBlockWidth}" y2="${scheduleSvgHeight}" stroke="#000" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                for (let day = 1; day < totalScheduleDays; day++) {
+                    const x = svgDaysStartX + day * dayColWidth;
+                    svgParts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${scheduleSvgHeight}" stroke="${scheduleVerticalLine}" stroke-width="1.1" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                }
+
+                scheduleRows.forEach((row, rowIndex) => {
+                    const y = headerHeight + rowIndex * rowHeight;
+                    const xStart = svgDaysStartX + (row.startDay - 1) * dayColWidth;
+                    const xEnd = svgDaysStartX + row.endDay * dayColWidth;
+                    const yMid = y + rowHeight / 2;
+                    svgParts.push(`<line x1="${xStart + 2}" y1="${yMid}" x2="${xEnd - 2}" y2="${yMid}" stroke="#000" stroke-width="4.2" stroke-linecap="square" vector-effect="non-scaling-stroke"/>`);
+                });
+                svgParts.push(`<path d="${workersPath}" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="miter" stroke-linecap="square" vector-effect="non-scaling-stroke"/>`);
+
+                svgColumnPositions.forEach((col) => {
+                    const anchor = col.align === 'start' ? 'start' : 'middle';
+                    const textX = col.align === 'start' ? col.x + 4 : col.cx;
+                    const headerLines = col.key === 'name' || col.key === 'machine'
+                        ? [col.label]
+                        : wrapSvgText(col.label, Math.max(6, col.chars), 2);
+                    headerLines.forEach((line, idx) => {
+                        svgParts.push(`<text x="${textX}" y="${12 + idx * 10}" font-size="${col.key === 'name' ? '8' : '9'}" font-weight="700" text-anchor="${anchor}" dominant-baseline="hanging">${escapeSvg(line)}</text>`);
+                    });
+                });
+
+                for (let day = 1; day <= totalScheduleDays; day++) {
+                    const x = svgDaysStartX + (day - 1) * dayColWidth + dayColWidth / 2;
+                    svgParts.push(`<text x="${x}" y="16" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="middle">${day}</text>`);
+                }
+
+                scheduleRows.forEach((row, rowIndex) => {
+                    const yTop = headerHeight + rowIndex * rowHeight;
+                    const yMid = yTop + rowHeight / 2;
+                    const rowValues = {
+                        num: String(row.index),
+                        name: row.name,
+                        volume: row.volumeLabel,
+                        machine: row.machine,
+                        crew: row.crew
+                    };
+                    svgColumnPositions.forEach((col) => {
+                        const anchor = col.align === 'start' ? 'start' : 'middle';
+                        const textX = col.align === 'start' ? col.x + 4 : col.cx;
+                        const lines = wrapSvgText(rowValues[col.key], Math.max(5, col.chars), col.key === 'name' ? 3 : 2);
+                        const firstY = yMid - ((lines.length - 1) * 8) / 2;
+                        lines.forEach((line, idx) => {
+                            svgParts.push(`<text x="${textX}" y="${firstY + idx * 8}" font-size="7.5" text-anchor="${anchor}" dominant-baseline="middle">${escapeSvg(line)}</text>`);
+                        });
+                    });
+                    const durationX = svgDaysStartX + ((row.startDay + row.endDay - 2) * dayColWidth) / 2 + dayColWidth / 2;
+                    const durationY = yMid - 7;
+                    svgParts.push(`<text x="${durationX}" y="${durationY}" font-size="7.5" font-weight="700" text-anchor="middle" dominant-baseline="middle">${escapeSvg(row.durationLabel)}</text>`);
+                });
+
+                const workersY = headerHeight + scheduleRows.length * rowHeight + workersHeight / 2;
+                svgParts.push(`<text x="${leftBlockWidth - 6}" y="${workersY}" font-size="9" font-weight="700" text-anchor="end" dominant-baseline="middle">Робітники</text>`);
+                workersByDay.forEach((value, idx) => {
+                    if (!value) return;
+                    const x = svgDaysStartX + idx * dayColWidth + dayColWidth / 2;
+                    const yLevel = workersGraphBottom - value * workersScale;
+                    svgParts.push(`<text x="${x}" y="${yLevel - 4}" font-size="7.5" text-anchor="middle" dominant-baseline="auto">${value}</text>`);
+                });
+
+                svgParts.push(`<line x1="${leftBlockWidth}" y1="0" x2="${leftBlockWidth}" y2="${scheduleSvgHeight}" stroke="#000" stroke-width="1.4" shape-rendering="crispEdges" vector-effect="non-scaling-stroke"/>`);
+                svgParts.push(`<rect x="0.5" y="0.5" width="${scheduleSvgWidth - 1}" height="${scheduleSvgHeight - 1}" fill="none" stroke="#000" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`);
+
+                const scheduleSvgHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="step13-schedule-svg" viewBox="0 0 ${scheduleSvgWidth} ${scheduleSvgHeight}" style="display:block; width:24.1cm; height:auto; background:#fff;">${svgParts.join('')}</svg>`;
+                const cartogramAxisTable = (axisLabel, valuesFill, valuesCut, cumFill, cumCut) => `
+                    <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">${axisLabel}</th>
+                            <th style="border:1px solid #000; padding:4px;">V<sub>н</sub>, м³</th>
+                            <th style="border:1px solid #000; padding:4px;">ΣV<sub>н</sub>, м³</th>
+                            <th style="border:1px solid #000; padding:4px;">V<sub>в</sub>, м³</th>
+                            <th style="border:1px solid #000; padding:4px;">ΣV<sub>в</sub>, м³</th>
+                        </tr></thead>
+                        <tbody>
+                            ${valuesFill.map((_, i) => `<tr>
+                                <td style="border:1px solid #000; padding:4px;">${i + 1}</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(valuesFill[i], 2)}</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(cumFill[i + 1], 2)}</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(valuesCut[i], 2)}</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(cumCut[i + 1], 2)}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>`;
+                const variantMachineSetRows = processes.map((process, i) => `<tr>
+                        <td style="border:1px solid #000; padding:4px; width:10%;">${i + 1}</td>
+                        <td style="border:1px solid #000; padding:4px; width:40%; text-align:left;">${process.name}</td>
+                        <td style="border:1px solid #000; padding:4px; width:${top2Available ? '25%' : '50%'};">${machineCell(top1?.set?.[i]?.machine, top1?.tep?.machineCounts?.[i] || 0)}</td>
+                        ${top2Available ? `<td style="border:1px solid #000; padding:4px; width:25%;">${machineCell(top2?.set?.[i]?.machine, top2?.tep?.machineCounts?.[i] || 0)}</td>` : ''}
+                    </tr>`).join('');
+                const buildTepTableHtml = (variant, title) => {
+                    if (!variant?.tep) return '';
+                    const variantTep = variant.tep;
+                    const variantSet = variant.set || [];
+                    const variantExec = variantTep.executionData || [];
+                    const rowsHtml = processes.map((process, i) => {
+                        const procData = variantExec[i] || {};
+                        return `<tr>
+                            <td style="border:1px solid #000; padding:4px; text-align:left;">${process.name}</td>
+                            <td style="border:1px solid #000; padding:4px;">${machineCell(variantSet?.[i]?.machine, variantTep?.machineCounts?.[i] || 0)}</td>
+                            <td style="border:1px solid #000; padding:4px;">${isNormative ? procData.normUnitLabel || '—' : procData.calcLabel || '—'}</td>
+                            <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(procData.normUnits, 3) : fmt(procData.calcVolume, 2)}</td>
+                            <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(procData.machineDays, 2) : '—'}</td>
+                            <td style="border:1px solid #000; padding:4px;">${isNormative ? fmt(procData.laborDays, 2) : '—'}</td>
+                            <td style="border:1px solid #000; padding:4px;">${variantTep?.machineCounts?.[i] || '—'}</td>
+                            <td style="border:1px solid #000; padding:4px;">${fmt(variantTep?.durations?.[i], 2)}</td>
+                        </tr>`;
+                    }).join('');
+                    return `
+                        <p style="text-align:center; font-weight:bold; margin-top:20px;">${title}</p>
+                        <table class="ultra-compact-table step11-table" style="width:100%; border-collapse: collapse; text-align:center;">
+                            <thead><tr>
+                                <th style="border:1px solid #000; padding:4px;">Процес</th>
+                                <th style="border:1px solid #000; padding:4px;">Машина</th>
+                                <th style="border:1px solid #000; padding:4px;">Норм. од.</th>
+                                <th style="border:1px solid #000; padding:4px;">Нормо-од.</th>
+                                <th style="border:1px solid #000; padding:4px;">днм</th>
+                                <th style="border:1px solid #000; padding:4px;">днл</th>
+                                <th style="border:1px solid #000; padding:4px;">Маш.</th>
+                                <th style="border:1px solid #000; padding:4px;">Дні</th>
+                            </tr></thead>
+                            <tbody>${rowsHtml}
+                                <tr>
+                                    <td colspan="7" style="text-align:right; border:1px solid #000; padding:4px;"><strong>Разом:</strong></td>
+                                    <td style="border:1px solid #000; padding:4px;"><strong>${fmt(variantTep.totalDuration, 2)}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>`;
+                };
+
+                step4Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">4. Визначення середньої планувальної відмітки</h2>
+                    ${paragraph(`Середню планувальну відмітку визначаємо за методикою для майданчика, розбитого на квадрати. При цьому чорні відмітки вершин враховуються з ваговими коефіцієнтами залежно від кількості суміжних квадратів.`)}
+                    ${mathLine(row(sub(mi('H'), mt('сер')), mo('='), frac(row(mn('4'), mo('·'), mo('∑'), sub(mi('H'), mn('4')), mo('+'), mn('2'), mo('·'), mo('∑'), sub(mi('H'), mn('2')), mo('+'), mo('∑'), sub(mi('H'), mn('1'))), row(mn('4'), mi('n')))))}
+                    ${paragraph(`де \\sum H<sub>4</sub> = ${f3(sumH4)} м, \\sum H<sub>2</sub> = ${f3(sumH2)} м, \\sum H<sub>1</sub> = ${f3(sumH1)} м, n = ${numSquares}.`)}
+                    ${mathLine(row(sub(mi('H'), mt('сер')), mo('='), frac(row(mn('4'), mo('·'), mn(f3(sumH4)), mo('+'), mn('2'), mo('·'), mn(f3(sumH2)), mo('+'), mn(f3(sumH1))), row(mn('4'), mo('·'), mn(numSquares))), mo('='), mn(f3(Hser)), mt(' м')))}
+                    ${resultLine(`Отже, середня планувальна відмітка майданчика становить H<sub>сер</sub> = ${f3(Hser)} м.`)}`;
+
+                step5Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">5. Обчислення червоних проектних та робочих відміток</h2>
+                    ${paragraph(`Червоні проектні відмітки визначаємо від середньої планувальної відмітки за формулою (4) методичних вказівок. Для кутів майданчика від H<sub>сер</sub> послідовно додаємо або віднімаємо половини перепадів за двома заданими ухилами.`)}
+                    ${mathLine(row(sub(mi('H'), mt('A-D')), mo('='), sub(mi('H'), mt('сер')), mo('±'), frac(row(sub(mi('L'), mn('1')), mo('·'), sub(mi('i'), mn('1'))), mn('2')), mo('±'), frac(row(sub(mi('L'), mn('2')), mo('·'), sub(mi('i'), mn('2'))), mn('2'))))}
+                    ${paragraph(`Для будь-якої проміжної вершини зручніше користуватися еквівалентним записом через відстані від центра майданчика: Δx та Δy.`)}
+                    ${mathLine(row(sub(mi('H'), mt('черв')), mo('='), sub(mi('H'), mt('сер')), mo('+'), row(mi('Δy'), mo('·'), sub(mi('i'), mn('1'))), mo('+'), row(mi('Δx'), mo('·'), sub(mi('i'), mn('2')))))}
+                    ${paragraph(`Для даного варіанта прийнято: H<sub>сер</sub> = ${f3(Hser)} м, A = ${f2(inp.A)} м, B = ${f2(inp.B)} м, i<sub>1</sub> = ${fmt(inp.i1, 4)}, i<sub>2</sub> = ${fmt(inp.i2, 4)}. Половини розмірів майданчика становлять A/2 = ${f2(inp.A / 2)} м та B/2 = ${f2(inp.B / 2)} м.`)}
+                    ${paragraph(`Знак перед кожним доданком залежить від положення вершини відносно центра майданчика. Для контролю наводимо розрахунок кутових червоних відміток.`)}
+                    ${cornerExamplesHtml}
+                    ${paragraph(`Після визначення червоних відміток для кожної вершини обчислюємо робочу відмітку як різницю між червоною і чорною відмітками.`)}
+                    ${mathLine(row(mi('h'), mo('='), sub(mi('H'), mt('черв')), mo('−'), sub(mi('H'), mt('ч'))))}
+                    ${sampleVerticesHtml}
+                    ${resultLine(`Знак робочої відмітки визначає характер робіт: при h > 0 маємо насип, при h < 0 маємо виїмку.`)}
+                    <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних, червоних та робочих відміток<br>Таблиця 2</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">Вершина квадрата</th>
+                            <th style="border:1px solid #000; padding:4px;">Значення чорної відмітки</th>
+                            <th style="border:1px solid #000; padding:4px;">Значення червоної відмітки</th>
+                            <th style="border:1px solid #000; padding:4px;">Робочі відмітки</th>
+                        </tr></thead>
+                        <tbody>${tbl2Rows.join('')}</tbody>
+                    </table>`;
+
+                step7Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">7. Обчислення об’ємів робіт (насип та виїмка)</h2>
+                    ${paragraph(`Об'єми земляних робіт визначаємо методом квадратних призм. Для повного квадрата використовується середня робоча відмітка чотирьох вершин, а для перехідного квадрата об'єм насипу та виїмки обчислюємо окремо.`)}
+                    ${mathLine(row(mi('V'), mo('='), frac(sup(mi('a'), mn('2')), mn('4')), row(mo('('), sub(mi('h'), mn('1')), mo('+'), sub(mi('h'), mn('2')), mo('+'), sub(mi('h'), mn('3')), mo('+'), sub(mi('h'), mn('4')), mo(')'))))}
+                    ${mathLine(row(sub(mi('V'), mt('в/н')), mo('='), frac(row(sup(mi('a'), mn('2')), sup(row(mo('('), mo('∑'), sub(mi('h'), mt('в/н')), mo(')')), mn('2'))), row(mn('4'), mo('∑'), mo('|'), mi('h'), mo('|')))))}
+                    ${sampleSquare ? paragraph(`Для квадрата №${sampleSquare.num} маємо: h<sub>1</sub> = ${f3(sampleSquare.h1)} м, h<sub>2</sub> = ${f3(sampleSquare.h2)} м, h<sub>3</sub> = ${f3(sampleSquare.h3)} м, h<sub>4</sub> = ${f3(sampleSquare.h4)} м.`) : ''}
+                    ${sampleSquare ? mathLine(row(sub(mi('V'), mn(sampleSquare.num)), mo('='), frac(sup(mn(squareA), mn('2')), mn('4')), row(mo('('), mn(f3(sampleSquare.h1)), mo('+'), mn(f3(sampleSquare.h2)), mo('+'), mn(f3(sampleSquare.h3)), mo('+'), mn(f3(sampleSquare.h4)), mo(')')))) : ''}
+                    <p style="text-align: center; font-weight: bold; margin-top: 30px;">Таблиця 3. Відомість обчислення об'ємів земляних робіт</p>
+                    <table style="width:100%; border-collapse: collapse; text-align:center; font-size:11pt;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">№ кв.</th>
+                                <th colspan="4" style="border:1px solid #000; padding:3px;">Робоча відмітка, м</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">a²/4</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>н</sub>)² / Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>в</sub>)² / Σ|h|</th>
+                                <th colspan="2" style="border:1px solid #000; padding:3px;">Об'єм робіт, м³</th>
+                            </tr>
+                            <tr>
+                                <th style="border:1px solid #000; padding:3px;">h1</th>
+                                <th style="border:1px solid #000; padding:3px;">h2</th>
+                                <th style="border:1px solid #000; padding:3px;">h3</th>
+                                <th style="border:1px solid #000; padding:3px;">h4</th>
+                                <th style="border:1px solid #000; padding:3px;">Насип</th>
+                                <th style="border:1px solid #000; padding:3px;">Виїмка</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${volData.squares.map(sq => {
+                    const marks = [sq.h1, sq.h2, sq.h3, sq.h4];
+                    const sumAbs = sq.sumAbsH;
+                    const a2d4 = (squareA * squareA / 4).toFixed(2);
+                    const posSum = marks.filter(h => h >= 0).reduce((s, h) => s + h, 0);
+                    const negSum = marks.filter(h => h < 0).reduce((s, h) => s + Math.abs(h), 0);
+                    const shN = sumAbs > 0 ? (posSum * posSum / sumAbs).toFixed(3) : '0.000';
+                    const shV = sumAbs > 0 ? (negSum * negSum / sumAbs).toFixed(3) : '0.000';
+                    return `<tr>
+                                    <td style="border:1px solid #000; padding:3px;">${sq.num}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${f3(sq.h1)}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${f3(sq.h2)}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${f3(sq.h3)}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${f3(sq.h4)}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${f3(sumAbs)}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${a2d4}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${shN}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${shV}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${sq.fill > 0.01 ? f2(sq.fill) : '0.00'}</td>
+                                    <td style="border:1px solid #000; padding:3px;">${sq.cut > 0.01 ? f2(sq.cut) : '0.00'}</td>
+                                </tr>`;
+                }).join('')}
+                            <tr><td colspan="9" style="text-align:right; border:1px solid #000; padding:3px;"><strong>Об'єм робіт</strong></td><td style="border:1px solid #000; padding:3px;"><strong>${f2(volData.totalFill)}</strong></td><td style="border:1px solid #000; padding:3px;"><strong>${f2(volData.totalCut)}</strong></td></tr>
+                        </tbody>
+                    </table>
+                    ${mathLine(row(mi('Δ'), mo('='), frac(row(mo('|'), mn(f2(volData.totalFill)), mo('−'), mn(f2(balance.loosened)), mo('|')), mn(f2(balance.maxVol))), mo('·'), mn('100'), mo('%'), mo('='), mn(fmt(balance.error, 2)), mo('%')))}
+                    ${resultLine(`Оскільки похибка балансу становить ${fmt(balance.error, 2)} %, що не перевищує 5 %, коригування об'ємів не потрібне.`)}`;
+
+                step8Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">8. Визначення середньої довжини транспортування графічним методом</h2>
+                    ${paragraph(`Середню відстань переміщення ґрунту визначаємо графічним методом відповідно до методичних вказівок. Для цього по вертикальних колонках і горизонтальних рядах квадратів будуємо криві наростаючих об’ємів насипу та виїмки.`)}
+                    ${paragraph(`Далі на кожній парі кривих знаходимо положення половинних об’ємів 0,5V<sub>н</sub> і 0,5V<sub>в</sub>. Саме ці точки задають проекції центрів ваги зон насипу та виїмки на координатні осі майданчика.`)}
+                    <p style="text-align:center; font-weight:bold; margin-top:20px;">Наростаючі об’єми по колонках</p>
+                    ${cartogramAxisTable('Колонка', carto?.colFill || [], carto?.colCut || [], carto?.cumColFill || [0], carto?.cumColCut || [0])}
+                    <p style="text-align:center; font-weight:bold; margin-top:20px;">Наростаючі об’єми по рядах</p>
+                    ${cartogramAxisTable('Ряд', carto?.rowFill || [], carto?.rowCut || [], carto?.cumRowFill || [0], carto?.cumRowCut || [0])}
+                    ${paragraph(`Половинні об’єми визначають координати центрів ваги: x<sub>M</sub> = ${fmt(carto?.cxCut, 1)} м, y<sub>M</sub> = ${fmt(carto?.cyCut, 1)} м для виїмки та x<sub>N</sub> = ${fmt(carto?.cxFill, 1)} м, y<sub>N</sub> = ${fmt(carto?.cyFill, 1)} м для насипу.`)}
+                    ${mathLine(row(sub(mi('L'), mt('ср')), mo('='), sqrt(row(sup(row(mo('('), sub(mi('x'), mi('M')), mo('−'), sub(mi('x'), mi('N')), mo(')')), mn('2')), mo('+'), sup(row(mo('('), sub(mi('y'), mi('M')), mo('−'), sub(mi('y'), mi('N')), mo(')')), mn('2'))))))}
+                    ${paragraph(`Координати центрів ваги: M(${fmt(carto?.cxCut, 1)}; ${fmt(carto?.cyCut, 1)}), N(${fmt(carto?.cxFill, 1)}; ${fmt(carto?.cyFill, 1)}).`)}
+                    ${mathLine(row(sub(mi('L'), mt('ср')), mo('='), sqrt(row(sup(row(mo('('), mn(fmt(carto?.cxCut, 1)), mo('−'), mn(fmt(carto?.cxFill, 1)), mo(')')), mn('2')), mo('+'), sup(row(mo('('), mn(fmt(carto?.cyCut, 1)), mo('−'), mn(fmt(carto?.cyFill, 1)), mo(')')), mn('2')))), mo('='), mn(fmt(carto?.Lsr, 1)), mt(' м')))}
+                    ${resultLine(`Середня дальність транспортування ґрунту становить ${fmt(carto?.Lsr, 1)} м.`)}
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div style="width:100%;">${svgs?.carto || ''}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 5 Картограма земляних мас та визначення середньої відстані переміщення ґрунту</p>`;
+
+                step9Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">9. Попередній вибір ведучих машин</h2>
+                    ${paragraph(`Попередній вибір ведучої машини виконуємо за загальним об'ємом земляних робіт та середньою дальністю переміщення ґрунту. Для даного варіанта приймаємо до розгляду два конкурентні варіанти техніки, після чого обираємо раціональніший комплект.`)}
+                    ${mathLine(row(mi('V'), mo('='), mn(fmt(maxVol / 1000, 2)), mt(' тис. м³'), mo(','), sub(mi('L'), mt('ср')), mo('='), mn(fmt(carto?.Lsr, 1)), mt(' м')))}
+                    ${paragraph(`<strong>Варіант 1:</strong> ${leadTypeLabel(rankedLead1)} ${rankedLead1.name || '—'}, потужність ${rankedLead1.power || '—'} кВт, орієнтовна вартість ${rankedLead1.price || '—'} тис. грн.`)}
+                    ${top2Available ? paragraph(`<strong>Варіант 2:</strong> ${leadTypeLabel(rankedLead2)} ${rankedLead2.name || '—'}, потужність ${rankedLead2.power || '—'} кВт, орієнтовна вартість ${rankedLead2.price || '—'} тис. грн.`) : ''}
+                    ${paragraph(`Варіанти ранжовано з урахуванням методичної області застосування машин, середньої дальності транспортування та подальших техніко-економічних показників.`)}
+                    ${resultLine(`Для подальшого розрахунку приймаємо комплект на чолі з машиною ${selectedLeadMachine?.name || '—'}.`)}`;
+
+                step10Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">10. Комплекти машин</h2>
+                    ${paragraph(`Комплектування машин виконуємо для двох конкурентних варіантів ведучої техніки. Для кожного процесу добираємо сумісні допоміжні машини, після чого порівнюємо комплекти за техніко-економічними показниками.`)}
+                    <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
+                            <th style="border:1px solid #000; padding:4px; width:40%;">Назва процесу</th>
+                            <th style="border:1px solid #000; padding:4px; width:${top2Available ? '25%' : '50%'};">Комплект 1</th>
+                            ${top2Available ? '<th style="border:1px solid #000; padding:4px; width:25%;">Комплект 2</th>' : ''}
+                        </tr></thead>
+                        <tbody>${variantMachineSetRows}</tbody>
+                    </table>`;
+
+                step11Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">11. Техніко-економічні показники (ТЕП)</h2>
+                    ${paragraph(`Техніко-економічні показники визначаємо для кожного процесу окремо, а потім порівнюємо два комплекти машин за сумарною тривалістю, трудомісткістю, собівартістю та приведеними витратами. Остаточне рішення приймаємо за результатами цього порівняння.`)}
+                    ${mathLine(row(mi('N'), mo('='), frac(mi('V'), sub(mi('q'), mt('н'))), mo(','), sub(mi('T'), mt('маш')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('маш')), mo(','), sub(mi('T'), mt('люд')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('люд')), mo(','), mi('t'), mo('='), frac(sub(mi('T'), mt('маш')), row(mi('n'), mo('·'), mi('z')))))}
+                    ${tepFormulaDetails}
+                    ${buildTepTableHtml(top1, 'Комплект 1')}
+                    ${top2Available ? buildTepTableHtml(top2, 'Комплект 2') : ''}
+                    <p style="text-align:center; font-weight:bold; margin-top:20px;">Порівняльна таблиця варіантів</p>
+                    <table class="compact-table step11-summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:4px;">Показник</th>
+                            <th style="border:1px solid #000; padding:4px;">Комплект 1</th>
+                            ${top2Available ? '<th style="border:1px solid #000; padding:4px;">Комплект 2</th>' : ''}
+                        </tr></thead>
+                        <tbody>
+                            <tr>
+                                <td style="border:1px solid #000; padding:4px;">Тривалість, днів</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top1?.tep?.totalDuration, 2)}</td>
+                                ${top2Available ? `<td style="border:1px solid #000; padding:4px;">${fmt(top2?.tep?.totalDuration, 2)}</td>` : ''}
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid #000; padding:4px;">Трудомісткість, люд-год/м³</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top1?.tep?.labourIntensity, 4)}</td>
+                                ${top2Available ? `<td style="border:1px solid #000; padding:4px;">${fmt(top2?.tep?.labourIntensity, 4)}</td>` : ''}
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid #000; padding:4px;">Собівартість C<sub>0</sub>, грн</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top1?.tep?.totalCost, 2)}</td>
+                                ${top2Available ? `<td style="border:1px solid #000; padding:4px;">${fmt(top2?.tep?.totalCost, 2)}</td>` : ''}
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid #000; padding:4px;">Приведені витрати, грн/м³</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top1?.tep?.reducedCosts, 4)}</td>
+                                ${top2Available ? `<td style="border:1px solid #000; padding:4px;">${fmt(top2?.tep?.reducedCosts, 4)}</td>` : ''}
+                            </tr>
+                            ${top2Available ? `<tr>
+                                <td style="border:1px solid #000; padding:4px;">Логічний штраф методичної відповідності</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top1?.logicPenalty, 2)}</td>
+                                <td style="border:1px solid #000; padding:4px;">${fmt(top2?.logicPenalty, 2)}</td>
+                            </tr>` : ''}
+                        </tbody>
+                    </table>
+                    ${resultLine(`Обрано комплект 1 на чолі з машиною ${selectedLeadMachine?.name || '—'}: він має кращу підсумкову оцінку та приймається для подальших розрахунків.`)}`;
+
+                step12Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">12. Калькуляція трудових витрат</h2>
+                    ${paragraph(`Калькуляція трудових витрат складається для визначення сумарної трудомісткості та загальної заробітної плати за весь комплекс робіт. Для кожного процесу використовуємо прийняту норму ЕН, нормативну одиницю, норму часу та склад ланки.`)}
+                    ${mathLine(row(sub(mi('T'), mt('маш')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('маш')), mo(','), sub(mi('T'), mt('люд')), mo('='), mi('N'), mo('·'), sub(mi('H'), mt('люд'))))}
+                    ${labourFormulaDetails}
+                    <div class="step12-table-wrap">
+                    <table class="ultra-compact-table step12-table" style="width:100%; border-collapse: collapse; text-align:center; table-layout:fixed; font-size:8.9pt; line-height:1; margin:0;">
+                        <thead><tr>
+                            <th style="border:1px solid #000; padding:3px;">№</th>
+                            <th style="border:1px solid #000; padding:3px;">Пункт</th>
+                            <th style="border:1px solid #000; padding:3px;">Назва</th>
+                            <th style="border:1px solid #000; padding:3px;">Об'єм</th>
+                            <th style="border:1px solid #000; padding:3px;">Норм.<br>од.</th>
+                            <th style="border:1px solid #000; padding:3px;">Норма<br>днм</th>
+                            <th style="border:1px solid #000; padding:3px;">Норма<br>днл</th>
+                            <th style="border:1px solid #000; padding:3px;">Труд.<br>днм</th>
+                            <th style="border:1px solid #000; padding:3px;">Труд.<br>днл</th>
+                            <th style="border:1px solid #000; padding:3px;">З/п</th>
+                            <th style="border:1px solid #000; padding:3px;">Ланка</th>
+                        </tr></thead>
+                        <tbody>${labRows}
+                            <tr>
+                                <td colspan="7" style="text-align:right; border:1px solid #000; padding:3px;"><strong>Разом:</strong></td>
+                                <td style="border:1px solid #000; padding:3px;"><strong>${fmt(totalMachineDays)}</strong></td>
+                                <td style="border:1px solid #000; padding:3px;"><strong>${fmt(totalLabourDays)}</strong></td>
+                                <td style="border:1px solid #000; padding:3px;"><strong>${totalWage.toFixed(2)}</strong></td>
+                                <td style="border:1px solid #000; padding:3px;">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <p style="text-align:center; text-indent:0; margin-top:8px; font-weight:bold; font-size:12pt;">Сумарна трудомісткість: ${fmt(totalLabourDays)} днлюд; загальна заробітна плата: ${fmt(totalWage)} грн.</p>`;
+
+                step13Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">13. Календарний графік виконання робіт</h2>
+                    ${paragraph(`Календарний графік будуємо на основі вже визначених витрат машинного часу, прийнятої кількості машин та змінності робіт. Для кожного процесу тривалість визначається окремо.`)}
+                    ${mathLine(row(mi('t'), mo('='), frac(sub(mi('T'), mt('маш')), row(mi('n'), mo('·'), mi('z')))))}
+                    ${scheduleFormulaDetails}
+                    ${paragraph(`Нижче календарний графік подано у вигляді чорно-білої табличної сітки. Зафарбовані клітинки показують інтервал виконання процесу по днях, а нижній рядок відображає потребу в робітниках за кожен день робіт.`)}
+                    <div class="step13-rotated-wrap" style="position:relative; width:100%; height:24.0cm; margin:2px 0 2px; overflow:hidden; page-break-inside:avoid; break-inside:avoid;"><div class="step13-rotated-inner" style="position:absolute; top:22.5cm; left:2.2cm; width:24.1cm; transform-origin:top left; transform:rotate(-90deg) scale(0.91); display:block;">${scheduleSvgHtml}</div></div>
+                    <p style="text-align: center; font-style: italic; margin-top: 10px;">Таблиця 6. Календарний графік виконання робіт</p>`;
+
+                let step14SafetyHtml = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">14. Охорона праці на майданчику</h2>
+                    ${paragraph(`При виконанні земляних робіт на будівельному майданчику необхідно дотримуватися вимог нормативних документів з охорони праці та техніки безпеки. Основні вимоги безпеки включають:`)}
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• До початку робіт необхідно визначити розташування підземних комунікацій та позначити їх на місцевості.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• Робота машин поблизу ліній електропередач дозволяється лише за наявності наряду-допуску.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• Зони виконання робіт повинні бути огороджені та забезпечені знаками безпеки.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• При розробці виїмок необхідно стежити за стійкістю укосів та вживати заходів проти їх обвалення.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• Рух транспортних засобів на майданчику має бути організований за встановленою схемою.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• Машиністи та робітники повинні бути забезпечені засобами індивідуального захисту: касками, спецодягом, сигнальними жилетами, захисним взуттям та іншими необхідними засобами.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• У нічний час майданчик та під’їзні шляхи повинні бути освітлені.</p>
+                    ${paragraph(`Склад та зміст проектних рішень з охорони праці у складі ПОБ і ПВР регламентується ДБН А.3.1-5-96 «Організація будівельного виробництва». При виконанні земляних робіт повинні бути передбачені наступні рішення:`)}
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• способи розроблення ґрунту у виїмках і способи планування будівельного майданчика з визначенням ведучих і допоміжних машин;</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">• способи технічної меліорації ґрунтів.</p>
+                    ${paragraph(`У будівництві ґрунт розробляють трьома основними способами:`)}
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">⎯ механічним – за допомогою екскаваторів, бульдозерів, скреперів;</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">⎯ гідромеханічним – за допомогою гідромоніторів і землевсмоктувальних снарядів;</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">⎯ вибуховим – за допомогою вибухових речовин.</p>
+                    ${paragraph(`Вибір способу розробки ґрунту і засобів механізації залежить від виду ґрунту, конструктивних особливостей споруди, обсягів і термінів виконання робіт, прийнятої технології, а також від гідрогеологічних та кліматичних умов будівництва.`)}
+                    ${paragraph(`<strong>Технологія виконання земляних робіт.</strong>`)}
+                    ${paragraph(`До початку основних будівельних робіт на будівельному майданчику необхідно виконати підготовчі роботи: встановлення і закріплення на місцевості контурів та розмірів майбутніх земляних споруд, звільнення будівельного майданчика від рослинності, влаштування поверхневого водовідведення і тимчасових доріг, обладнання побутових приміщень та тимчасових інженерних комунікацій.`)}
+                    ${paragraph(`Відповідно до природоохоронних вимог у межах контуру будівельного майданчика слід зрізати рослинний шар ґрунту товщиною 0,2 - 0,3 м і укласти його в тимчасові кавальєри за межами майданчика для подальшої рекультивації земель. Усі підготовчі роботи мають бути виконані відповідно до будівельного генерального плану на підготовчий період.`)}
+                    ${paragraph(`<strong>Виконання земляних робіт механічним способом.</strong>`)}
+                    ${paragraph(`Для виконання земляних робіт механічним способом застосовують землекопальні і землерийно-транспортні машини. Засіб механізації вибирають залежно від виду земляної споруди і ґрунтових умов. При вертикальному плануванні будівельних майданчиків і будівництві лінійних споруд, каналів великих розмірів доцільно застосовувати скрепери, навантажувачі і бульдозери.`)}
+                    ${paragraph(`Остаточний вибір способу розробки ґрунту і застосування того чи іншого засобу механізації визначається техніко-економічним обґрунтуванням. Таким чином, дотримання вимог охорони праці є обов'язковою умовою безпечного виконання вертикального планування будівельного майданчика та запобігання виробничому травматизму.`)}`;
+
+                step14Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">15. Висновок</h2>
+                    ${paragraph(`У роботі виконано повний розрахунок вертикального планування будівельного майданчика розміром ${f2(inp.A)} × ${f2(inp.B)} м із побудовою плану, визначенням чорних, червоних і робочих відміток, побудовою нульової лінії, розрахунком об'ємів земляних робіт, картограми земляних мас, підбором машин та складанням календарного графіка.`)}
+                    ${paragraph(`За результатами розрахунку середня планувальна відмітка становить <strong>${f3(Hser)} м</strong>, загальний об'єм насипу - <strong>${f2(volData.totalFill)} м³</strong>, загальний об'єм виїмки - <strong>${f2(volData.totalCut)} м³</strong>, а похибка балансу земляних мас - <strong>${fmt(balance.error, 2)} %</strong>.`)}
+                    ${paragraph(`Середня відстань переміщення ґрунту за картограмою земляних мас становить <strong>${fmt(carto?.Lsr, 1)} м</strong>. На основі порівняння техніко-економічних показників обрано раціональний комплект машин на чолі з <strong>${chosenMachine}</strong>.`)}
+                    ${paragraph(`Для прийнятого комплекту машин отримано такі підсумкові показники: загальна тривалість робіт - <strong>${totalDays} днів</strong>, загальна вартість - <strong>${totalCost} грн</strong>, приведені витрати - <strong>${fmt(selectedTep?.reducedCosts, 4)} грн/м³</strong>.`)}
+                    ${resultLine(`Отже, сформоване рішення є придатним для виконання робіт і відповідає прийнятим нормативним та технологічним вимогам.`)}`;
+
+                let step16LiteratureHtml = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">16. Використана література</h2>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">1. Черненко В.К. Проектування земляних робіт. Київ: Вища школа, 1989.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">2. ЕН. Економічні нормативи. 2005 р.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">3. Ярмоленко М.Г. Технологія будівельного виробництва. Київ: Вища школа, 2005.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">4. Територіальний каталог індустріальних конструкцій і виробів. 2005 р.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">5. Методичні поради до розробки курсового проекту. 2007 р.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">6. Васильчик Н.В. Основи охорони праці. 2007 р.</p>
+                    <p style="margin: 0 0 10px 1.25cm; text-indent:0;">7. Державні будівельні норми України. Управління, організація і технологія. Організація будівельного виробництва. ДБН А.3.1-5-96. Київ, 2003.</p>`;
 
                 // DOM Construction
                 const pages = [
-                    { content: tocHtml },
-                    { content: introHtml },
-                    { content: step2Html },
-                    { content: step3Html },
-                    { content: step4Html },
-                    { content: step5Html },
-                    { content: step6Html },
-                    { content: step7Html },
-                    { content: step8Html },
-                    { content: step9Html + step10Html },       // combined length
-                    { content: step11Html },
-                    { content: step12Html },
-                    { content: step13Html },
-                    { content: step14Html }
+                    { sectionId: 'toc', content: tocHtml },
+                    { sectionId: 'intro', content: introHtml },
+                    { sectionId: 'step2', content: step2Html },
+                    { sectionId: 'step3', content: step3Html },
+                    { sectionId: 'step4', content: step4Html },
+                    { sectionId: 'step5', content: step5Html },
+                    { sectionId: 'step6', content: step6Html },
+                    { sectionId: 'step7', content: step7Html },
+                    { sectionId: 'step8', content: step8Html },
+                    { sectionId: 'step9', content: step9Html },
+                    { sectionId: 'step10', content: step10Html },
+                    { sectionId: 'step11', content: step11Html },
+                    { sectionId: 'step12', content: step12Html },
+                    { sectionId: 'step13', content: step13Html },
+                    { sectionId: 'step14safety', content: step14SafetyHtml },
+                    { sectionId: 'step15', content: step14Html },
+                    { sectionId: 'step16', content: step16LiteratureHtml }
                 ];
 
                 const fragment = document.createDocumentFragment();
-                pages.forEach(p => {
-                    const newPage = document.createElement('div');
-                    newPage.className = 'page content-page';
-                    newPage.innerHTML = p.content;
-                    fragment.appendChild(newPage);
+                pages.forEach((p) => {
+                    paginateHtmlContent(p.content, p.sectionId).forEach((pageEl) => {
+                        fragment.appendChild(pageEl);
+                    });
                 });
 
                 // Clear the container and replace
                 const wrappersPage = document.querySelector('.page:not(.title-sheet)');
                 wrappersPage.parentNode.replaceChild(fragment, wrappersPage);
+                requestAnimationFrame(() => {
+                    fitScaledTables();
+                    requestAnimationFrame(() => {
+                        fitScaledTables();
+                        updateTocPageNumbers();
+                        requestAnimationFrame(updateTocPageNumbers);
+                    });
+                });
 
             } else {
                 document.getElementById('previewContent').innerHTML = '<p style="color:#d90429; text-align:center; padding: 40px;">Немає даних для відображення. Поверніться на головну сторінку і натисніть "Розрахувати все".</p>';
             }
+        });
+
+        window.addEventListener('resize', () => {
+            fitScaledTables();
+            updateTocPageNumbers();
+        });
+        window.addEventListener('beforeprint', () => {
+            fitScaledTables();
+            updateTocPageNumbers();
         });
     </script>
 </body>

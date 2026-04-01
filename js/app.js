@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const soil = Machines.soilTypes.find(s => s.id === soilId) || Machines.soilTypes[0];
     const tShift = parseFloat(document.getElementById('paramShiftHours').value) || 8;
     const numShifts = parseInt(document.getElementById('paramNumShifts').value) || 1;
+    const calcMode = document.getElementById('paramCalcMode')?.value || 'normative';
 
     const n = state.cols * state.rows;
     const blackMarks = [];
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    return { A, B, i1, i2, topsoil, soil, tShift, numShifts, blackMarks, blackMarksDetails };
+    return { A, B, i1, i2, topsoil, soil, tShift, numShifts, calcMode, blackMarks, blackMarksDetails };
   }
 
   // ===== Run all calculations =====
@@ -127,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const tepResults = renderSteps9to11(results, suggestions, processes, volData, carto, inp, maxVol);
 
     // Step 12: Labour cost calculation
-    renderStep12(results, tepResults);
+    renderStep12Logical(results, tepResults, inp);
 
     // Step 13: Calendar schedule
-    renderStep13(results, tepResults, inp);
+    renderStep13Logical(results, tepResults, inp);
 
     // Save to window for PDF export
     window.geoData = {
@@ -340,202 +341,616 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderSteps9to11(parent, suggestions, processes, volData, carto, inp, maxVol) {
-    // Step 9: Machine selection
+    const ranked = pickBestMachineVariants(suggestions, processes, carto, inp, maxVol);
+    const top1 = ranked.primary;
+    const top2 = ranked.alternative;
+    const modeLabel = inp.calcMode === 'normative' ? 'нормативним режимом ЕН' : 'експлуатаційним режимом';
+
     const c9 = makeStep(parent, 9, 'Попередній вибір ведучих машин');
-    let h9 = `<p>Об'єм робіт: ${(maxVol / 1000).toFixed(2)} тис. м³. Середня відстань переміщення: ${carto.Lsr.toFixed(1)} м.</p>`;
-    h9 += '<p>Рекомендовані ведучі машини відповідно до таблиці 8 методичних вказівок:</p>';
-
-    const lead1 = suggestions.bulldozers[0] || Machines.bulldozers[0];
-    const lead2 = suggestions.loaders[0] || Machines.loaders[0];
-    const compact1 = suggestions.compactors.length > 1 ? suggestions.compactors[1] : suggestions.compactors[0];
-    const compact2 = compact1;
-
-    h9 += '<h3 style="margin-top:12px;color:var(--primary)">Варіант 1: Бульдозер</h3>';
-    h9 += machineInfoHtml(lead1);
-    h9 += '<h3 style="margin-top:12px;color:var(--primary)">Варіант 2: Навантажувач</h3>';
-    h9 += machineInfoHtml(lead2);
+    let h9 = `<p>Об'єм робіт: ${(maxVol / 1000).toFixed(2)} тис. м3. Середня відстань переміщення: ${carto.Lsr.toFixed(1)} м.</p>`;
+    h9 += `<p>Варіанти автоматично ранжовані за табл. 8 методичних вказівок, відстанню переміщення та показниками, розрахованими за ${modeLabel}.</p>`;
+    h9 += `<h3 style="margin-top:12px;color:var(--primary)">Варіант 1: ${formatLeadTypeLabel(top1.leadMachine)}</h3>`;
+    h9 += machineInfoHtml(top1.leadMachine);
+    h9 += `<p>${buildSelectionRationale(top1, carto.Lsr)}</p>`;
+    h9 += `<h3 style="margin-top:12px;color:var(--primary)">Варіант 2: ${formatLeadTypeLabel(top2.leadMachine)}</h3>`;
+    h9 += machineInfoHtml(top2.leadMachine);
+    h9 += `<p>${buildSelectionRationale(top2, carto.Lsr)}</p>`;
     c9.innerHTML = h9;
 
-    // Step 10: Machine sets
     const c10 = makeStep(parent, 10, 'Комплекти машин');
-    const topsoilBulldozer = lead1;
-    const ripperLoosening = Machines.suggestRipperBulldozer(maxVol, carto.Lsr, suggestions) || Machines.getById('dp15');
-    const set1 = [
-      { process: processes[0].name, machine: lead1 },
-      { process: processes[1].name, machine: null },
-      { process: processes[2].name, machine: lead1 },
-      { process: processes[3].name, machine: lead1 },
-      { process: processes[4].name, machine: compact1 },
-      { process: processes[5].name, machine: lead1 }
-    ];
-    const set2 = [
-      { process: processes[0].name, machine: lead2.type === 'loader' ? (suggestions.bulldozers[0] || lead1) : lead2 },
-      { process: processes[1].name, machine: ripperLoosening },
-      { process: processes[2].name, machine: lead2 },
-      { process: processes[3].name, machine: lead2 },
-      { process: processes[4].name, machine: compact2 },
-      { process: processes[5].name, machine: lead2.type === 'loader' ? (suggestions.bulldozers[0] || lead1) : lead2 }
-    ];
-
     let h10 = '<table class="data-table"><thead><tr><th>№</th><th>Назва процесу</th><th>Комплект 1</th><th>Комплект 2</th></tr></thead><tbody>';
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < processes.length; i++) {
       h10 += `<tr><td>${i + 1}</td><td>${processes[i].name}</td>` +
-        `<td>${set1[i].machine ? set1[i].machine.name : '—'}</td>` +
-        `<td>${set2[i].machine ? set2[i].machine.name : '—'}</td></tr>`;
+        `<td>${formatMachineSetCell(top1.set[i].machine, top1.tep.machineCounts[i])}</td>` +
+        `<td>${formatMachineSetCell(top2.set[i].machine, top2.tep.machineCounts[i])}</td></tr>`;
     }
     h10 += '</tbody></table>';
     c10.innerHTML = h10;
 
-    // Step 11: TEP calculation
     const c11 = makeStep(parent, 11, 'Техніко-економічні показники (ТЕП)');
-    const tShift = inp.tShift;
-    const Lsr = carto.Lsr;
-
-    const tep1 = computeTEP(set1, processes, lead1, compact1, Lsr, tShift, maxVol, inp);
-    const tep2 = computeTEP(set2, processes, lead2, compact2, Lsr, tShift, maxVol, inp);
-
     let h11 = '<h3 style="color:var(--primary)">Варіант 1</h3>';
-    h11 += tepTableHtml(tep1, processes, set1, tShift);
+    h11 += tepTableHtmlLogical(top1.tep, processes, top1.set, inp);
     h11 += '<h3 style="color:var(--primary);margin-top:16px">Варіант 2</h3>';
-    h11 += tepTableHtml(tep2, processes, set2, tShift);
-
+    h11 += tepTableHtmlLogical(top2.tep, processes, top2.set, inp);
     h11 += '<h3 style="margin-top:16px;color:var(--primary)">Порівняльна таблиця</h3>';
     h11 += '<table class="data-table"><thead><tr><th>Показник</th><th>Комплект 1</th><th>Комплект 2</th></tr></thead><tbody>';
-    h11 += `<tr><td>Тривалість, змін</td><td>${tep1.totalDuration.toFixed(2)}</td><td>${tep2.totalDuration.toFixed(2)}</td></tr>`;
-    h11 += `<tr><td>Трудомісткість, люд-год/м³</td><td>${tep1.labourIntensity.toFixed(4)}</td><td>${tep2.labourIntensity.toFixed(4)}</td></tr>`;
-    h11 += `<tr><td>Собівартість С₀, грн</td><td>${tep1.totalCost.toFixed(2)}</td><td>${tep2.totalCost.toFixed(2)}</td></tr>`;
-    h11 += `<tr><td>Приведені витрати, грн/м³</td><td>${tep1.reducedCosts.toFixed(4)}</td><td>${tep2.reducedCosts.toFixed(4)}</td></tr>`;
+    h11 += `<tr><td>Тривалість, днів</td><td>${top1.tep.totalDuration.toFixed(2)}</td><td>${top2.tep.totalDuration.toFixed(2)}</td></tr>`;
+    h11 += `<tr><td>Трудомісткість, люд-год/м3</td><td>${top1.tep.labourIntensity.toFixed(4)}</td><td>${top2.tep.labourIntensity.toFixed(4)}</td></tr>`;
+    h11 += `<tr><td>Собівартість C0, грн</td><td>${top1.tep.totalCost.toFixed(2)}</td><td>${top2.tep.totalCost.toFixed(2)}</td></tr>`;
+    h11 += `<tr><td>Приведені витрати, грн/м3</td><td>${top1.tep.reducedCosts.toFixed(4)}</td><td>${top2.tep.reducedCosts.toFixed(4)}</td></tr>`;
+    h11 += `<tr><td>Логічний штраф</td><td>${top1.logicPenalty.toFixed(2)}</td><td>${top2.logicPenalty.toFixed(2)}</td></tr>`;
     h11 += '</tbody></table>';
-
-    const winner = tep1.reducedCosts <= tep2.reducedCosts ? 1 : 2;
-    const winnerTep = winner === 1 ? tep1 : tep2;
-    const winnerSet = winner === 1 ? set1 : set2;
-    h11 += `<div class="success-box">Обрано <strong>Комплект ${winner}</strong> з мінімальними приведеними витратами ${winnerTep.reducedCosts.toFixed(4)} грн/м³</div>`;
+    h11 += `<div class="success-box">Обрано <strong>Комплект 1</strong>: він краще відповідає методичній області застосування та має кращу сумарну оцінку.</div>`;
     c11.innerHTML = h11;
 
-    return { winner, tep: winnerTep, set: winnerSet, processes, maxVol, Lsr };
+    return { winner: 1, tep: top1.tep, set: top1.set, processes, maxVol, Lsr: carto.Lsr };
+  }
+
+  function formatNumber(value, digits = 2) {
+    return Number.isFinite(value) ? value.toFixed(digits) : '—';
+  }
+
+  function formatLeadTypeLabel(machine) {
+    if (!machine) return 'Машина не визначена';
+    if (machine.type === 'scraper') return 'Скрепер';
+    if (machine.type === 'loader') return 'Навантажувач';
+    return 'Бульдозер';
+  }
+
+  function formatMachineSetCell(machine, count) {
+    if (!machine) return '—';
+    return count > 1 ? `${machine.name} × ${count}` : machine.name;
+  }
+
+  function buildSelectionRationale(variant, Lsr) {
+    const machine = variant.leadMachine;
+    if (!machine) return 'Варіант без визначеної ведучої машини.';
+    if (machine.type === 'bulldozer') {
+      return `Доцільний для переміщення ґрунту на ${Lsr.toFixed(1)} м при відносно короткому плечі транспортування.`;
+    }
+    if (machine.type === 'scraper') {
+      return `Доцільний для суміщення розроблення, транспортування та часткового розрівнювання на плечі ${Lsr.toFixed(1)} м.`;
+    }
+    return `Навантажувач залишено як альтернативу для механізованого комплекту при складніших локальних операціях.`;
+  }
+
+  function getProcessExecutionData(process, index, inp, machine) {
+    if (inp.calcMode === 'production') {
+      return getProductionExecutionData(process, index, inp, machine);
+    }
+    return getNormativeExecutionData(process, index, inp, machine);
+  }
+
+  function getProductionExecutionData(process, index, inp, machine) {
+    const isAreaProcess = index === 0 || index === 5;
+    const layerThickness = inp.topsoil || 0.2;
+    const calcVolume = isAreaProcess ? process.volume * layerThickness : process.volume;
+    const calcUnit = isAreaProcess ? 'м3' : process.unit;
+
+    return {
+      mode: 'production',
+      norm: null,
+      isAreaProcess,
+      mainVolume: process.volume,
+      mainUnit: process.unit,
+      calcVolume,
+      calcUnit,
+      sourceLabel: `${formatNumber(process.volume)} ${process.unit}`,
+      calcLabel: `${formatNumber(calcVolume)} ${calcUnit}`,
+      normUnitLabel: '—',
+      normUnits: null,
+      machineDays: null,
+      laborDays: null,
+      machineDayNorm: null,
+      laborDayNorm: null,
+      enCode: '—',
+      crewLabel: machine ? `${machine.workers || 1} маш.` : '—'
+    };
+  }
+
+  function getNormativeExecutionData(process, index, inp, machine) {
+    const norm = ENNorms.getByProcessId(process.id);
+    if (!norm) {
+      return getProductionExecutionData(process, index, inp, machine);
+    }
+
+    const machineType = machine?.type || 'bulldozer';
+    const machineDayNorm = getMachineSpecificNorm(norm, machineType, 'machineDay');
+    const laborDayNorm = getMachineSpecificNorm(norm, machineType, 'laborDay');
+    const normUnits = process.volume / norm.unitSize;
+    const machineDays = normUnits * machineDayNorm;
+    const laborDays = normUnits * laborDayNorm;
+    const crewCount = Math.max(machine?.workers || 1, Math.ceil(laborDayNorm / Math.max(machineDayNorm, 0.01)));
+
+    return {
+      mode: 'normative',
+      norm,
+      isAreaProcess: norm.unitBase === 'м²',
+      mainVolume: process.volume,
+      mainUnit: process.unit,
+      calcVolume: process.volume,
+      calcUnit: process.unit,
+      sourceLabel: `${formatNumber(process.volume)} ${process.unit}`,
+      calcLabel: `${formatNumber(process.volume)} ${process.unit}`,
+      normUnitLabel: `${norm.unitSize} ${norm.unitBase}`,
+      normUnits,
+      machineDays,
+      laborDays,
+      machineDayNorm,
+      laborDayNorm,
+      enCode: norm.enCode || 'ЕН',
+      crewLabel: `${crewCount} роб. у зміну`
+    };
+  }
+
+  function getMachineSpecificNorm(norm, machineType, fieldPrefix) {
+    const mapName = fieldPrefix === 'machineDay' ? 'machineDayByType' : 'laborDayByType';
+    const baseName = fieldPrefix === 'machineDay' ? 'machineDayNorm' : 'laborDayNorm';
+    return norm[mapName]?.[machineType] ?? norm[baseName];
+  }
+
+  function computeProductionBaseDuration(machine, procData, Lsr, tShift, index) {
+    const vol = procData.calcVolume;
+    const isLocalOperation = procData.isAreaProcess || index === 1 || index === 3;
+    const workDistance = isLocalOperation ? 30 : Lsr;
+
+    if (!machine) return 0;
+    if (machine.type === 'bulldozer') {
+      return vol / Calc.bulldozerProductivity(machine, workDistance, tShift).Pe;
+    }
+    if (machine.type === 'scraper') {
+      return vol / Calc.scraperProductivity(machine, Lsr, tShift).Pe;
+    }
+    if (machine.type === 'loader') {
+      return vol / Calc.loaderProductivity(machine, workDistance, tShift).Pe;
+    }
+    if (machine.type === 'compactor') {
+      return vol / (machine.productivityPerShift || 1000);
+    }
+    return vol / 500;
+  }
+
+  function targetScheduleDays(maxVol, Lsr) {
+    const volumeThousand = maxVol / 1000;
+    return Math.max(18, Math.min(45, 12 + 1.5 * volumeThousand + 0.03 * Lsr));
+  }
+
+  function maxMachinesForProcess(machine, processIndex) {
+    if (!machine) return 1;
+    if (machine.type === 'scraper') return 4;
+    if (machine.type === 'loader') return 4;
+    if (machine.type === 'compactor') return 3;
+    if (machine.type === 'bulldozer') {
+      if (processIndex === 2) return 4;
+      if (processIndex === 1) return 2;
+      return 3;
+    }
+    return 2;
+  }
+
+  function optimizeMachineCounts(baseDurations, machines, numShifts, maxVol, Lsr) {
+    const counts = baseDurations.map(dur => dur > 0 ? 1 : 0);
+    const targetDays = targetScheduleDays(maxVol, Lsr);
+
+    function score(currentCounts) {
+      const totalDays = baseDurations.reduce((sum, dur, idx) => {
+        if (!dur || !machines[idx]) return sum;
+        return sum + dur / Math.max(currentCounts[idx], 1) / Math.max(numShifts, 1);
+      }, 0);
+      const overrun = Math.max(0, totalDays - targetDays);
+      const extraMachinesPenalty = currentCounts.reduce((sum, count, idx) => {
+        const machine = machines[idx];
+        if (!machine || count <= 1) return sum;
+        return sum + (count - 1) * (1 + (machine.price || 0) / 250);
+      }, 0);
+      return Math.abs(totalDays - targetDays) * 20 + overrun * 10 + extraMachinesPenalty * 3;
+    }
+
+    let bestScore = score(counts);
+    let improved = true;
+    while (improved) {
+      improved = false;
+      let bestIdx = -1;
+      let candidateBest = bestScore;
+      for (let i = 0; i < counts.length; i++) {
+        if (!machines[i]) continue;
+        if (counts[i] >= maxMachinesForProcess(machines[i], i)) continue;
+        if (baseDurations[i] / Math.max(counts[i], 1) < 2.5) continue;
+        const trial = [...counts];
+        trial[i] += 1;
+        const trialScore = score(trial);
+        if (trialScore + 1e-6 < candidateBest) {
+          candidateBest = trialScore;
+          bestIdx = i;
+        }
+      }
+      if (bestIdx >= 0) {
+        counts[bestIdx] += 1;
+        bestScore = candidateBest;
+        improved = true;
+      }
+    }
+
+    return counts.map((count, idx) => (machines[idx] ? Math.max(count, 1) : 0));
   }
 
   function computeTEP(set, processes, leadMachine, compactor, Lsr, tShift, maxVol, inp) {
+    const baseDurations = [];
+    const executionData = [];
+    const machines = set.map(item => item.machine);
+    const isNormative = inp.calcMode !== 'production';
+
+    for (let i = 0; i < processes.length; i++) {
+      const procData = getProcessExecutionData(processes[i], i, inp, machines[i]);
+      executionData.push(procData);
+      const baseDuration = isNormative
+        ? procData.machineDays || 0
+        : computeProductionBaseDuration(machines[i], procData, Lsr, tShift, i);
+      baseDurations.push(Number.isFinite(baseDuration) && baseDuration > 0 ? baseDuration : 0);
+    }
+
+    const machineCounts = optimizeMachineCounts(baseDurations, machines, inp.numShifts || 1, maxVol, Lsr);
     const durations = [];
     const machineHourCosts = [];
     const wages = [];
     const machinesUsed = [];
+    let sumMachineCost = 0;
+    let totalLabourHours = 0;
 
-    for (let i = 0; i < 6; i++) {
-      const m = set[i].machine;
-      let vol = processes[i].volume;
-      const isAreaProcess = (i === 0 || i === 5);
-      if (isAreaProcess) vol = vol * (inp.topsoil || 0.2);
-      let Pe, dur;
+    for (let i = 0; i < processes.length; i++) {
+      const machine = machines[i];
+      const count = Math.max(machineCounts[i], 1);
+      const procData = executionData[i];
+      let durationDays = 0;
+      let machineHoursPerMachine = 0;
+      let labourHours = 0;
 
-      if (!m) {
-        dur = 0;
-        Pe = 1;
-      } else if (m.type === 'bulldozer') {
-        const prod = Calc.bulldozerProductivity(m, isAreaProcess ? 30 : Lsr, tShift);
-        Pe = prod.Pe;
-        dur = vol / Pe;
-      } else if (m.type === 'scraper') {
-        const prod = Calc.scraperProductivity(m, Lsr, tShift);
-        Pe = prod.Pe;
-        dur = vol / Pe;
-      } else if (m.type === 'loader') {
-        const prod = Calc.loaderProductivity(m, isAreaProcess ? 30 : Lsr, tShift);
-        Pe = prod.Pe;
-        dur = vol / Pe;
-      } else if (m.type === 'compactor') {
-        Pe = m.productivityPerShift || 1000;
-        dur = vol / Pe;
-      } else {
-        Pe = 500;
-        dur = vol / Pe;
+      if (machine && baseDurations[i] > 0) {
+        if (isNormative) {
+          durationDays = (procData.machineDays || 0) / (count * Math.max(inp.numShifts || 1, 1));
+          machineHoursPerMachine = ((procData.machineDays || 0) / count) * tShift;
+          labourHours = (procData.laborDays || 0) * tShift;
+        } else {
+          const durationShifts = baseDurations[i] / count;
+          durationDays = durationShifts / Math.max(inp.numShifts || 1, 1);
+          machineHoursPerMachine = durationShifts * tShift;
+          labourHours = durationShifts * count * tShift * (machine.workers || 1);
+        }
       }
 
-      if (dur < 0 || !isFinite(dur) || isNaN(dur)) dur = 0.5;
-      durations.push(dur);
+      durations.push(durationDays);
 
-      if (m) {
-        const Cmh = Calc.machineHourCost(m.oneTime || 0, dur * tShift, m.price, m.amort, m.yearHours, m.Ce);
+      if (machine && machineHoursPerMachine > 0) {
+        const Cmh = Calc.machineHourCost(machine.oneTime || 0, machineHoursPerMachine, machine.price, machine.amort, machine.yearHours, machine.Ce);
         machineHourCosts.push(Cmh);
-        wages.push(dur * tShift * (m.workers || 1) * 30);
-        machinesUsed.push(m);
+        wages.push(labourHours * 30);
+        totalLabourHours += labourHours;
+        sumMachineCost += count * Cmh * machineHoursPerMachine;
+        for (let k = 0; k < count; k++) machinesUsed.push(machine);
       } else {
         machineHourCosts.push(0);
         wages.push(0);
-        machinesUsed.push({ price: 0, yearHours: 1, oneTime: 0, Ce: 0, workers: 0, name: '—' });
       }
     }
 
-    const totalDuration = durations.reduce((s, d) => s + d, 0);
-    const workerCounts = set.map(s => s.machine ? (s.machine.workers || 1) : 0);
-    const labourInt = Calc.labourIntensity(durations, workerCounts, tShift, maxVol);
-    const C0 = Calc.totalCost(machineHourCosts, durations, tShift, 0, wages);
-    const Pv = Calc.reducedCosts(C0, 0.12, machinesUsed, durations, tShift, maxVol);
+    const totalDuration = durations.reduce((sum, value) => sum + value, 0);
+    const totalCost = 1.08 * sumMachineCost + 1.5 * wages.reduce((sum, value) => sum + value, 0);
+    const reducedCosts = maxVol > 0
+      ? (totalCost + 0.12 * machines.reduce((sum, machine, index) => {
+        if (!machine) return sum;
+        const count = machineCounts[index];
+        const machineHours = isNormative
+          ? ((executionData[index].machineDays || 0) / Math.max(count, 1)) * tShift
+          : (baseDurations[index] / Math.max(count, 1)) * tShift;
+        return sum + count * (machine.price * 1000) * machineHours / Math.max(machine.yearHours, 1);
+      }, 0)) / maxVol
+      : 0;
 
     return {
-      durations, machineHourCosts, wages, machinesUsed,
-      totalDuration, labourIntensity: labourInt, totalCost: C0, reducedCosts: Pv
+      mode: inp.calcMode,
+      executionData,
+      machineCounts,
+      baseDurations,
+      durations,
+      machineHourCosts,
+      wages,
+      machinesUsed,
+      totalDuration,
+      labourIntensity: maxVol > 0 ? totalLabourHours / maxVol : 0,
+      totalCost,
+      reducedCosts
     };
   }
 
-  function tepTableHtml(tep, processes, set, tShift) {
-    let html = '<table class="data-table"><thead><tr><th>Процес</th><th>Машина</th><th>Пе, м³/зм</th>' +
-      '<th>Тривалість, змін</th><th>С<sub>маш.год</sub>, грн</th></tr></thead><tbody>';
-    for (let i = 0; i < 6; i++) {
-      const m = set[i].machine;
-      const dur = tep.durations[i];
-      const pe = dur > 0 ? (processes[i].volume / dur).toFixed(1) : '—';
-      html += `<tr><td>${processes[i].name}</td><td>${m ? m.name : '—'}</td>` +
-        `<td>${pe}</td><td>${dur.toFixed(2)}</td><td>${tep.machineHourCosts[i].toFixed(2)}</td></tr>`;
+  function tepTableHtmlLogical(tep, processes, set, inp) {
+    if (tep.mode === 'production') {
+      let html = '<table class="data-table"><thead><tr><th>Процес</th><th>Машина</th><th>Розрах. об\'єм</th><th>К-сть машин</th><th>Тривалість, днів</th><th>С<sub>маш.год</sub>, грн</th></tr></thead><tbody>';
+      for (let i = 0; i < processes.length; i++) {
+        const machine = set[i].machine;
+        const procData = tep.executionData[i];
+        html += `<tr><td>${processes[i].name}</td><td>${formatMachineSetCell(machine, tep.machineCounts[i])}</td>` +
+          `<td>${procData.calcLabel}</td><td>${tep.machineCounts[i] || '—'}</td><td>${formatNumber(tep.durations[i])}</td><td>${formatNumber(tep.machineHourCosts[i])}</td></tr>`;
+      }
+      html += `<tr class="total-row"><td colspan="4">Разом</td><td>${formatNumber(tep.totalDuration)}</td><td>—</td></tr>`;
+      html += '</tbody></table>';
+      return html;
     }
-    html += `<tr class="total-row"><td colspan="3">Разом</td><td>${tep.totalDuration.toFixed(2)}</td><td>—</td></tr>`;
+
+    let html = '<table class="data-table"><thead><tr><th>Процес</th><th>Основний об\'єм</th><th>Нормативна одиниця</th><th>К-сть нормо-од.</th><th>днмаш</th><th>днлюд</th><th>Машина</th><th>К-сть машин</th><th>Тривалість, днів</th></tr></thead><tbody>';
+    for (let i = 0; i < processes.length; i++) {
+      const machine = set[i].machine;
+      const procData = tep.executionData[i];
+      html += `<tr><td>${processes[i].name}</td><td>${procData.sourceLabel}</td><td>${procData.normUnitLabel}</td>` +
+        `<td>${formatNumber(procData.normUnits, 3)}</td><td>${formatNumber(procData.machineDays, 2)}</td><td>${formatNumber(procData.laborDays, 2)}</td>` +
+        `<td>${formatMachineSetCell(machine, tep.machineCounts[i])}</td><td>${tep.machineCounts[i] || '—'}</td><td>${formatNumber(tep.durations[i])}</td></tr>`;
+    }
+    html += `<tr class="total-row"><td colspan="8">Разом</td><td>${formatNumber(tep.totalDuration)}</td></tr>`;
     html += '</tbody></table>';
     return html;
   }
 
-  function renderStep12(parent, tepResults) {
+  function renderStep12Logical(parent, tepResults, inp) {
     const c = makeStep(parent, 12, 'Калькуляція трудових витрат');
     const { tep, set, processes } = tepResults;
-    let html = '<table class="data-table"><thead><tr><th>№</th><th>Назва процесу</th><th>Од. вим.</th>' +
-      '<th>Об\'єм</th><th>Машина</th><th>Трудомісткість, люд-год</th><th>Зарплата, грн</th></tr></thead><tbody>';
-    let totalLabour = 0, totalWage = 0;
-    for (let i = 0; i < 6; i++) {
-      const m = set[i].machine;
-      const labour = tep.durations[i] * (m ? m.workers || 1 : 0) * 8;
-      totalLabour += labour;
-      totalWage += tep.wages[i];
-      html += `<tr><td>${i + 1}</td><td>${processes[i].name}</td><td>${processes[i].unit}</td>` +
-        `<td>${processes[i].volume.toFixed(2)}</td><td>${m ? m.name : '—'}</td>` +
-        `<td>${labour.toFixed(2)}</td><td>${tep.wages[i].toFixed(2)}</td></tr>`;
+
+    if (tep.mode === 'production') {
+      let html = '<div class="note-box">Для експлуатаційного режиму калькуляція показана у спрощеному вигляді. Для курсової рекомендовано використовувати нормативний режим ЕН.</div>';
+      html += '<table class="data-table"><thead><tr><th>№</th><th>Процес</th><th>Об\'єм</th><th>Машина</th><th>Трудомісткість, люд-год</th><th>Зарплата, грн</th></tr></thead><tbody>';
+      let totalLabour = 0;
+      let totalWage = 0;
+      for (let i = 0; i < processes.length; i++) {
+        const machine = set[i].machine;
+        const labour = tep.wages[i] / 30;
+        totalLabour += labour;
+        totalWage += tep.wages[i];
+        html += `<tr><td>${i + 1}</td><td>${processes[i].name}</td><td>${tep.executionData[i].calcLabel}</td><td>${formatMachineSetCell(machine, tep.machineCounts[i])}</td>` +
+          `<td>${formatNumber(labour)}</td><td>${formatNumber(tep.wages[i])}</td></tr>`;
+      }
+      html += `<tr class="total-row"><td colspan="4">Разом</td><td>${formatNumber(totalLabour)}</td><td>${formatNumber(totalWage)}</td></tr>`;
+      html += '</tbody></table>';
+      c.innerHTML = html;
+      return;
     }
-    html += `<tr class="total-row"><td colspan="5">Разом</td><td>${totalLabour.toFixed(2)}</td><td>${totalWage.toFixed(2)}</td></tr>`;
+
+    let html = '<table class="data-table"><thead><tr><th>№</th><th>Пункт ЕН</th><th>Назва процесу</th><th>Об\'єм робіт</th><th>Нормативна одиниця</th><th>Норма часу, днмаш</th><th>Норма часу, днлюд</th><th>Трудомісткість, днмаш</th><th>Трудомісткість, днлюд</th><th>Сума зарплати, грн</th><th>Склад ланки</th></tr></thead><tbody>';
+    let totalMachineDays = 0;
+    let totalLabourDays = 0;
+    let totalWage = 0;
+    const sourceLines = [];
+
+    for (let i = 0; i < processes.length; i++) {
+      const procData = tep.executionData[i];
+      totalMachineDays += procData.machineDays || 0;
+      totalLabourDays += procData.laborDays || 0;
+      totalWage += tep.wages[i];
+      if (procData.norm?.source) {
+        sourceLines.push(`${procData.enCode} — ${procData.norm.source}`);
+      }
+      html += `<tr><td>${i + 1}</td><td>${procData.enCode}</td><td>${processes[i].name}</td><td>${procData.sourceLabel}</td>` +
+        `<td>${procData.normUnitLabel}</td><td>${formatNumber(procData.machineDayNorm, 3)}</td><td>${formatNumber(procData.laborDayNorm, 3)}</td>` +
+        `<td>${formatNumber(procData.machineDays, 2)}</td><td>${formatNumber(procData.laborDays, 2)}</td><td>${formatNumber(tep.wages[i])}</td><td>${procData.crewLabel}</td></tr>`;
+    }
+
+    html += `<tr class="total-row"><td colspan="7">Разом</td><td>${formatNumber(totalMachineDays)}</td><td>${formatNumber(totalLabourDays)}</td><td>${formatNumber(totalWage)}</td><td>—</td></tr>`;
     html += '</tbody></table>';
+    if (sourceLines.length) {
+      html += `<div class="formula-sub" style="margin-top:12px">${[...new Set(sourceLines)].join('<br>')}</div>`;
+    }
     c.innerHTML = html;
   }
 
-  function renderStep13(parent, tepResults, inp) {
+  function renderStep13Logical(parent, tepResults, inp) {
     const c = makeStep(parent, 13, 'Календарний графік виконання робіт');
     const { tep, set, processes } = tepResults;
-    const numShifts = inp.numShifts;
-
+    const numShifts = Math.max(inp.numShifts || 1, 1);
     const schedData = [];
-    for (let i = 0; i < 6; i++) {
-      if (tep.durations[i] <= 0) continue;
-      const m = set[i].machine;
+    let tableHtml = '<table class="data-table"><thead><tr><th>№</th><th>Процес</th><th>Машина</th><th>К-сть машин</th><th>днмаш</th><th>днлюд</th><th>Змін/добу</th><th>Тривалість, днів</th></tr></thead><tbody>';
+
+    for (let i = 0; i < processes.length; i++) {
+      const durationDays = tep.durations[i];
+      if (!durationDays || durationDays <= 0) continue;
+      const machine = set[i].machine;
+      const procData = tep.executionData[i];
+      const machineCount = tep.machineCounts[i] || 1;
+      const workersPerShift = tep.mode === 'normative'
+        ? Math.max(machineCount * (machine?.workers || 1), Math.ceil((procData.laborDays || 0) / Math.max(durationDays * numShifts, 0.1)))
+        : Math.max(1, machineCount * (machine?.workers || 1));
+
+      tableHtml += `<tr><td>${i + 1}</td><td>${processes[i].name}</td><td>${formatMachineSetCell(machine, machineCount)}</td><td>${machineCount}</td>` +
+        `<td>${tep.mode === 'normative' ? formatNumber(procData.machineDays) : '—'}</td><td>${tep.mode === 'normative' ? formatNumber(procData.laborDays) : '—'}</td>` +
+        `<td>${numShifts}</td><td>${formatNumber(durationDays)}</td></tr>`;
+
       schedData.push({
         name: processes[i].name,
-        duration: tep.durations[i],
-        workers: m ? (m.workers || 1) : 1,
+        duration: durationDays * numShifts,
+        durationLabel: `${formatNumber(durationDays)} дн.`,
+        workers: workersPerShift,
         shifts: numShifts,
-        machine: m ? m.name : '—',
-        volumeStr: `${processes[i].volume.toFixed(0)} ${processes[i].unit}`
+        machine: formatMachineSetCell(machine, machineCount),
+        volumeStr: tep.mode === 'normative' ? `${formatNumber(procData.normUnits, 2)} норм.` : procData.calcLabel
       });
     }
 
-    let html = '<div class="diagram-container" id="scheduleDiagram"></div>';
-    c.innerHTML = html;
+    tableHtml += '</tbody></table>';
+    c.innerHTML = `${tableHtml}<div class="diagram-container" id="scheduleDiagram"></div>`;
     setTimeout(() => Schedule.drawSchedule('scheduleDiagram', schedData), 50);
+  }
+
+  function getMethodologyBand(volumeThousand) {
+
+    if (volumeThousand <= 1.5) {
+      return {
+        bulldozerPower: [20, 60],
+        scraperBucket: [0, 3],
+        loaderBucket: [0.2, 0.6]
+      };
+    }
+    if (volumeThousand <= 20) {
+      return {
+        bulldozerPower: [60, 90],
+        scraperBucket: [4, 8],
+        loaderBucket: [0.7, 1.5]
+      };
+    }
+    if (volumeThousand <= 50) {
+      return {
+        bulldozerPower: [90, 160],
+        scraperBucket: [9, 18],
+        loaderBucket: [1.6, 2.5]
+      };
+    }
+    if (volumeThousand <= 100) {
+      return {
+        bulldozerPower: [160, 220],
+        scraperBucket: [20, 30],
+        loaderBucket: [2.6, 4]
+      };
+    }
+    return {
+      bulldozerPower: [220, 440],
+      scraperBucket: [30, 40],
+      loaderBucket: [4, Infinity]
+    };
+  }
+
+  function rangePenalty(value, [min, max]) {
+    if (value >= min && value <= max) return 0;
+    if (value < min) return (min - value) / Math.max(min, 1);
+    if (!isFinite(max)) return 0;
+    return (value - max) / Math.max(max, 1);
+  }
+
+  function distancePenalty(machine, Lsr) {
+    if (machine.type === 'bulldozer') {
+      if (Lsr <= 70) return 0;
+      if (Lsr <= 100) return 0.5;
+      if (Lsr <= 150 && (machine.power || 0) >= 200) return 1.0;
+      return 4 + Math.max(0, (Lsr - 100) / 50);
+    }
+    if (machine.type === 'scraper') {
+      if (Lsr < 80) return 1.0;
+      if (Lsr <= 300) return 0;
+      if ((machine.bucketVolume || 0) <= 5 && Lsr <= 400) return 0.7;
+      if ((machine.bucketVolume || 0) <= 10 && Lsr <= 750) return 0.2;
+      if ((machine.bucketVolume || 0) <= 15 && Lsr <= 1000) return 0.2;
+      return 3 + Math.max(0, (Lsr - 750) / 250);
+    }
+    if (machine.type === 'loader') {
+      if (Lsr <= 40) return 0.3;
+      if (Lsr <= 80) return 1.2;
+      return 4 + Math.max(0, (Lsr - 80) / 40);
+    }
+    return 0;
+  }
+
+  function methodologyPenalty(machine, maxVol, Lsr) {
+    const band = getMethodologyBand(maxVol / 1000);
+    let penalty = distancePenalty(machine, Lsr);
+    if (machine.type === 'bulldozer') penalty += 2 * rangePenalty(machine.power || 0, band.bulldozerPower);
+    if (machine.type === 'scraper') penalty += 2 * rangePenalty(machine.bucketVolume || 0, band.scraperBucket);
+    if (machine.type === 'loader') penalty += 2 * rangePenalty(machine.bucketVolume || 0, band.loaderBucket);
+    return penalty;
+  }
+
+  function pickPreferredMachine(machineIds, fallbackList, fallbackMachine) {
+    for (const machineId of machineIds || []) {
+      const machine = Machines.getById(machineId);
+      if (machine) return machine;
+    }
+    return fallbackList?.[0] || fallbackMachine || null;
+  }
+
+  function buildMachineSetForLead(leadMachine, suggestions, processes, maxVol, carto) {
+    const helperBulldozer = suggestions.bulldozers[0] || Machines.bulldozers[0];
+    const gradingBulldozer = pickPreferredMachine(
+      ENNorms.getByProcessId('topsoil_cut')?.recommendedMachines,
+      suggestions.bulldozers,
+      helperBulldozer
+    );
+    const finalBulldozer = pickPreferredMachine(
+      ENNorms.getByProcessId('final_grading')?.recommendedMachines,
+      suggestions.bulldozers,
+      gradingBulldozer
+    );
+    const spreadingBulldozer = pickPreferredMachine(
+      ENNorms.getByProcessId('soil_spreading')?.recommendedMachines,
+      suggestions.bulldozers,
+      helperBulldozer
+    );
+    const ripperLoosening = Machines.suggestRipperBulldozer(maxVol, carto.Lsr, suggestions) || Machines.getById('dp15');
+    const compactor = suggestions.compactors.length > 1 ? suggestions.compactors[1] : suggestions.compactors[0];
+
+    if (leadMachine.type === 'scraper') {
+      return [
+        { process: processes[0].name, machine: gradingBulldozer },
+        { process: processes[1].name, machine: ripperLoosening },
+        { process: processes[2].name, machine: leadMachine },
+        { process: processes[3].name, machine: spreadingBulldozer },
+        { process: processes[4].name, machine: compactor },
+        { process: processes[5].name, machine: finalBulldozer }
+      ];
+    }
+
+    if (leadMachine.type === 'loader') {
+      return [
+        { process: processes[0].name, machine: gradingBulldozer },
+        { process: processes[1].name, machine: ripperLoosening },
+        { process: processes[2].name, machine: leadMachine },
+        { process: processes[3].name, machine: spreadingBulldozer },
+        { process: processes[4].name, machine: compactor },
+        { process: processes[5].name, machine: finalBulldozer }
+      ];
+    }
+
+    return [
+      { process: processes[0].name, machine: gradingBulldozer },
+      { process: processes[1].name, machine: ripperLoosening },
+      { process: processes[2].name, machine: leadMachine },
+      { process: processes[3].name, machine: spreadingBulldozer },
+      { process: processes[4].name, machine: compactor },
+      { process: processes[5].name, machine: finalBulldozer }
+    ];
+  }
+
+  function evaluateLeadCandidate(leadMachine, suggestions, processes, carto, inp, maxVol) {
+    const machineSet = buildMachineSetForLead(leadMachine, suggestions, processes, maxVol, carto);
+    const compact = suggestions.compactors.length > 1 ? suggestions.compactors[1] : suggestions.compactors[0];
+    const tep = computeTEP(machineSet, processes, leadMachine, compact, carto.Lsr, inp.tShift, maxVol, inp);
+    const logicPenalty = methodologyPenalty(leadMachine, maxVol, carto.Lsr);
+    const score = logicPenalty * 1000 + tep.reducedCosts * 100 + tep.totalDuration;
+
+    return {
+      leadMachine,
+      leadType: leadMachine.type,
+      set: machineSet,
+      tep,
+      logicPenalty,
+      score
+    };
+  }
+
+  function pickBestMachineVariants(suggestions, processes, carto, inp, maxVol) {
+    const candidates = [
+      ...(suggestions.bulldozers || []),
+      ...(suggestions.scrapers || []),
+      ...(suggestions.loaders || [])
+    ];
+
+    const uniqueCandidates = [];
+    const seen = new Set();
+    for (const candidate of candidates) {
+      if (!candidate || seen.has(candidate.id)) continue;
+      seen.add(candidate.id);
+      uniqueCandidates.push(candidate);
+    }
+
+    const evaluated = uniqueCandidates
+      .map(candidate => evaluateLeadCandidate(candidate, suggestions, processes, carto, inp, maxVol))
+      .sort((a, b) => a.score - b.score);
+
+    const primary = evaluated[0];
+    const alternative = evaluated.find(v => v.leadType !== primary.leadType) || evaluated[1] || primary;
+    return { primary, alternative, evaluated };
   }
 
   function machineInfoHtml(m) {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Preview Runner</title>
+</head>
+<body>
+  <iframe id="appFrame" src="index.html" style="width:0;height:0;border:0;"></iframe>
+  <script>
+    function transferAndOpenPreview() {
+      const frame = document.getElementById('appFrame');
+      const frameWindow = frame.contentWindow;
+      const frameDocument = frameWindow.document;
+      const calculateButton = frameDocument.getElementById('btnCalculate');
+
+      if (!calculateButton) {
+        document.body.textContent = 'btnCalculate not found';
+        return;
+      }
+
+      calculateButton.click();
+
+      setTimeout(() => {
+        if (!frameWindow.geoData) {
+          document.body.textContent = 'geoData not generated';
+          return;
+        }
+
+        localStorage.setItem('rawGeoData', JSON.stringify(frameWindow.geoData));
+        location.href = 'preview.html';
+      }, 1200);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(transferAndOpenPreview, 1200);
+    });
+  </script>
+</body>
+</html>
