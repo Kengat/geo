@@ -126,6 +126,28 @@ const ContourEditor = (() => {
       const dy = mid.end.y - mid.control.y;
       mid.end = extendToEdge(mid.end.x, mid.end.y, dx, dy, gW, gH);
     }
+
+    // The visual half-step contour should follow the same radial interpolation
+    // logic as the black-mark calculation; averaging Bezier control points alone
+    // is not enough and makes the dashed curve drift away from the true middle.
+    const ox = 0;
+    const oy = gH;
+    const startAngle = Math.atan2(mid.start.y - oy, mid.start.x - ox);
+    const endAngle = Math.atan2(mid.end.y - oy, mid.end.x - ox);
+    const targetAngle = (startAngle + endAngle) / 2;
+    const ra = contourRadiusAtAngle(a, targetAngle, ox, oy);
+    const rb = contourRadiusAtAngle(b, targetAngle, ox, oy);
+    const rm = (ra + rb) / 2;
+    const midPoint = {
+      x: ox + rm * Math.cos(targetAngle),
+      y: oy + rm * Math.sin(targetAngle)
+    };
+
+    mid.control = {
+      x: 2 * midPoint.x - 0.5 * (mid.start.x + mid.end.x),
+      y: 2 * midPoint.y - 0.5 * (mid.start.y + mid.end.y)
+    };
+
     return mid;
   }
 
@@ -455,7 +477,7 @@ const ContourEditor = (() => {
   function contourRadiusAtAngle(contour, targetAngle, ox, oy) {
     let bestDiff = Infinity;
     let bestR = 0;
-    const N = 120;
+    const N = 360;
     for (let i = 0; i <= N; i++) {
       const t = i / N;
       const bx = qB(t, contour.start.x, contour.control.x, contour.end.x);
@@ -486,7 +508,8 @@ const ContourEditor = (() => {
       svgEl('path', {
         d: `M ${mid.start.x * s} ${mid.start.y * s} Q ${mid.control.x * s} ${mid.control.y * s} ${mid.end.x * s} ${mid.end.y * s}`,
         fill: 'none', stroke: '#999', 'stroke-width': 0.8, 'stroke-dasharray': '5,3',
-        opacity: op * 0.6
+        opacity: op * 0.6,
+        'data-contour-kind': 'mid'
       }, g);
     }
 
@@ -494,7 +517,8 @@ const ContourEditor = (() => {
     contourParams.forEach(c => {
       svgEl('path', {
         d: `M ${c.start.x * s} ${c.start.y * s} Q ${c.control.x * s} ${c.control.y * s} ${c.end.x * s} ${c.end.y * s}`,
-        fill: 'none', stroke: c.color, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: op
+        fill: 'none', stroke: c.color, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: op,
+        'data-contour-kind': 'main', 'data-contour-id': c.id
       }, g);
       const t = 0.38;
       const lx = qB(t, c.start.x, c.control.x, c.end.x) * s;
@@ -506,7 +530,8 @@ const ContourEditor = (() => {
       const txt = svgEl('text', {
         x: lx + nx, y: ly + ny,
         'font-size': 12, fill: c.color, 'font-style': 'italic', opacity: op,
-        'text-anchor': 'middle'
+        'text-anchor': 'middle',
+        'data-contour-kind': 'main', 'data-contour-id': c.id
       }, g);
       txt.textContent = c.label;
     });

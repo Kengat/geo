@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step 7: Cartogram
     const carto = Calc.computeCartogram(volData, cols, rows, squareA, squareB);
-    renderStep7(results, carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB);
+    renderStep7(results, carto, volData, inp.blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB);
 
     // Step 8: Process structure
     const maxVol = balance.maxVol;
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => Diagram.drawSitePlan('siteDiagram', data), 50);
   }
 
-  function renderStep7(parent, carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB) {
+  function renderStep7(parent, carto, volData, blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB) {
     const c = makeStep(parent, 7, 'Картограма земляних мас та середня відстань переміщення');
     let html = '<p>Побудовано криві об\'ємів насипу і виїмки з наростаючою сумою. ' +
       'Центри ваги зон виїмки (M) та насипу (N) визначені графічно.</p>';
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     html += '<div class="diagram-container" id="cartogramDiagram"></div>';
     c.innerHTML = html;
     setTimeout(() => Diagram.drawCartogram('cartogramDiagram', {
-      carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB
+      carto, volData, blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB
     }), 50);
   }
 

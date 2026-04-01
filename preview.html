@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uk">
 
 <head>
@@ -235,6 +235,15 @@
 
         #previewContent th {
             font-weight: bold !important;
+        }
+
+        #previewContent table.preview-grid-table,
+        #previewContent table.preview-grid-table thead,
+        #previewContent table.preview-grid-table tbody,
+        #previewContent table.preview-grid-table tr,
+        #previewContent table.preview-grid-table th,
+        #previewContent table.preview-grid-table td {
+            border: 1px solid #000 !important;
         }
 
         #previewContent table.compact-table th,
@@ -564,6 +573,192 @@
             page-break-inside: avoid;
         }
 
+        [data-preview-diagram-host] {
+            position: relative;
+            margin: 20px auto 0;
+            max-width: 100%;
+        }
+
+        .preview-diagram-frame,
+        .carto-svg-frame {
+            width: 100%;
+            padding: 0;
+            border: none;
+            background: transparent;
+            box-sizing: border-box;
+        }
+
+        .preview-diagram-frame > svg,
+        .carto-svg-frame > svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .carto-style-panel {
+            position: fixed;
+            z-index: 1100;
+            width: 280px;
+            max-width: calc(100vw - 24px);
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(245, 240, 229, 0.96);
+            border: 1px solid rgba(54, 48, 36, 0.18);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(10px);
+            color: #2e261d;
+        }
+
+        .carto-style-panel[hidden] {
+            display: none !important;
+        }
+
+        .carto-style-panel h4 {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+        .carto-style-panel p {
+            margin: 6px 0 0;
+            font-size: 12px;
+            line-height: 1.35;
+            color: rgba(46, 38, 29, 0.72);
+        }
+
+        .carto-style-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .carto-style-section {
+            border: 1px solid rgba(54, 48, 36, 0.14);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.46);
+            overflow: hidden;
+        }
+
+        .carto-style-section summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .carto-style-section summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .carto-style-section summary::after {
+            content: 'в–ѕ';
+            font-size: 12px;
+            transition: transform 0.15s ease;
+        }
+
+        .carto-style-section[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .carto-style-section-body {
+            display: grid;
+            gap: 12px;
+            padding: 0 12px 12px;
+        }
+
+        .carto-style-row {
+            display: grid;
+            gap: 6px;
+        }
+
+        .carto-style-row label,
+        .carto-style-range-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .carto-style-row input[type="color"] {
+            width: 100%;
+            height: 38px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .carto-style-row input[type="range"] {
+            width: 100%;
+            accent-color: #8c5e3c;
+        }
+
+        .carto-style-row select {
+            width: 100%;
+            border: 1px solid rgba(54, 48, 36, 0.18);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 8px 10px;
+            color: #2e261d;
+        }
+
+        .carto-style-presets,
+        .carto-style-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .carto-style-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .carto-style-btn {
+            border: 1px solid rgba(54, 48, 36, 0.16);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.82);
+            color: #2e261d;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .carto-style-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            border-color: rgba(54, 48, 36, 0.28);
+        }
+
+        .carto-style-btn:active {
+            transform: translateY(0);
+        }
+
+        .carto-style-btn[data-preset="paper"] {
+            background: linear-gradient(180deg, #f7f1e3 0%, #efe3c7 100%);
+        }
+
+        .carto-style-btn[data-preset="mono"] {
+            background: linear-gradient(180deg, #ffffff 0%, #d9d9d9 100%);
+        }
+
+        .carto-style-panel .value-chip {
+            min-width: 44px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(46, 38, 29, 0.08);
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
         .btn-print-float {
             position: fixed;
             bottom: 30px;
@@ -598,6 +793,7 @@
             }
 
             .controls-panel,
+            .carto-style-panel,
             .btn-print-float,
             .no-print {
                 display: none !important;
@@ -703,6 +899,8 @@
     </div>
 
     <!-- 1 СТОРІНКА: ТИТУЛКА -->
+    <aside id="cartogramStylePanel" class="carto-style-panel no-print" hidden></aside>
+
     <div class="page title-sheet">
         <div class="title-header">
             НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ «ЛЬВІВСЬКА ПОЛІТЕХНІКА»
@@ -911,6 +1109,459 @@
             });
         }
 
+        const CARTO_THEME_STORAGE_KEY = 'geo-cartogram-preview-theme-v4';
+        const CARTO_DEFAULT_THEME = Object.freeze({
+            fillColor: '#6a6a6a',
+            cutColor: '#111111',
+            inkColor: '#2a2a2a',
+            paperColor: '#ffffff',
+            zoneOpacity: 0,
+            hatchOpacity: 65,
+            lineScale: 1.4,
+            contourKColor: '#111111',
+            contourLColor: '#111111',
+            contourMColor: '#111111',
+            backgroundContourColor: '#111111',
+            backgroundContourStyle: 'solid',
+            blackMarkColor: '#4a4a4a',
+            redMarkColor: '#e00000',
+            workingMarkColor: '#4a97e5'
+        });
+        const CARTO_PRESETS = Object.freeze({
+            default: { ...CARTO_DEFAULT_THEME },
+            paper: {
+                fillColor: '#787067',
+                cutColor: '#2c261f',
+                inkColor: '#2b241c',
+                paperColor: '#f7f1e3',
+                zoneOpacity: 4,
+                hatchOpacity: 55,
+                lineScale: 1.25,
+                contourKColor: '#7a3c28',
+                contourLColor: '#5f5649',
+                contourMColor: '#8b7a62',
+                backgroundContourColor: '#a59a87',
+                backgroundContourStyle: 'solid',
+                blackMarkColor: '#2b241c',
+                redMarkColor: '#7a3c28',
+                workingMarkColor: '#4c4339'
+            },
+            mono: {
+                fillColor: '#5f5f5f',
+                cutColor: '#111111',
+                inkColor: '#222222',
+                paperColor: '#ffffff',
+                zoneOpacity: 0,
+                hatchOpacity: 80,
+                lineScale: 1.45,
+                contourKColor: '#111111',
+                contourLColor: '#444444',
+                contourMColor: '#666666',
+                backgroundContourColor: '#9a9a9a',
+                backgroundContourStyle: 'dashed',
+                blackMarkColor: '#111111',
+                redMarkColor: '#333333',
+                workingMarkColor: '#555555'
+            }
+        });
+
+        let cartogramTheme = { ...CARTO_DEFAULT_THEME };
+
+        function normalizeColorToken(value) {
+            return String(value || '').replace(/\s+/g, '').toLowerCase();
+        }
+
+        function clampNumber(value, min, max, fallback) {
+            if (!Number.isFinite(value)) return fallback;
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function normalizeHexColor(value, fallback) {
+            return /^#[0-9a-f]{6}$/i.test(value || '') ? value : fallback;
+        }
+
+        function normalizeCartogramTheme(raw = {}) {
+            return {
+                fillColor: normalizeHexColor(raw.fillColor, CARTO_DEFAULT_THEME.fillColor),
+                cutColor: normalizeHexColor(raw.cutColor, CARTO_DEFAULT_THEME.cutColor),
+                inkColor: normalizeHexColor(raw.inkColor, CARTO_DEFAULT_THEME.inkColor),
+                paperColor: normalizeHexColor(raw.paperColor, CARTO_DEFAULT_THEME.paperColor),
+                zoneOpacity: clampNumber(Number(raw.zoneOpacity), 0, 25, CARTO_DEFAULT_THEME.zoneOpacity),
+                hatchOpacity: clampNumber(Number(raw.hatchOpacity), 0, 100, CARTO_DEFAULT_THEME.hatchOpacity),
+                lineScale: clampNumber(Number(raw.lineScale), 0.6, 1.8, CARTO_DEFAULT_THEME.lineScale),
+                contourKColor: normalizeHexColor(raw.contourKColor, CARTO_DEFAULT_THEME.contourKColor),
+                contourLColor: normalizeHexColor(raw.contourLColor, CARTO_DEFAULT_THEME.contourLColor),
+                contourMColor: normalizeHexColor(raw.contourMColor, CARTO_DEFAULT_THEME.contourMColor),
+                backgroundContourColor: normalizeHexColor(raw.backgroundContourColor, CARTO_DEFAULT_THEME.backgroundContourColor),
+                backgroundContourStyle: raw.backgroundContourStyle === 'solid' ? 'solid' : CARTO_DEFAULT_THEME.backgroundContourStyle,
+                blackMarkColor: normalizeHexColor(raw.blackMarkColor, CARTO_DEFAULT_THEME.blackMarkColor),
+                redMarkColor: normalizeHexColor(raw.redMarkColor, CARTO_DEFAULT_THEME.redMarkColor),
+                workingMarkColor: normalizeHexColor(raw.workingMarkColor, CARTO_DEFAULT_THEME.workingMarkColor)
+            };
+        }
+
+        function loadCartogramTheme() {
+            try {
+                const raw = localStorage.getItem(CARTO_THEME_STORAGE_KEY);
+                return raw ? normalizeCartogramTheme(JSON.parse(raw)) : { ...CARTO_DEFAULT_THEME };
+            } catch (error) {
+                return { ...CARTO_DEFAULT_THEME };
+            }
+        }
+
+        function saveCartogramTheme(theme) {
+            try {
+                localStorage.setItem(CARTO_THEME_STORAGE_KEY, JSON.stringify(theme));
+            } catch (error) {
+                console.warn('Could not save cartogram preview theme', error);
+            }
+        }
+
+        function hexToRgb(hex) {
+            const safeHex = (hex || '#000000').replace('#', '');
+            return {
+                r: parseInt(safeHex.slice(0, 2), 16),
+                g: parseInt(safeHex.slice(2, 4), 16),
+                b: parseInt(safeHex.slice(4, 6), 16)
+            };
+        }
+
+        function hexToRgba(hex, alpha) {
+            const { r, g, b } = hexToRgb(hex);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        function getDiagramHosts() {
+            return Array.from(document.querySelectorAll('[data-preview-diagram-host]'));
+        }
+
+        function getDiagramSvgs() {
+            return getDiagramHosts()
+                .map((host) => ({ host, svg: host.querySelector('svg') }))
+                .filter((entry) => entry.svg);
+        }
+
+        function getActiveDiagramHost() {
+            const hosts = getDiagramHosts();
+            if (!hosts.length) return null;
+
+            const viewportH = window.innerHeight || document.documentElement.clientHeight || 0;
+            const visibleHosts = hosts
+                .map((host) => ({ host, rect: host.getBoundingClientRect() }))
+                .filter(({ rect }) => rect.bottom > 60 && rect.top < viewportH - 60)
+                .sort((a, b) => Math.abs(a.rect.top - 110) - Math.abs(b.rect.top - 110));
+
+            return (visibleHosts[0] || { host: hosts[0] }).host;
+        }
+
+        function detectCartogramRole(value) {
+            const color = normalizeColorToken(value);
+            if (!color || color === 'none' || color.startsWith('url(')) return '';
+            if (color === '#fff' || color === '#ffffff' || color === 'white') return 'paper';
+            if (color === '#2a9d8f' || color === 'rgb(42,157,143)' || color === '#6a6a6a') return 'fill';
+            if (color === '#e76f51' || color === 'rgb(231,111,81)' || color === '#e63946' || color === '#d62828' || color === 'rgb(230,57,70)' || color === 'rgb(214,40,40)') return 'cut';
+            if (color === '#fafafa') return 'paper';
+            if (color.startsWith('rgba(42,157,143,')) return 'fill-zone';
+            if (color.startsWith('rgba(231,111,81,')) return 'cut-zone';
+            if (color.startsWith('rgba(0,0,0,0.07') || color.startsWith('rgba(0,0,0,0.08')) return 'watermark';
+
+            const inkPalette = new Set([
+                '#264653', '#333', '#333333', '#444', '#444444', '#555', '#555555',
+                '#666', '#666666', '#777', '#777777', '#888', '#888888', '#999', '#999999',
+                'black', '#000', '#000000'
+            ]);
+            return inkPalette.has(color) ? 'ink' : '';
+        }
+
+        function prepareCartogramSvg(svg) {
+            if (!svg || svg.dataset.cartoPrepared === '1') return;
+
+            svg.querySelectorAll('*').forEach((node) => {
+                if (node.closest('pattern') && node.tagName.toLowerCase() === 'line') {
+                    node.dataset.cartoStrokeRole = node.dataset.cartoStrokeRole || 'hatch';
+                }
+
+                if (node.hasAttribute('fill') && !node.dataset.cartoFillRole) {
+                    const role = detectCartogramRole(node.getAttribute('fill'));
+                    if (role) node.dataset.cartoFillRole = role;
+                }
+
+                if (node.hasAttribute('stroke') && !node.dataset.cartoStrokeRole) {
+                    const role = detectCartogramRole(node.getAttribute('stroke'));
+                    if (role) node.dataset.cartoStrokeRole = role;
+                }
+
+                if (node.hasAttribute('stroke-width') && !node.dataset.cartoBaseStrokeWidth) {
+                    node.dataset.cartoBaseStrokeWidth = node.getAttribute('stroke-width');
+                }
+            });
+
+            svg.dataset.cartoPrepared = '1';
+        }
+
+        function applyCartogramRole(node, attrName, role, theme) {
+            if (!role) return;
+            if (role === 'fill') node.setAttribute(attrName, theme.fillColor);
+            if (role === 'cut') node.setAttribute(attrName, theme.cutColor);
+            if (role === 'ink') node.setAttribute(attrName, theme.inkColor);
+            if (role === 'paper') node.setAttribute(attrName, theme.paperColor);
+            if (role === 'fill-zone') node.setAttribute(attrName, hexToRgba(theme.fillColor, theme.zoneOpacity / 100));
+            if (role === 'cut-zone') node.setAttribute(attrName, hexToRgba(theme.cutColor, theme.zoneOpacity / 100));
+            if (role === 'watermark') node.setAttribute(attrName, hexToRgba(theme.inkColor, 0.12));
+            if (role === 'hatch') {
+                node.setAttribute(attrName, theme.inkColor);
+                node.setAttribute('opacity', String(theme.hatchOpacity / 100));
+            }
+        }
+
+        function applyCartogramTheme(theme) {
+            const diagrams = getDiagramSvgs();
+            if (!diagrams.length) return;
+
+            diagrams.forEach(({ host, svg }) => {
+                prepareCartogramSvg(svg);
+                host.style.background = theme.paperColor;
+
+                svg.querySelectorAll('*').forEach((node) => {
+                    if (node.dataset.cartoFillRole) {
+                        applyCartogramRole(node, 'fill', node.dataset.cartoFillRole, theme);
+                    }
+                    if (node.dataset.cartoStrokeRole) {
+                        applyCartogramRole(node, 'stroke', node.dataset.cartoStrokeRole, theme);
+                    }
+
+                    if (node.dataset.cartoBaseStrokeWidth && node.hasAttribute('stroke-width')) {
+                        const baseWidth = parseFloat(node.dataset.cartoBaseStrokeWidth);
+                        if (Number.isFinite(baseWidth)) {
+                            const scaledWidth = Math.max(0.2, baseWidth * theme.lineScale);
+                            node.setAttribute('stroke-width', scaledWidth.toFixed(3).replace(/\.?0+$/, ''));
+                        }
+                    }
+                });
+
+                svg.querySelectorAll('[data-contour-kind="mid"]').forEach((node) => {
+                    node.setAttribute('stroke', theme.backgroundContourColor);
+                    node.setAttribute('stroke-dasharray', theme.backgroundContourStyle === 'solid' ? 'none' : '5,3');
+                });
+
+                ['K', 'L', 'M'].forEach((contourId) => {
+                    const colorKey = `contour${contourId}Color`;
+                    svg.querySelectorAll(`[data-contour-kind="main"][data-contour-id="${contourId}"]`).forEach((node) => {
+                        if (node.tagName.toLowerCase() === 'path') node.setAttribute('stroke', theme[colorKey]);
+                        else node.setAttribute('fill', theme[colorKey]);
+                    });
+                });
+
+                svg.querySelectorAll('[data-mark-role="black"]').forEach((node) => {
+                    node.setAttribute('fill', theme.blackMarkColor);
+                });
+                svg.querySelectorAll('[data-mark-role="red"]').forEach((node) => {
+                    node.setAttribute('fill', theme.redMarkColor);
+                });
+                svg.querySelectorAll('[data-mark-role="working"]').forEach((node) => {
+                    node.setAttribute('fill', theme.workingMarkColor);
+                });
+            });
+
+            saveCartogramTheme(theme);
+        }
+
+        function syncCartogramPanelValues() {
+            const panel = document.getElementById('cartogramStylePanel');
+            if (!panel || panel.hidden) return;
+
+            panel.querySelector('[name="fillColor"]').value = cartogramTheme.fillColor;
+            panel.querySelector('[name="cutColor"]').value = cartogramTheme.cutColor;
+            panel.querySelector('[name="inkColor"]').value = cartogramTheme.inkColor;
+            panel.querySelector('[name="paperColor"]').value = cartogramTheme.paperColor;
+            panel.querySelector('[name="zoneOpacity"]').value = String(cartogramTheme.zoneOpacity);
+            panel.querySelector('[name="hatchOpacity"]').value = String(cartogramTheme.hatchOpacity);
+            panel.querySelector('[name="lineScale"]').value = String(cartogramTheme.lineScale);
+            panel.querySelector('[name="contourKColor"]').value = cartogramTheme.contourKColor;
+            panel.querySelector('[name="contourLColor"]').value = cartogramTheme.contourLColor;
+            panel.querySelector('[name="contourMColor"]').value = cartogramTheme.contourMColor;
+            panel.querySelector('[name="backgroundContourColor"]').value = cartogramTheme.backgroundContourColor;
+            panel.querySelector('[name="backgroundContourStyle"]').value = cartogramTheme.backgroundContourStyle;
+            panel.querySelector('[name="blackMarkColor"]').value = cartogramTheme.blackMarkColor;
+            panel.querySelector('[name="redMarkColor"]').value = cartogramTheme.redMarkColor;
+            panel.querySelector('[name="workingMarkColor"]').value = cartogramTheme.workingMarkColor;
+
+            panel.querySelector('[data-value-for="zoneOpacity"]').textContent = `${cartogramTheme.zoneOpacity}%`;
+            panel.querySelector('[data-value-for="hatchOpacity"]').textContent = `${cartogramTheme.hatchOpacity}%`;
+            panel.querySelector('[data-value-for="lineScale"]').textContent = `${cartogramTheme.lineScale.toFixed(2)}x`;
+        }
+
+        function setCartogramTheme(nextTheme) {
+            cartogramTheme = normalizeCartogramTheme(nextTheme);
+            syncCartogramPanelValues();
+            applyCartogramTheme(cartogramTheme);
+            positionCartogramStylePanel();
+        }
+
+        function positionCartogramStylePanel() {
+            const panel = document.getElementById('cartogramStylePanel');
+            const anchor = getActiveDiagramHost();
+            if (!panel || panel.hidden || !anchor) return;
+
+            const gap = 84;
+            const anchorRect = anchor.getBoundingClientRect();
+            const panelRect = panel.getBoundingClientRect();
+
+            let left = anchorRect.left - panelRect.width - gap;
+            if (left < 16) left = anchorRect.right + gap;
+            if (left + panelRect.width > window.innerWidth - 16) {
+                left = Math.max(16, window.innerWidth - panelRect.width - 16);
+            }
+
+            const topLimit = Math.max(16, window.innerHeight - panelRect.height - 16);
+            const top = Math.min(Math.max(16, anchorRect.top), topLimit);
+
+            panel.style.left = `${Math.round(left)}px`;
+            panel.style.top = `${Math.round(top)}px`;
+        }
+
+        function initCartogramCustomizer() {
+            const panel = document.getElementById('cartogramStylePanel');
+            const anchor = getActiveDiagramHost();
+            const diagrams = getDiagramSvgs();
+            if (!panel) return;
+
+            if (!anchor || !diagrams.length) {
+                panel.hidden = true;
+                return;
+            }
+
+            panel.hidden = false;
+            panel.innerHTML = `
+                <h4>Стиль схем і картограми</h4>
+                <p>Змінює копії у прев'ю та в PDF: майданчик, нульову лінію, позначки та картограму.</p>
+                <div class="carto-style-grid">
+                    <div class="carto-style-presets">
+                        <button type="button" class="carto-style-btn" data-preset="default">Звичайний</button>
+                        <button type="button" class="carto-style-btn" data-preset="paper">Папір</button>
+                        <button type="button" class="carto-style-btn" data-preset="mono">Р§/Р±</button>
+                    </div>
+                    <details class="carto-style-section" open>
+                        <summary>Загальні</summary>
+                        <div class="carto-style-section-body">
+                            <div class="carto-style-row">
+                                <label for="cartoFillColor">Насип</label>
+                                <input id="cartoFillColor" type="color" name="fillColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="cartoCutColor">Виїмка</label>
+                                <input id="cartoCutColor" type="color" name="cutColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="cartoInkColor">Контури й текст</label>
+                                <input id="cartoInkColor" type="color" name="inkColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="cartoPaperColor">Фон аркуша</label>
+                                <input id="cartoPaperColor" type="color" name="paperColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <div class="carto-style-range-head">
+                                    <span>Тон заливки</span>
+                                    <span class="value-chip" data-value-for="zoneOpacity"></span>
+                                </div>
+                                <input type="range" name="zoneOpacity" min="0" max="25" step="1">
+                            </div>
+                            <div class="carto-style-row">
+                                <div class="carto-style-range-head">
+                                    <span>Штрихування</span>
+                                    <span class="value-chip" data-value-for="hatchOpacity"></span>
+                                </div>
+                                <input type="range" name="hatchOpacity" min="0" max="100" step="1">
+                            </div>
+                            <div class="carto-style-row">
+                                <div class="carto-style-range-head">
+                                    <span>Товщина ліній</span>
+                                    <span class="value-chip" data-value-for="lineScale"></span>
+                                </div>
+                                <input type="range" name="lineScale" min="0.6" max="1.8" step="0.05">
+                            </div>
+                        </div>
+                    </details>
+                    <details class="carto-style-section">
+                        <summary>Горизонталі</summary>
+                        <div class="carto-style-section-body">
+                            <div class="carto-style-row">
+                                <label for="contourKColor">K</label>
+                                <input id="contourKColor" type="color" name="contourKColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="contourLColor">L</label>
+                                <input id="contourLColor" type="color" name="contourLColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="contourMColor">M</label>
+                                <input id="contourMColor" type="color" name="contourMColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="backgroundContourColor">Фонові горизонталі</label>
+                                <input id="backgroundContourColor" type="color" name="backgroundContourColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="backgroundContourStyle">Тип фонових</label>
+                                <select id="backgroundContourStyle" name="backgroundContourStyle">
+                                    <option value="dashed">Штрихові</option>
+                                    <option value="solid">Суцільні</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="carto-style-section">
+                        <summary>Позначки</summary>
+                        <div class="carto-style-section-body">
+                            <div class="carto-style-row">
+                                <label for="blackMarkColor">Чорні позначки</label>
+                                <input id="blackMarkColor" type="color" name="blackMarkColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="redMarkColor">Червоні позначки</label>
+                                <input id="redMarkColor" type="color" name="redMarkColor">
+                            </div>
+                            <div class="carto-style-row">
+                                <label for="workingMarkColor">Робочі позначки</label>
+                                <input id="workingMarkColor" type="color" name="workingMarkColor">
+                            </div>
+                        </div>
+                    </details>
+                    <div class="carto-style-actions">
+                        <button type="button" class="carto-style-btn" data-action="reset">Скинути налаштування</button>
+                    </div>
+                </div>
+            `;
+
+            cartogramTheme = loadCartogramTheme();
+            diagrams.forEach(({ svg }) => prepareCartogramSvg(svg));
+            syncCartogramPanelValues();
+            applyCartogramTheme(cartogramTheme);
+
+            panel.querySelectorAll('[data-preset]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const presetName = button.dataset.preset;
+                    setCartogramTheme(CARTO_PRESETS[presetName] || CARTO_DEFAULT_THEME);
+                });
+            });
+
+            panel.querySelector('[data-action="reset"]').addEventListener('click', () => {
+                setCartogramTheme(CARTO_DEFAULT_THEME);
+            });
+
+            panel.querySelectorAll('input, select').forEach((input) => {
+                input.addEventListener('input', () => {
+                    setCartogramTheme({
+                        ...cartogramTheme,
+                        [input.name]: input.type === 'range' ? Number(input.value) : input.value
+                    });
+                });
+            });
+
+            requestAnimationFrame(positionCartogramStylePanel);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             updatePrintView();
 
@@ -1045,7 +1696,7 @@
                         laborDays,
                         machineDayNorm,
                         laborDayNorm,
-                        enCode: norm.enCode || 'ЕН',
+                        enCode: norm.enCode || 'Р•Рќ',
                         crewLabel: `${crewCount} роб. у зміну`
                     };
                 };
@@ -1316,7 +1967,7 @@
                 // ==========================
                 let step2Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">2. Розбивка будівельного майданчика</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">На плані майданчика в горизонталях наносимо сітку квадратів зі сторонами ${squareA}x${squareB} м залежно від розмірів майданчика та рельєфу місцевості так, щоб в квадраті була мінімум одна і максимум дві горизонталі. Якщо рельєф місцевості складний, квадрати розділяють діагоналями на трикутники. Перетин сторін квадратів чи трикутників утворює вершину Hn, де n– число квадратів чи трикутників. (Рис. 1)</p>
-                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-2-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="preview-diagram-frame step-2-diagram" data-preview-diagram-host data-diagram-group="site" style="width:100%;">${svgs?.site || ''}</div></div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 1 План будівельного майданчика</p>`;
 
                 // ==========================
@@ -1326,6 +1977,7 @@
                 let h1L = [], h2L = [], h4L = [];
                 const nPoints = cols * rows;
                 const tbl1Rows = [];
+                const blackCalcLines = [];
                 for (let r = 0; r < rows; r++) {
                     for (let c = 0; c < cols; c++) {
                         let i = r * cols + c;
@@ -1343,20 +1995,41 @@
                         const vl = typeof det?.l === 'number' ? det.l.toFixed(2) : (det?.l || '-');
                         const vL_dist = typeof det?.L === 'number' ? det.L.toFixed(2) : (det?.L || '-');
                         const vh = typeof det?.h === 'number' ? det.h.toFixed(3) : (det?.h || '-');
-                        tbl1Rows.push(`<tr><td>H${i + 1}</td><td>${vH0}</td><td>${vl}</td><td>${vL_dist}</td><td>${vh}</td><td>${f3(inp.blackMarks[i])}</td></tr>`);
+                        if (typeof det?.H0 === 'number' && typeof det?.h === 'number' && typeof det?.l === 'number' && typeof det?.L === 'number') {
+                            blackCalcLines.push(
+                                mathLine(
+                                    row(
+                                        mt(`Hч(H${i + 1})`),
+                                        mo('='),
+                                        mn(det.H0.toFixed(3)),
+                                        mo('+'),
+                                        frac(
+                                            row(mn(det.h.toFixed(3)), mo('·'), mn(det.l.toFixed(2))),
+                                            mn(det.L.toFixed(2))
+                                        ),
+                                        mo('='),
+                                        mn(f3(inp.blackMarks[i])),
+                                        mt(' м')
+                                    )
+                                )
+                            );
+                        }
+                        tbl1Rows.push(`<tr><td style="border:1px solid #000; padding:4px;">H${i + 1}</td><td style="border:1px solid #000; padding:4px;">${vH0}</td><td style="border:1px solid #000; padding:4px;">${vl}</td><td style="border:1px solid #000; padding:4px;">${vL_dist}</td><td style="border:1px solid #000; padding:4px;">${vh}</td><td style="border:1px solid #000; padding:4px;">${f3(inp.blackMarks[i])}</td></tr>`);
                     }
                 }
                 const numSquares = (cols - 1) * (rows - 1);
 
                 let step3Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">3. Визначення чорних відміток</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">Чорні відмітки, які знаходяться між двома горизонталями, визначаємо методом інтерполяції. Наносимо знайдені чорні відмітки на будівельний майданчик (Рис.2)</p>
-                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">H<sub>ч</sub> = H<sub>0</sub> + h * l / L</p>
+                    ${mathLine(row(sub(mi('H'), mt('ч')), mo('='), sub(mi('H'), mn('0')), mo('+'), frac(row(mi('h'), mo('·'), mi('l')), mi('L'))))}
                     <p style="text-align: justify; text-indent: 1.25cm;">де H<sub>0</sub> – відмітка меншої горизонталі, м;</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">h – перевищення одної горизонталі над іншою, м;</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">l – відстань від горизонталі з меншою відміткою до точки А, м;</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">L – відстань між двома горизонталями в плані, м.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Значення чорних відміток на плані будівельного майданчика записують внизу справа від вершини квадрата (рис.2) і в зведену таблицю чорних відміток (табл. 1)</p>
-                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-3-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <p style="text-align: justify; text-indent: 1.25cm; margin-top: 16px;">Розрахунок чорних відміток для всіх вершин:</p>
+                    ${blackCalcLines.join('')}
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="preview-diagram-frame step-3-diagram" data-preview-diagram-host data-diagram-group="site" style="width:100%;">${svgs?.site || ''}</div></div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 2 Будівельний майданчик з нанесеними чорними відмітками вершин квадратів</p>
                     <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних відміток<br>Таблиця 1</p>
                     <table style="width:100%; border-collapse: collapse; text-align:center;">
@@ -1391,7 +2064,7 @@
                 // ==========================
                 const tbl2Rows = [];
                 for (let i = 0; i < nPoints; i++) {
-                    tbl2Rows.push(`<tr><td>H${i + 1}</td><td>${f3(inp.blackMarks[i])}</td><td>${f3(redMarks[i])}</td><td>${f3(workingMarks[i])}</td></tr>`);
+                    tbl2Rows.push(`<tr><td style="border:1px solid #000; padding:4px;">H${i + 1}</td><td style="border:1px solid #000; padding:4px;">${f3(inp.blackMarks[i])}</td><td style="border:1px solid #000; padding:4px;">${f3(redMarks[i])}</td><td style="border:1px solid #000; padding:4px;">${f3(workingMarks[i])}</td></tr>`);
                 }
 
                 let step5Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">5. Обчислення червоних проектних та робочих відміток (загальна таблиця)</h2>
@@ -1405,7 +2078,7 @@
                     <p style="text-align: justify; text-indent: 1.25cm;">За знаком робочої відмітки h визначають тип робіт на майданчику: при h>0 – насип; h<0 – виїмка. Чорні, червоні (проектні) та робочі відмітки записують у табл. 2.</p>
                     
                     <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних, червоних та робочих відміток<br>Таблиця 2</p>
-                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                    <table class="preview-grid-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
                             <th style="border:1px solid #000; padding:4px;">Вершина квадрата</th>
                             <th style="border:1px solid #000; padding:4px;">Значення чорної відмітки</th>
@@ -1422,7 +2095,7 @@
                     <p style="text-align: justify; text-indent: 1.25cm;">Нульову лінію будують, з’єднуючи нульові точки, положення яких визначають графічним або аналітичним способом. При графічному способі на сторонах квадратів у довільному масштабі відкладають робочі відмітки зі знаком „плюс” в одну сторону, а зі знаком „мінус” – в іншу і з’єднують між собою.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">В місцях перетину з стороною квадрата отримують нульові точки, які характеризують перелом рельєфу. Крива проведена через нульові точки є нульовою лінією, яка розділяє ділянки виїмки і насипу.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Аналітично положення нульових точок визначають інтерполяцією, виходячи зі значення робочих відміток «сусідніх» вершин квадратів (трикутників). Приклад запису чорних, червоних і робочих відміток та лінії нульових робіт на план будівельного майданчика показано на (рис.3).</p>
-                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="step-6-diagram" style="width:100%;">${svgs?.site || ''}</div></div>
+                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div class="preview-diagram-frame step-6-diagram" data-preview-diagram-host data-diagram-group="site" style="width:100%;">${svgs?.site || ''}</div></div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 3 Нанесення чорних, червоних і робочих відміток та лінії нульових робіт на план будівельного майданчика</p>`;
 
                 // ==========================
@@ -1430,7 +2103,7 @@
                 // ==========================
                 let step7Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">7. Обчислення об’ємів робіт (насип та виїмка)</h2>
                     <p style="text-align: justify; text-indent: 1.25cm;">Об’єм розраховують як добуток середньої робочої відмітки (із чотирьох) на площу квадрата за формулою:</p>
-                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V = a² / 4 * (h1 + h2 + h3 + h4)</p>
+                    <p style="text-align: center; font-size: 16pt; margin: 20px 0;">V = aВІ / 4 * (h1 + h2 + h3 + h4)</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">де а – сторона квадрата, м;</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">h1, h2, h3, h4 – робочі відмітки, м.</p>
                     <p style="text-align: justify; text-indent: 1.25cm;">Об’єм грунту в межах перехідних квадратів визначають за формулою:</p>
@@ -1444,10 +2117,10 @@
                             <tr>
                                 <th rowspan="2" style="border:1px solid #000; padding:3px;">№ кв.</th>
                                 <th colspan="4" style="border:1px solid #000; padding:3px;">Робоча відмітка, м</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">Σ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">a²/4</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>Н</sub>)²<br>/Σ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>В</sub>)²<br>/Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">aВІ/4</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>Рќ</sub>)ВІ<br>/ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>Р’</sub>)ВІ<br>/ОЈ|h|</th>
                                 <th colspan="2" style="border:1px solid #000; padding:3px;">Об'єм робіт, м³</th>
                             </tr>
                             <tr>
@@ -1496,7 +2169,7 @@
                     <p style="text-align: justify; text-indent: 1.25cm;">Наносимо на майданчик лінію середньої відстані переміщення грунту на будевельний майданчик та визначаємо її довжину, відносно неї виконуємо подальший підбір техніки (Рис.4)</p>
                     <p style="text-align: center; margin-top: 10px; font-weight: bold;">L<sub>сер</sub> = ${f3(carto?.Lsr || 0)} м</p>
                     <p style="text-align: justify; text-indent: 1.25cm; margin-top:20px;">При графічному методі визначення середньої відстані переміщення грунту будують криві об’ємів насипу і виїмки з наростаючою сумою по вертикальних колонках квадратів чи трикутників для поперечної та поздовжньої сторін майданчика (рис. 5).</p>
-                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div style="width:100%;">${svgs?.carto || ''}</div></div>
+                    <div class="preview-diagram-frame carto-svg-frame" data-preview-diagram-host data-diagram-group="cartogram">${svgs?.carto || ''}</div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 5 Картограма земляних мас та визначення середньої відстані переміщення грунту графічним способом</p>`;
 
 
@@ -1523,7 +2196,7 @@
                     <p style="text-align: justify; text-indent: 1.25cm;">Формуємо комплект спеціалізованої техніки для подальшого техніко-економічного та нормативного розрахунку. Для планувальних операцій застосовуємо окремі допоміжні машини, а для ущільнення — коток.</p>
                     <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">в„–</th>
                             <th style="border:1px solid #000; padding:4px; width:50%;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px; width:40%;">Машина (Комплект ${tepResults?.winner || 1})</th>
                         </tr></thead>
@@ -1618,7 +2291,7 @@
                     <div class="scaled-table-wrap"><div class="scaled-table-inner">
                     <table class="ultra-compact-table" style="width:100%; border-collapse: collapse; text-align:center; mt-4">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px;">№</th>
+                            <th style="border:1px solid #000; padding:4px;">в„–</th>
                             <th style="border:1px solid #000; padding:4px;">Пункт ЕН</th>
                             <th style="border:1px solid #000; padding:4px;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px;">Об'єм робіт</th>
@@ -1786,7 +2459,7 @@
                     <table class="step13-schedule-table">
                         <thead>
                             <tr>
-                                <th class="num-col">№</th>
+                                <th class="num-col">в„–</th>
                                 <th class="process-col">Назва процесу</th>
                                 <th class="volume-col">Об'єм</th>
                                 <th class="machine-col">Машина</th>
@@ -1844,7 +2517,7 @@
                     return clipped;
                 };
                 const svgColumns = [
-                    { key: 'num', label: '№', width: 20, chars: 2, align: 'middle' },
+                    { key: 'num', label: 'в„–', width: 20, chars: 2, align: 'middle' },
                     { key: 'name', label: "Назва процесу", width: 58, chars: 7, align: 'start' },
                     { key: 'volume', label: "Об'єм", width: 54, chars: 9, align: 'middle' },
                     { key: 'machine', label: 'Машина', width: 48, chars: 7, align: 'start' },
@@ -2044,7 +2717,7 @@
                 step4Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">4. Визначення середньої планувальної відмітки</h2>
                     ${paragraph(`Середню планувальну відмітку визначаємо за методикою для майданчика, розбитого на квадрати. При цьому чорні відмітки вершин враховуються з ваговими коефіцієнтами залежно від кількості суміжних квадратів.`)}
                     ${mathLine(row(sub(mi('H'), mt('сер')), mo('='), frac(row(mn('4'), mo('·'), mo('∑'), sub(mi('H'), mn('4')), mo('+'), mn('2'), mo('·'), mo('∑'), sub(mi('H'), mn('2')), mo('+'), mo('∑'), sub(mi('H'), mn('1'))), row(mn('4'), mi('n')))))}
-                    ${paragraph(`де \\sum H<sub>4</sub> = ${f3(sumH4)} м, \\sum H<sub>2</sub> = ${f3(sumH2)} м, \\sum H<sub>1</sub> = ${f3(sumH1)} м, n = ${numSquares}.`)}
+                    ${paragraph(`де ΣH<sub>4</sub> = ${f3(sumH4)} м, ΣH<sub>2</sub> = ${f3(sumH2)} м, ΣH<sub>1</sub> = ${f3(sumH1)} м, n = ${numSquares}.`)}
                     ${mathLine(row(sub(mi('H'), mt('сер')), mo('='), frac(row(mn('4'), mo('·'), mn(f3(sumH4)), mo('+'), mn('2'), mo('·'), mn(f3(sumH2)), mo('+'), mn(f3(sumH1))), row(mn('4'), mo('·'), mn(numSquares))), mo('='), mn(f3(Hser)), mt(' м')))}
                     ${resultLine(`Отже, середня планувальна відмітка майданчика становить H<sub>сер</sub> = ${f3(Hser)} м.`)}`;
 
@@ -2061,7 +2734,7 @@
                     ${sampleVerticesHtml}
                     ${resultLine(`Знак робочої відмітки визначає характер робіт: при h > 0 маємо насип, при h < 0 маємо виїмку.`)}
                     <p style="text-align: center; font-weight: bold; margin-top: 30px;">Зведена таблиця чорних, червоних та робочих відміток<br>Таблиця 2</p>
-                    <table style="width:100%; border-collapse: collapse; text-align:center;">
+                    <table class="preview-grid-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
                             <th style="border:1px solid #000; padding:4px;">Вершина квадрата</th>
                             <th style="border:1px solid #000; padding:4px;">Значення чорної відмітки</th>
@@ -2083,10 +2756,10 @@
                             <tr>
                                 <th rowspan="2" style="border:1px solid #000; padding:3px;">№ кв.</th>
                                 <th colspan="4" style="border:1px solid #000; padding:3px;">Робоча відмітка, м</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">Σ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">a²/4</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>н</sub>)² / Σ|h|</th>
-                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(Σh<sub>в</sub>)² / Σ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">aВІ/4</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>РЅ</sub>)ВІ / ОЈ|h|</th>
+                                <th rowspan="2" style="border:1px solid #000; padding:3px;">(ОЈh<sub>РІ</sub>)ВІ / ОЈ|h|</th>
                                 <th colspan="2" style="border:1px solid #000; padding:3px;">Об'єм робіт, м³</th>
                             </tr>
                             <tr>
@@ -2124,8 +2797,13 @@
                             <tr><td colspan="9" style="text-align:right; border:1px solid #000; padding:3px;"><strong>Об'єм робіт</strong></td><td style="border:1px solid #000; padding:3px;"><strong>${f2(volData.totalFill)}</strong></td><td style="border:1px solid #000; padding:3px;"><strong>${f2(volData.totalCut)}</strong></td></tr>
                         </tbody>
                     </table>
+                    ${paragraph(`Під час перевірки балансу земляних мас об'єм виїмки враховують з урахуванням залишкового розпушення ґрунту. Для вибраного ґрунту коефіцієнт становить k<sub>зал</sub> = ${inp.soil.kResidual.toFixed(3)}.`)}
+                    ${paragraph(`Приведений об'єм виїмки дорівнює ${f2(volData.totalCut)} · ${inp.soil.kResidual.toFixed(3)} = ${f2(balance.loosened)} м³.`)}
+                    ${paragraph(`У разі перевищення допустимої похибки 5 % виконують коригування середньої планувальної відмітки на величину ΔH = <span style="display:inline-block; vertical-align:middle; text-align:center; line-height:1.05;"><span style="display:block; border-bottom:1px solid currentColor; padding:0 6px;">(V<sub>виїм</sub> − V<sub>нас</sub>)</span><span style="display:block;">n · a²</span></span>, після чого повторно визначають червоні та робочі відмітки і перераховують об'єми земляних робіт.`)}
                     ${mathLine(row(mi('Δ'), mo('='), frac(row(mo('|'), mn(f2(volData.totalFill)), mo('−'), mn(f2(balance.loosened)), mo('|')), mn(f2(balance.maxVol))), mo('·'), mn('100'), mo('%'), mo('='), mn(fmt(balance.error, 2)), mo('%')))}
-                    ${resultLine(`Оскільки похибка балансу становить ${fmt(balance.error, 2)} %, що не перевищує 5 %, коригування об'ємів не потрібне.`)}`;
+                    ${balance.error <= 5
+                        ? resultLine(`Оскільки похибка балансу становить ${fmt(balance.error, 2)} %, що не перевищує 5 %, коригування об'ємів не потрібне.`)
+                        : resultLine(`Оскільки похибка балансу становить ${fmt(balance.error, 2)} %, що перевищує 5 %, необхідно виконати коригування об'ємів.`)}`;
 
                 step8Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">8. Визначення середньої довжини транспортування графічним методом</h2>
                     ${paragraph(`Середню відстань переміщення ґрунту визначаємо графічним методом відповідно до методичних вказівок. Для цього по вертикальних колонках і горизонтальних рядах квадратів будуємо криві наростаючих об’ємів насипу та виїмки.`)}
@@ -2139,7 +2817,7 @@
                     ${paragraph(`Координати центрів ваги: M(${fmt(carto?.cxCut, 1)}; ${fmt(carto?.cyCut, 1)}), N(${fmt(carto?.cxFill, 1)}; ${fmt(carto?.cyFill, 1)}).`)}
                     ${mathLine(row(sub(mi('L'), mt('ср')), mo('='), sqrt(row(sup(row(mo('('), mn(fmt(carto?.cxCut, 1)), mo('−'), mn(fmt(carto?.cxFill, 1)), mo(')')), mn('2')), mo('+'), sup(row(mo('('), mn(fmt(carto?.cyCut, 1)), mo('−'), mn(fmt(carto?.cyFill, 1)), mo(')')), mn('2')))), mo('='), mn(fmt(carto?.Lsr, 1)), mt(' м')))}
                     ${resultLine(`Середня дальність транспортування ґрунту становить ${fmt(carto?.Lsr, 1)} м.`)}
-                    <div style="text-align:center; margin-top:20px; max-width:100%;"><div style="width:100%;">${svgs?.carto || ''}</div></div>
+                    <div class="preview-diagram-frame carto-svg-frame" data-preview-diagram-host data-diagram-group="cartogram">${svgs?.carto || ''}</div>
                     <p style="text-align: center; font-style: italic; margin-top: 10px;">Рис. 5 Картограма земляних мас та визначення середньої відстані переміщення ґрунту</p>`;
 
                 step9Html = `<h2 style="text-align: center; font-size: 16pt; margin-bottom: 20px; font-weight: bold;">9. Попередній вибір ведучих машин</h2>
@@ -2154,7 +2832,7 @@
                     ${paragraph(`Комплектування машин виконуємо для двох конкурентних варіантів ведучої техніки. Для кожного процесу добираємо сумісні допоміжні машини, після чого порівнюємо комплекти за техніко-економічними показниками.`)}
                     <table class="compact-table" style="width:100%; border-collapse: collapse; text-align:center;">
                         <thead><tr>
-                            <th style="border:1px solid #000; padding:4px; width:10%;">№</th>
+                            <th style="border:1px solid #000; padding:4px; width:10%;">в„–</th>
                             <th style="border:1px solid #000; padding:4px; width:40%;">Назва процесу</th>
                             <th style="border:1px solid #000; padding:4px; width:${top2Available ? '25%' : '50%'};">Комплект 1</th>
                             ${top2Available ? '<th style="border:1px solid #000; padding:4px; width:25%;">Комплект 2</th>' : ''}
@@ -2316,12 +2994,14 @@
                 // Clear the container and replace
                 const wrappersPage = document.querySelector('.page:not(.title-sheet)');
                 wrappersPage.parentNode.replaceChild(fragment, wrappersPage);
+                initCartogramCustomizer();
                 requestAnimationFrame(() => {
                     fitScaledTables();
                     requestAnimationFrame(() => {
                         fitScaledTables();
                         updateTocPageNumbers();
                         requestAnimationFrame(updateTocPageNumbers);
+                        requestAnimationFrame(positionCartogramStylePanel);
                     });
                 });
 
@@ -2333,7 +3013,9 @@
         window.addEventListener('resize', () => {
             fitScaledTables();
             updateTocPageNumbers();
+            positionCartogramStylePanel();
         });
+        window.addEventListener('scroll', positionCartogramStylePanel, { passive: true });
         window.addEventListener('beforeprint', () => {
             fitScaledTables();
             updateTocPageNumbers();

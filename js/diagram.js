@@ -171,18 +171,25 @@ const Diagram = (() => {
         el('circle', { cx, cy, r: 4, fill: '#333' }, g);
 
         if (redMarks && redMarks[idx] != null) {
-          const t = el('text', { x: cx + 6, y: cy - 4, 'font-size': 10.5, fill: '#d62828', class: 'svg-red-mark' }, g);
+          const t = el('text', {
+            x: cx + 6, y: cy - 4, 'font-size': 10.5, fill: '#d62828',
+            class: 'svg-red-mark', 'data-mark-role': 'red'
+          }, g);
           t.textContent = redMarks[idx].toFixed(2);
         }
         if (blackMarks && blackMarks[idx] != null) {
-          const t = el('text', { x: cx + 6, y: cy + 15, 'font-size': 10.5, fill: '#333', 'font-weight': 'bold', class: 'svg-black-mark' }, g);
+          const t = el('text', {
+            x: cx + 6, y: cy + 15, 'font-size': 10.5, fill: '#333',
+            'font-weight': 'bold', class: 'svg-black-mark', 'data-mark-role': 'black'
+          }, g);
           t.textContent = blackMarks[idx].toFixed(2);
         }
         if (workingMarks && workingMarks[idx] != null) {
           const wm = workingMarks[idx];
           const t = el('text', {
             x: cx - 52, y: cy - 4,
-            'font-size': 10.5, fill: wm >= 0 ? '#2a9d8f' : '#e76f51', 'font-weight': 'bold', class: 'svg-working-mark'
+            'font-size': 10.5, fill: wm >= 0 ? '#2a9d8f' : '#e76f51',
+            'font-weight': 'bold', class: 'svg-working-mark', 'data-mark-role': 'working'
           }, g);
           t.textContent = (wm >= 0 ? '+' : '') + wm.toFixed(2);
         }
@@ -284,7 +291,7 @@ const Diagram = (() => {
     if (!container) return;
     container.innerHTML = '';
 
-    const { carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB } = data;
+    const { carto, volData, blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB } = data;
     const nC = cols - 1, nR = rows - 1;
 
     const padL = 10, padT = 10;
@@ -299,6 +306,8 @@ const Diagram = (() => {
     svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
     svg.setAttribute('width', '100%');
     svg.setAttribute('style', 'max-width:1000px');
+    svg.setAttribute('class', 'diagram-svg diagram-svg-cartogram');
+    svg.setAttribute('data-diagram', 'cartogram');
     container.appendChild(svg);
 
     // hatching patterns
@@ -309,7 +318,7 @@ const Diagram = (() => {
     // ── site plan ──
     const sX = padL, sY = padT;
     const gSite = el('g', { transform: `translate(${sX},${sY})` }, svg);
-    drawCartogramSite(gSite, { carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB, sx, sy, siteW, siteH });
+    drawCartogramSite(gSite, { carto, volData, blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB, sx, sy, siteW, siteH });
 
     // ── bottom chart (below site) ──
     const bChartY = sY + siteH + gap;
@@ -378,7 +387,7 @@ const Diagram = (() => {
 
   // ── Site plan ──
   function drawCartogramSite(g, d) {
-    const { carto, volData, workingMarks, zeroPoints, cols, rows, squareA, squareB, sx, sy, siteW, siteH } = d;
+    const { carto, volData, blackMarks, redMarks, workingMarks, zeroPoints, cols, rows, squareA, squareB, sx, sy, siteW, siteH } = d;
     const nC = cols - 1, nR = rows - 1;
 
     // zone shading
@@ -442,21 +451,45 @@ const Diagram = (() => {
       }
     }
 
-    // vertex working marks
+    // vertex marks
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
         const px = c * squareA * sx, py = r * squareB * sy;
         el('circle', { cx: px, cy: py, r: 2, fill: '#333' }, g);
-        if (!workingMarks) continue;
-        const wm = workingMarks[r * cols + c];
-        if (wm == null) continue;
-        const wt = el('text', {
-          x: px + (c === 0 ? 3 : c === cols - 1 ? -3 : 3),
-          y: py + (r === 0 ? 12 : -4),
-          'text-anchor': c === cols - 1 ? 'end' : 'start',
-          'font-size': 8, fill: wm >= 0 ? '#2a9d8f' : '#e76f51'
-        }, g);
-        wt.textContent = (wm >= 0 ? '+' : '') + wm.toFixed(2);
+        const redBlackAnchor = 'start';
+        const redBlackX = px + 4;
+        const redY = py - 4;
+        const blackY = py + 11;
+        const workingAnchor = 'end';
+        const workX = px - 4;
+        const workY = py - 4;
+
+        if (redMarks && redMarks[idx] != null) {
+          const rt = el('text', {
+            x: redBlackX, y: redY, 'text-anchor': redBlackAnchor,
+            'font-size': 8, fill: '#d62828',
+            class: 'svg-red-mark', 'data-mark-role': 'red'
+          }, g);
+          rt.textContent = redMarks[idx].toFixed(2);
+        }
+        if (blackMarks && blackMarks[idx] != null) {
+          const bt = el('text', {
+            x: redBlackX, y: blackY, 'text-anchor': redBlackAnchor,
+            'font-size': 8, fill: '#333', 'font-weight': 'bold',
+            class: 'svg-black-mark', 'data-mark-role': 'black'
+          }, g);
+          bt.textContent = blackMarks[idx].toFixed(2);
+        }
+        if (workingMarks && workingMarks[idx] != null) {
+          const wm = workingMarks[idx];
+          const wt = el('text', {
+            x: workX, y: workY, 'text-anchor': workingAnchor,
+            'font-size': 8, fill: wm >= 0 ? '#2a9d8f' : '#e76f51',
+            'font-weight': 'bold', class: 'svg-working-mark', 'data-mark-role': 'working'
+          }, g);
+          wt.textContent = (wm >= 0 ? '+' : '') + wm.toFixed(2);
+        }
       }
     }
 
@@ -558,24 +591,15 @@ const Diagram = (() => {
     for (let c = 0; c < nC; c++) {
       const cx = (c + 0.5) * squareA * sx;
       const tv = el('text', { x: cx, y: rH * 0.65, 'text-anchor': 'middle', 'font-size': 10, fill: '#e76f51' }, g);
-      tv.textContent = carto.colCut[c].toFixed(1);
+      tv.textContent = carto.cumColCut[c + 1].toFixed(1);
       const tn = el('text', { x: cx, y: rH * 1.65, 'text-anchor': 'middle', 'font-size': 10, fill: '#2a9d8f' }, g);
-      tn.textContent = carto.colFill[c].toFixed(1);
+      tn.textContent = carto.cumColFill[c + 1].toFixed(1);
     }
     for (let c = 0; c <= nC; c++) {
       const cx = c * squareA * sx;
       const td = el('text', { x: cx, y: rH * 2.65, 'text-anchor': 'middle', 'font-size': 10, fill: '#333' }, g);
       td.textContent = cumDist[c].toFixed(0);
     }
-
-    // totals at the right edge
-    const totCut = carto.colCut.reduce((s, v) => s + v, 0);
-    const totFill = carto.colFill.reduce((s, v) => s + v, 0);
-    const tx = siteW + 6;
-    const ttc = el('text', { x: tx, y: rH * 0.65, 'font-size': 10, fill: '#e76f51', 'font-weight': 'bold' }, g);
-    ttc.textContent = totCut.toFixed(1);
-    const ttf = el('text', { x: tx, y: rH * 1.65, 'font-size': 10, fill: '#2a9d8f', 'font-weight': 'bold' }, g);
-    ttf.textContent = totFill.toFixed(1);
   }
 
   // ── Right chart (right of site, top-to-bottom, values grow rightward) ──
@@ -648,6 +672,16 @@ const Diagram = (() => {
 
     const cumDist = [0];
     for (let r = 0; r < nR; r++) cumDist.push(cumDist[r] + squareB);
+    const revCumRowCut = new Array(nR).fill(0);
+    const revCumRowFill = new Array(nR).fill(0);
+    let accCut = 0;
+    let accFill = 0;
+    for (let r = nR - 1; r >= 0; r--) {
+      accCut += carto.rowCut[r];
+      accFill += carto.rowFill[r];
+      revCumRowCut[r] = accCut;
+      revCumRowFill[r] = accFill;
+    }
 
     for (let r = 0; r < nR; r++) {
       const cy = (r + 0.5) * squareB * sy;
@@ -655,12 +689,12 @@ const Diagram = (() => {
         x: rW * 0.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
         'font-size': 9, fill: '#e76f51', transform: `rotate(-90,${rW * 0.5},${cy})`
       }, g);
-      tv.textContent = carto.rowCut[r].toFixed(1);
+      tv.textContent = revCumRowCut[r].toFixed(1);
       const tn = el('text', {
         x: rW * 1.5, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
         'font-size': 9, fill: '#2a9d8f', transform: `rotate(-90,${rW * 1.5},${cy})`
       }, g);
-      tn.textContent = carto.rowFill[r].toFixed(1);
+      tn.textContent = revCumRowFill[r].toFixed(1);
     }
     for (let r = 0; r <= nR; r++) {
       const cy = r * squareB * sy;
